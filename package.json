@@ -1,0 +1,36 @@
+{
+  "name": "void",
+  "version": "1.0.0",
+  "description": "Discord bot geared towards moderation",
+  "main": "Void.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "FreezIn",
+  "license": "ISC",
+  "dependencies": {
+    "bufferutil": "^3.0.5",
+    "discord.js": "github:hydrabolt/discord.js",
+    "eris": "github:abalabahaha/eris#dev",
+    "erlpack": "github:abalabahaha/erlpack",
+    "eventemitter3": "^3.1.0",
+    "fs-nextra": "^0.3.5",
+    "js-beautify": "^1.7.5",
+    "moment": "^2.22.2",
+    "moment-duration-format": "^2.2.2",
+    "node-opus": "^0.3.0",
+    "pako": "^1.0.6",
+    "rethinkdb": "^2.3.3",
+    "rethinkdbdash": "^2.3.31",
+    "snekfetch": "^4.0.4",
+    "sodium-native": "^2.1.6",
+    "uws": "^10.148.1",
+    "ws": "^5.2.1",
+    "zlib-sync": "^0.1.4"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0"
+  }
+}
