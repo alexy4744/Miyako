@@ -1,18 +1,7 @@
+/* eslint no-use-before-define: 0 */
+/* eslint no-eval: 0 */
+
 module.exports.run = async (client, msg, args) => {
-  const clean = text => {
-    if (typeof text === "string") {
-      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203)); // eslint-disable-line
-    } else return text; // eslint-disable-line
-  };
-
-  function isFunction(input) {
-		return typeof input === "function";
-  }
-
-  function isThenable(input) {
-		return (input instanceof Promise) || (Boolean(input) && isFunction(input.then) && isFunction(input.catch));
-	}
-
   try {
     let output = true;
     let code = args.join(" ");
@@ -22,7 +11,7 @@ module.exports.run = async (client, msg, args) => {
       code = args.join(" ");
     }
     if (args[0].toLowerCase() === "async") code = `(async () => {\n${code.slice(6)}\n})();`;
-    let evaled = eval(code); // eslint-disable-line
+    let evaled = eval(code);
 
     if (isThenable(evaled)) evaled = await evaled;
 
@@ -37,7 +26,7 @@ module.exports.run = async (client, msg, args) => {
       console.log(evaled);
       const result = clean(evaled).replace(client.token, "SIKE");
       if (result.length > 2048) {
-        return msg.channel.send("Your output was too long to send!", {
+        msg.channel.send("Your output was too long to be sent!", {
           files: [{
             attachment: Buffer.from(result),
             name: "output.txt"
@@ -49,8 +38,8 @@ module.exports.run = async (client, msg, args) => {
             color: msg.colors.fail
           }
         }));
-      } else { // eslint-disable-line
-        return msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${result}\n\`\`\``);
+      } else {
+        msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${result}\n\`\`\``);
       }
     }
   } catch (error) {
@@ -62,6 +51,17 @@ module.exports.run = async (client, msg, args) => {
       }
     });
   }
+
+  // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
+  const isFunction = input => typeof input === "function";
+  const isThenable = input => (input instanceof Promise) || (Boolean(input) && isFunction(input.then) && isFunction(input.catch));
+
+  // https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/examples/making-an-eval-command.md
+  const clean = text => {
+    if (typeof text === "string") {
+      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203)); // eslint-disable-line
+    } else return text; // eslint-disable-line
+  };
 };
 
 module.exports.options = {
