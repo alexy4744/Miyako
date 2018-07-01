@@ -1,8 +1,8 @@
 const r = require("rethinkdb");
 
-module.exports = class RethinkDB {
+module.exports = class Database {
 	constructor() {
-		this.rethink = this.connect();
+		this.db = this.connect();
 	}
 
 	async connect() {

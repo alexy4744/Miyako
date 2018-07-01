@@ -1,6 +1,7 @@
 const { Client, Collection } = require("discord.js");
 const { readdir } = require("fs-nextra");
-const RethinkDB = require("../db/rethinkdb");
+const Database = require("../db/rethinkdb");
+const RethinkDB = require("../db/methods");
 const Structures = require("../structures/Structures");
 
 module.exports = class Void extends Client {
@@ -10,8 +11,9 @@ module.exports = class Void extends Client {
     this.inhibitors = new Collection();
     this.commands = new Collection();
     this.aliases = new Collection();
-    this.db = new RethinkDB();
     this.userCooldowns = new Set();
+    this.rethink = new Database();
+    this.db = new RethinkDB(this, "voidData", "415313696102023169");
     this.structures = Structures;
     this.owner = options.owner;
     this.prefix = options.prefix;
@@ -48,7 +50,9 @@ module.exports = class Void extends Client {
               });
               if (cmd.options && (cmd.options.aliases || cmd.options.aliases.length > 0)) { // Check if there are aliases for this command.
                 for (let i = 0, len = cmd.options.aliases.length; i < len; i++) {
-                  this.aliases.set(cmd.options.aliases[i], this.commands.get(c.slice(0, -3)));
+                  const cmdAlias = this.commands.get(c.slice(0, -3));
+                  cmdAlias.parentCommand = c.slice(0, -3);
+                  this.aliases.set(cmd.options.aliases[i], cmdAlias);
                 }
               }
             }
@@ -73,22 +77,12 @@ module.exports = class Void extends Client {
 
   // Perform a check against all inhibitors before executing the command.
   runCmd(msg, cmd, args) {
-    if (!this.userCooldowns.has(msg.author.id)) {
-      if (msg.author.id !== this.owner) {
-        this.userCooldowns.add(msg.author.id);
-        setTimeout(() => this.userCooldowns.delete(msg.author.id), cmd.command.options.cooldown * 1000);
-      }
-    } else {
-      return msg.channel.send(`${msg.author.toString()}, wait ${cmd.command.options.cooldown} seconds before executing commands again!`).then(m => {
-        setTimeout(() => m.delete().catch(() => {}), cmd.command.options.cooldown * 1000);
-      });
-    }
-
     const keys = Array.from(this.inhibitors.keys());
     const len = keys.length;
-    let count = 0; // Keep track of the inhibitors that allows the command to execute.
 
     if (len < 1 || cmd.command.options.disableCheck) return cmd.command.run(this, msg, args); // Skip inhibitor checking if enabled.
+
+    let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 
     for (let i = 0; i < len; i++) { // Loop through all loaded inhibitors.
       try {

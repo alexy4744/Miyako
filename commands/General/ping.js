@@ -13,7 +13,7 @@ module.exports.run = async (client, msg) => {
       title: `🏓${msg.emojis.bar}Pong!`,
       fields: [
         {
-          "name": "Latency \\⏱",
+          "name": "Latency \\⏰",
           "value": String(Math.round(Date.now() - init)), // Get the time it took to edit the message.
           "inline": true
         },

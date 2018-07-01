@@ -2,6 +2,17 @@
 /* eslint no-eval: 0 */
 
 module.exports.run = async (client, msg, args) => {
+    // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
+  const isFunction = input => typeof input === "function";
+  const isThenable = input => (input instanceof Promise) || (Boolean(input) && isFunction(input.then) && isFunction(input.catch));
+
+  // https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/examples/making-an-eval-command.md
+  const clean = text => {
+    if (typeof text === "string") {
+      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203)); // eslint-disable-line
+    } else return text; // eslint-disable-line
+  };
+
   try {
     let output = true;
     let code = args.join(" ");
@@ -51,17 +62,6 @@ module.exports.run = async (client, msg, args) => {
       }
     });
   }
-
-  // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
-  const isFunction = input => typeof input === "function";
-  const isThenable = input => (input instanceof Promise) || (Boolean(input) && isFunction(input.then) && isFunction(input.catch));
-
-  // https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/examples/making-an-eval-command.md
-  const clean = text => {
-    if (typeof text === "string") {
-      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203)); // eslint-disable-line
-    } else return text; // eslint-disable-line
-  };
 };
 
 module.exports.options = {
