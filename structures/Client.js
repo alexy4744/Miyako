@@ -1,8 +1,9 @@
 const { Client, Collection } = require("discord.js");
-const { readdir } = require("fs-nextra");
+const fs = require("fs-nextra");
 const Database = require("../db/rethinkdb");
 const RethinkDB = require("../db/methods");
 const Structures = require("../structures/Structures");
+const loaders = require("../loaders/loader");
 
 module.exports = class Void extends Client {
   constructor(options = {}) {
@@ -28,6 +29,9 @@ module.exports = class Void extends Client {
       throw new Error(error);
     });
 
+    // Load all the events, inhibitors, commands and goodies.
+    for (const loader in loaders) loaders[loader](this, fs); // eslint-disable-line
+
     process.on("unhandledRejection", (reason, p) => {
       console.error(reason, "Unhandled Rejection at Promise", p);
     });
@@ -35,54 +39,6 @@ module.exports = class Void extends Client {
     process.on("uncaughtException", err => {
       console.error(err, "Uncaught Exception thrown");
       process.exit(1);
-    });
-
-    /* Load all client events. */
-    readdir("./events").then(events => {
-      if (events.length < 1) throw new Error("No events found");
-      events.map(e => this.events.set(e.slice(0, -3), require(`../events/${e}`)));
-    }).catch(error => {
-      console.error(error);
-    });
-
-    /* Load all commands and aliases. */
-    readdir("./commands").then(folders => {
-      folders.map(folder => {
-        readdir(`./commands/${folder}`).then(commands => {
-          commands.map(c => {
-            const cmd = require(`../commands/${folder}/${c}`);
-            if (!cmd.options) console.error(`${c} must export an object called "options" module.exports.options = {}`); // eslint-disable-line
-            else if (!cmd.run) console.error(`${c} must export a function called "run" module.exports.run = () => {}`); // eslint-disable-line
-            else {
-              if (!cmd.options.name) cmd.options.name = c.slice(0, -3);
-              this.commands.set(c.slice(0, -3), {
-                category: folder,
-                command: cmd
-              });
-              if (cmd.options && (cmd.options.aliases || cmd.options.aliases.length > 0)) { // Check if there are aliases for this command.
-                for (let i = 0, len = cmd.options.aliases.length; i < len; i++) {
-                  const cmdAlias = this.commands.get(c.slice(0, -3));
-                  cmdAlias.parentCommand = c.slice(0, -3);
-                  this.aliases.set(cmd.options.aliases[i], cmdAlias);
-                }
-              }
-            }
-          });
-        }).catch(error => {
-          console.error(error);
-        });
-      });
-    }).catch(error => {
-      console.error(error);
-    });
-
-    /* Load all command inhibitors. */
-    readdir("./inhibitors").then(inhibitors => {
-      inhibitors.map(i => {
-        this.inhibitors.set(i.slice(0, -3), require(`../inhibitors/${i}`));
-      });
-    }).catch(error => {
-      console.error(error);
     });
   }
 
@@ -105,6 +61,7 @@ module.exports = class Void extends Client {
         break;
       }
     }
+
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
     if (count >= len) return cmd.command.run(this, msg, args);
   }

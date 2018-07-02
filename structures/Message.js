@@ -28,6 +28,15 @@ Structures.extend("Message", Message => {
         }
       }).catch(() => {}); // noop
     }
+
+    noArgs(action) {
+      return this.channel.send({
+        embed: {
+          title: `${this.emojis.fail}${this.author.username}, you must ${action} in order to execute this command!`,
+          color: this.colors.fail
+        }
+      }).catch(() => {}); // noop
+    }
   }
 
   return VoidMessage;
