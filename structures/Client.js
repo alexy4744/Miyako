@@ -18,6 +18,16 @@ module.exports = class Void extends Client {
     this.owner = options.owner;
     this.prefix = options.prefix;
 
+    this.db.get().then(data => {
+      if (!data) {
+        this.db.insert({
+          id: "415313696102023169"
+        });
+      }
+    }).catch(error => {
+      throw new Error(error);
+    });
+
     process.on("unhandledRejection", (reason, p) => {
       console.error(reason, "Unhandled Rejection at Promise", p);
     });
@@ -77,16 +87,12 @@ module.exports = class Void extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, cmd, args) {
-    // Cache the guild's disabled commands, instead of awaiting in inhibitors everytime a command runs.
-    if (!msg.guild.disabledCommands) {
-      const data = await msg.guild.db.get();
-      if (data && data.disabledCommands) msg.guild.disabledCommands = data.disabledCommands;
-    }
+  runCmd(msg, cmd, args) {
+    // Update the cache of the guild's database
+    if (!msg.guild.cache) msg.guild.updateCache();
 
     const keys = Array.from(this.inhibitors.keys());
     const len = keys.length;
-
     if (len < 1) return cmd.command.run(this, msg, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
@@ -99,8 +105,11 @@ module.exports = class Void extends Client {
         break;
       }
     }
-
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
     if (count >= len) return cmd.command.run(this, msg, args);
+  }
+
+  async updateCache() {
+    this.cache = await this.db.get();
   }
 };

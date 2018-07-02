@@ -18,6 +18,16 @@ Structures.extend("Message", Message => {
         default: 0x5089DB
       };
     }
+
+    error(err, action) {
+      return this.channel.send({
+        embed: {
+          title: `${this.emojis.fail}Sorry ${this.author.username}, I have failed to ${action}`,
+          description: `\`\`\`js\n${err}\n\`\`\``,
+          color: this.colors.fail
+        }
+      }).catch(() => {}); // noop
+    }
   }
 
   return VoidMessage;

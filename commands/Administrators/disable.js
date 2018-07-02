@@ -19,14 +19,22 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-  let data = await msg.guild.db.get();
+  const error = err => msg.channel.send({
+    embed: {
+      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to disable this command!`,
+      description: `\`\`\`js\n${err}\n\`\`\``,
+      color: msg.colors.fail
+    }
+  });
+
+  let data = await msg.guild.db.get().catch(e => error(e));
 
   if (!data || !data.disabledCommands) {
     await msg.guild.db.insert({
       id: msg.guild.id,
       disabledCommands: []
-    });
-    data = await msg.guild.db.get(); // reassign data with the updated object containing the disabledCommands array for this guild.
+    }).catch(e => error(e));
+    data = await msg.guild.db.get().catch(e => error(e)); // reassign data with the updated object containing the disabledCommands array for this guild.
   } else if (data && data.disabledCommands.includes(args[0])) {
     return msg.channel.send({
       embed: {
@@ -42,15 +50,7 @@ module.exports.run = async (client, msg, args) => {
 
   await msg.guild.db.update({
     disabledCommands: data.disabledCommands
-  }).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to disable this command!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
-
-  if (msg.guild.disabledCommands) msg.guild.disabledCommands = data.disabledCommands; // Update the cache of disabled commands for this guild.
+  }).then(() => msg.guild.updateCache().catch(e => error(e))).catch(e => error(e));
 
   return msg.channel.send({
     embed: {

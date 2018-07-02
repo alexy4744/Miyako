@@ -1,8 +1,7 @@
-/* eslint no-use-before-define: 0 */
 /* eslint no-eval: 0 */
 
 module.exports.run = async (client, msg, args) => {
-    // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
+  // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
   const isFunction = input => typeof input === "function";
   const isThenable = input => (input instanceof Promise) || (Boolean(input) && isFunction(input.then) && isFunction(input.catch));
 

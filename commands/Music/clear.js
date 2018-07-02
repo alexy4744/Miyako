@@ -27,7 +27,6 @@ module.exports.options = {
   aliases: [],
   botOwnerOnly: false,
   checkVC: true,
-  disableCheck: false, // Overrides all other settings
   userPermissions: [],
   botPermissions: [],
   runIn: ["text"],

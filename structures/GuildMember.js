@@ -7,6 +7,10 @@ Structures.extend("GuildMember", GuildMember => {
       super._patch(data);
       this.db = new RethinkDB(this.client, "memberData", this.id);
     }
+
+    async updateCache() {
+      this.cache = await this.db.get();
+    }
   }
 
   return VoidMember;

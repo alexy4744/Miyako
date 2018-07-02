@@ -32,7 +32,6 @@ module.exports.options = {
   aliases: ["disconnect"],
   botOwnerOnly: false,
   checkVC: true,
-  disableCheck: false, // Overrides all other boolean
   userPermissions: [],
   botPermissions: [],
   runIn: ["text"],

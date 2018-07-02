@@ -60,7 +60,6 @@ module.exports.options = {
   nsfw: false,
   aliases: [],
   botOwnerOnly: false,
-  disableCheck: false, // Overrides all other boolean
   userPermissions: [],
   botPermissions: ["CONNECT", "SPEAK"],
   runIn: ["text"],

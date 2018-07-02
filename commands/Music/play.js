@@ -164,7 +164,6 @@ module.exports.options = {
   aliases: [],
   botOwnerOnly: false,
   checkVC: true,
-  disableCheck: false, // Overrides all other boolean
   userPermissions: [],
   botPermissions: ["CONNECT", "SPEAK"],
   runIn: ["text"],

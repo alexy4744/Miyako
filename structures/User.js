@@ -7,6 +7,10 @@ Structures.extend("User", User => {
       super._patch(data);
       this.db = new RethinkDB(this.client, "userData", this.id);
     }
+
+    async updateCache() {
+      this.cache = await this.db.get();
+    }
   }
 
   return VoidUser;

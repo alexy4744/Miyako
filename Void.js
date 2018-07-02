@@ -53,6 +53,7 @@ client.on("ready", () => {
 });
 
 client.on("error", error => client.events.get("error")(error));
+client.on("guildCreate", guild => client.events.get("guildCreate")(guild));
 client.on("message", msg => client.events.get("message")(client, msg));
 
 client.login(token);
