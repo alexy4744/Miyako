@@ -3,7 +3,7 @@ module.exports = (client, msg, cmd) => {
   if (!msg.channel.nsfw && cmd.command.options.nsfw) {
     return msg.channel.send({
       embed: {
-        title: `${msg.emojis.fail}Sorry ${msg.author.username}, I cannot run this command in non-NSFW channels!`,
+        title: `${msg.emojis.fail}I cannot run this command in non-NSFW channels!`,
         color: msg.colors.fail
       }
     });

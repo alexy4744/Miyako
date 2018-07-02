@@ -8,6 +8,17 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
+  const cmd = client.commands.get(args[0]) || client.aliases.get(args[0]);
+
+  if (cmd.command.options.guarded) { // Check if the command can be disabled per guild.
+    return msg.channel.send({
+      embed: {
+        title: `${msg.emojis.fail}This command cannot be disabled!`,
+        color: msg.colors.fail
+      }
+    });
+  }
+
   let data = await msg.guild.db.get();
 
   if (!data || !data.disabledCommands) {
@@ -25,14 +36,27 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-  const cmd = client.commands.get(args[0]) || client.aliases.get(args[0]);
-
   // Only aliases has the parentCommand property, if it doesn't, that means args[0] is already the parentCommand.
   data.disabledCommands.push(cmd.parentCommand || args[0]);
   cmd.command.options.aliases.map(a => data.disabledCommands.push(a));
 
   await msg.guild.db.update({
     disabledCommands: data.disabledCommands
+  }).catch(error => msg.channel.send({
+    embed: {
+      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to disable this command!`,
+      description: `\`\`\`js\n${error}\n\`\`\``,
+      color: msg.colors.fail
+    }
+  }));
+
+  if (msg.guild.disabledCommands) msg.guild.disabledCommands = data.disabledCommands; // Update the cache of disabled commands for this guild.
+
+  return msg.channel.send({
+    embed: {
+      title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,
+      color: msg.colors.success
+    }
   });
 };
 
@@ -44,7 +68,6 @@ module.exports.options = {
   aliases: [],
   botOwnerOnly: false,
   checkVC: false,
-  disableCheck: false, // Overrides all other boolean
   userPermissions: ["administrator"],
   botPermissions: [],
   runIn: [],

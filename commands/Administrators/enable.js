@@ -40,12 +40,14 @@ module.exports.run = async (client, msg, args) => {
     }
   }));
 
+  if (msg.guild.disabledCommands) msg.guild.disabledCommands = filteredCommands; // Update the cache of disabled commands for this guild.
+
   return msg.channel.send({
     embed: {
       title: `${msg.emojis.success}I have succesfully enabled "${args[0]}"`,
       color: msg.colors.success
     }
-  })
+  });
 };
 
 module.exports.options = {
@@ -56,7 +58,6 @@ module.exports.options = {
   aliases: [],
   botOwnerOnly: false,
   checkVC: false,
-  disableCheck: false, // Overrides all other boolean
   userPermissions: ["administrator"],
   botPermissions: [],
   runIn: [],

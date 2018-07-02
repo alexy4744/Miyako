@@ -44,6 +44,7 @@ module.exports = class Void extends Client {
             if (!cmd.options) console.error(`${c} must export an object called "options" module.exports.options = {}`); // eslint-disable-line
             else if (!cmd.run) console.error(`${c} must export a function called "run" module.exports.run = () => {}`); // eslint-disable-line
             else {
+              if (!cmd.options.name) cmd.options.name = c.slice(0, -3);
               this.commands.set(c.slice(0, -3), {
                 category: folder,
                 command: cmd
@@ -76,11 +77,17 @@ module.exports = class Void extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  runCmd(msg, cmd, args) {
+  async runCmd(msg, cmd, args) {
+    // Cache the guild's disabled commands, instead of awaiting in inhibitors everytime a command runs.
+    if (!msg.guild.disabledCommands) {
+      const data = await msg.guild.db.get();
+      if (data && data.disabledCommands) msg.guild.disabledCommands = data.disabledCommands;
+    }
+
     const keys = Array.from(this.inhibitors.keys());
     const len = keys.length;
 
-    if (len < 1 || cmd.command.options.disableCheck) return cmd.command.run(this, msg, args); // Skip inhibitor checking if enabled.
+    if (len < 1) return cmd.command.run(this, msg, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 

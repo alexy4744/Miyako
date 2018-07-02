@@ -1,12 +1,12 @@
 const Void = require("./structures/Client");
 const { token, owner, prefix, yt, twitch } = require("./config.json");
 const { LePlayer } = require("LePlayer");
+const chalk = require("chalk");
+const figlet = require("figlet");
 const client = new Void({
   owner: owner,
   prefix: prefix
 });
-const chalk = require("chalk");
-const figlet = require("figlet");
 
 client.on("ready", () => {
   client.LePlayer = new LePlayer(client, { // Initialze LePlayer in the ready event to get the bot's user id.

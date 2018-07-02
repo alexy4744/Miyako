@@ -35,7 +35,6 @@ module.exports.options = {
   nsfw: false,
   aliases: ["latency", "pong"],
   botOwnerOnly: false,
-  disableCheck: true, // Overrides all other boolean
   userPermissions: [],
   botPermissions: [],
   runIn: [],

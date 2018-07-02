@@ -9,7 +9,7 @@ module.exports = (client, msg, cmd) => {
     if (!member.hasPermission(perms[i])) {
       return msg.channel.send({
         embed: {
-          title: `${msg.emojis.fail}Sorry ${msg.author.username}, you do not have the permissions to run this command!`,
+          title: `${msg.emojis.fail}You do not have the permissions to run this command!`,
           description: `You must have the permission \`${perms[i].toUpperCase()}\` in order to execute this command!`,
           color: msg.colors.fail
         }
