@@ -9,6 +9,8 @@ const client = new Void({
 });
 
 client.on("ready", () => {
+  client.updateCache();
+
   client.LePlayer = new LePlayer(client, { // Initialze LePlayer in the ready event to get the bot's user id.
     port: 6969,
     cleanUpOnClose: true,

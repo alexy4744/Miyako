@@ -9,7 +9,7 @@ module.exports = (client, fs) => {
           else if (!cmd.run) console.error(`${c} must export a function called "run" module.exports.run = () => {}`); // eslint-disable-line
           else {
             if (!cmd.options.name) cmd.options.name = c.slice(0, -3);
-            client.commands.set(c.slice(0, -3), {
+            client.commands.set(c.slice(0, -3).toLowerCase(), {
               category: folder,
               command: cmd
             });
@@ -17,7 +17,7 @@ module.exports = (client, fs) => {
               for (let i = 0, len = cmd.options.aliases.length; i < len; i++) {
                 const cmdAlias = client.commands.get(c.slice(0, -3));
                 cmdAlias.parentCommand = c.slice(0, -3);
-                client.aliases.set(cmd.options.aliases[i], cmdAlias);
+                client.aliases.set(cmd.options.aliases[i].toLowerCase(), cmdAlias);
               }
             }
           }

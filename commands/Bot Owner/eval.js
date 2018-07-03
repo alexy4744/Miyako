@@ -1,4 +1,5 @@
 /* eslint no-eval: 0 */
+const util = require("util");
 
 module.exports.run = async (client, msg, args) => {
   // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
@@ -15,51 +16,47 @@ module.exports.run = async (client, msg, args) => {
   try {
     let output = true;
     let code = args.join(" ");
+    let rawOutput;
+    let consoleOutput;
     if (code.startsWith("nooutput")) {
       output = false;
       code = args.shift();
       code = args.join(" ");
     }
-    if (args[0].toLowerCase() === "async") code = `(async () => {\n${code.slice(6)}\n})();`;
+    if (args[0].toLowerCase() === "async") code = `(async () => {\n  ${code.slice(6)}\n})();`;
     let evaled = eval(code);
 
     if (isThenable(evaled)) evaled = await evaled;
 
     if (typeof evaled !== "string") {
-      evaled = require("util").inspect(evaled, {
+      rawOutput = util.inspect(evaled, {
         depth: 0,
         showHidden: true
+      });
+
+      consoleOutput = util.inspect(evaled, {
+        depth: 0,
+        showHidden: true,
+        colors: true
       });
     }
 
     if (output) {
-      console.log(evaled);
-      const result = clean(evaled).replace(client.token, "SIKE");
+      console.log(consoleOutput);
+      const result = clean(rawOutput).replace(client.token, "SIKE");
       if (result.length > 2048) {
         msg.channel.send("Your output was too long to be sent!", {
           files: [{
             attachment: Buffer.from(result),
             name: "output.txt"
           }]
-        }).catch(error => msg.channel.send({
-          embed: {
-            title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to send this output as a text file!`,
-            description: `\`\`\`js\n${error}\n\`\`\``,
-            color: msg.colors.fail
-          }
-        }));
+        }).catch(error => msg.error(error, "send this output as a text file!"));
       } else {
         msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${result}\n\`\`\``);
       }
     }
   } catch (error) {
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}Error`,
-        description: `\`\`\`js\n${clean(error.stack)}\n\`\`\``,
-        color: msg.colors.fail
-      }
-    });
+    return msg.error(error, "evaluate this snippet!");
   }
 };
 

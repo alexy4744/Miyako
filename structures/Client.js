@@ -23,6 +23,8 @@ module.exports = class Void extends Client {
       if (!data) {
         this.db.insert({
           id: "415313696102023169"
+        }).catch(error => {
+          throw new Error(error);
         });
       }
     }).catch(error => {
@@ -43,9 +45,12 @@ module.exports = class Void extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  runCmd(msg, cmd, args) {
-    // Update the cache of the guild's database
-    if (!msg.guild.cache) msg.guild.updateCache();
+  async runCmd(msg, cmd, args) {
+    // Update the cache of the guild's database.
+    if (!this.cache) await this.updateCache();
+    if (!msg.member.cache) await msg.member.updateCache();
+    if (!msg.author.cache) await msg.author.updateCache();
+    if (!msg.guild.cache) await msg.guild.updateCache();
 
     const keys = Array.from(this.inhibitors.keys());
     const len = keys.length;
@@ -66,6 +71,7 @@ module.exports = class Void extends Client {
     if (count >= len) return cmd.command.run(this, msg, args);
   }
 
+  // Update the client's cache.
   async updateCache() {
     this.cache = await this.db.get();
   }
