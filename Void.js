@@ -59,3 +59,12 @@ client.on("guildCreate", guild => client.events.get("guildCreate")(guild));
 client.on("message", msg => client.events.get("message")(client, msg));
 
 client.login(token);
+
+process.on("unhandledRejection", (reason, p) => {
+  console.error(reason, "Unhandled Rejection at Promise", p);
+});
+
+process.on("uncaughtException", err => {
+  console.error(err, "Uncaught Exception thrown");
+  process.exit(1);
+});

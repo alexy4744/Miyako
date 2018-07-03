@@ -33,15 +33,6 @@ module.exports = class Void extends Client {
 
     // Load all the events, inhibitors, commands and goodies.
     for (const loader in loaders) loaders[loader](this, fs); // eslint-disable-line
-
-    process.on("unhandledRejection", (reason, p) => {
-      console.error(reason, "Unhandled Rejection at Promise", p);
-    });
-
-    process.on("uncaughtException", err => {
-      console.error(err, "Uncaught Exception thrown");
-      process.exit(1);
-    });
   }
 
   // Perform a check against all inhibitors before executing the command.
