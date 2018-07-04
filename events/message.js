@@ -6,6 +6,6 @@ module.exports = (client, msg) => {
 
   if (client.commands.has(cmd) || client.aliases.has(cmd)) {
     console.time("run time");
-    client.runCmd(msg, client.commands.get(cmd) || client.aliases.get(cmd), args);
+    return client.runCmd(msg, client.commands.get(cmd) || client.aliases.get(cmd), args);
   }
 };

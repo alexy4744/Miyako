@@ -1,3 +1,5 @@
+/* eslint no-undefined: 0 */
+
 const { Client, Collection } = require("discord.js");
 const fs = require("fs-nextra");
 const Database = require("../db/rethinkdb");
@@ -20,15 +22,21 @@ module.exports = class Void extends Client {
     this.prefix = options.prefix;
 
     this.db.get().then(data => {
-      if (!data) {
+      if (data === null) {
         this.db.insert({
           id: "415313696102023169"
-        }).catch(error => {
-          throw new Error(error);
+        }).then(() => {
+          this.db.get().then(newData => {
+            this.cache = newData;
+          }).catch(err => {
+            throw new Error(err);
+          });
+        }).catch(err => {
+          throw new Error(err);
         });
       }
-    }).catch(error => {
-      throw new Error(error);
+    }).catch(err => {
+      throw new Error(err);
     });
 
     // Load all the events, inhibitors, commands and goodies.
@@ -38,19 +46,22 @@ module.exports = class Void extends Client {
   // Perform a check against all inhibitors before executing the command.
   async runCmd(msg, cmd, args) {
     // Update the cache of the guild's database.
-    if (!this.cache) await this.updateCache();
-    if (!msg.member.cache) await msg.member.updateCache();
-    if (!msg.author.cache) await msg.author.updateCache();
-    if (!msg.guild.cache) await msg.guild.updateCache();
+    // Check for undefined only because the db can return null
+    if (this.cache === undefined) await this.updateCache().catch(e => msg.error(e, "failed to execute this command"));
+    if (msg.member.cache === undefined) await msg.member.updateCache().catch(e => msg.error(e, "failed to execute this command"));
+    if (msg.author.cache === undefined) await msg.author.updateCache().catch(e => msg.error(e, "failed to execute this command"));
+    if (msg.guild.cache === undefined) await msg.guild.updateCache().catch(e => msg.error(e, "failed to execute this command"));
 
     const keys = Array.from(this.inhibitors.keys());
     const len = keys.length;
+
     if (len < 1) return cmd.command.run(this, msg, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 
     for (let i = 0; i < len; i++) { // Loop through all loaded inhibitors.
       try {
+        console.log(keys[i])
         if (isNaN(count)) break; // If the inhibitor throws anything that is not a error, then the command should fail to execute.
         count += this.inhibitors.get(keys[i])(this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
@@ -63,7 +74,11 @@ module.exports = class Void extends Client {
   }
 
   // Update the client's cache.
-  async updateCache() {
-    this.cache = await this.db.get();
+  updateCache() {
+    return new Promise((resolve, reject) => {
+      this.db.get().then(data => {
+        resolve(this.cache = data);
+      }).catch(e => reject(e));
+    });
   }
 };

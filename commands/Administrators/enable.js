@@ -34,7 +34,7 @@ module.exports.run = async (client, msg, args) => {
   })
   .then(() => msg.guild.updateCache().catch(e => msg.error(e, "enable this command")))
   .catch(e => msg.error(e, "enable this command"));
-
+  console.timeEnd("run time");
   return msg.channel.send({
     embed: {
       title: `${msg.emojis.success}I have succesfully enabled "${args[0]}"`,

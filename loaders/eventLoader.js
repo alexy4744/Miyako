@@ -6,4 +6,4 @@ module.exports = (client, fs) => {
   }).catch(error => {
     console.error(error);
   });
-}
+};

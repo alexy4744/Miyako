@@ -8,8 +8,12 @@ Structures.extend("User", User => {
       this.db = new RethinkDB(this.client, "userData", this.id);
     }
 
-    async updateCache() {
-      this.cache = await this.db.get();
+    updateCache() {
+      return new Promise((resolve, reject) => {
+        this.db.get().then(data => {
+          resolve(this.cache = data);
+        }).catch(e => reject(e));
+      });
     }
   }
 

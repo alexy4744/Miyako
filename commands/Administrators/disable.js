@@ -19,13 +19,13 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-  let data = await msg.guild.db.get().catch(e => msg.error(e, "enable this command"));
+  let data = await msg.guild.db.get().catch(e => msg.error(e, "disable this command"));
 
-  if (!data.disabledCommands) {
+  if (!data || !data.disabledCommands) {
     await msg.guild.db.update({
       disabledCommands: []
-    }).catch(e => msg.error(e, "enable this command"));
-    data = await msg.guild.db.get().catch(e => msg.error(e, "enable this command")); // reassign data with the updated object containing the disabledCommands array for this guild.
+    }).catch(e => msg.error(e, "disable this command"));
+    data = await msg.guild.db.get().catch(e => msg.error(e, "disable this command")); // reassign data with the updated object containing the disabledCommands array for this guild.
   } else if (data && data.disabledCommands.includes(args[0])) {
     return msg.channel.send({
       embed: {
@@ -37,14 +37,14 @@ module.exports.run = async (client, msg, args) => {
 
   // Only aliases has the parentCommand property, if it doesn't, that means args[0] is already the parentCommand.
   data.disabledCommands.push(cmd.parentCommand || args[0]);
-  cmd.command.options.aliases.map(a => data.disabledCommands.push(a));
+  cmd.command.options.aliases.forEach(a => data.disabledCommands.push(a));
 
   await msg.guild.db.update({
     disabledCommands: data.disabledCommands
   })
-  .then(() => msg.guild.updateCache().catch(e => msg.error(e, "enable this command")))
-  .catch(e => msg.error(e, "enable this command"));
-
+  .then(() => msg.guild.updateCache().catch(e => msg.error(e, "disable this command")))
+  .catch(e => msg.error(e, "disable this command"));
+  console.timeEnd("run time");
   return msg.channel.send({
     embed: {
       title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,
