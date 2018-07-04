@@ -47,10 +47,10 @@ module.exports = class Void extends Client {
   async runCmd(msg, cmd, args) {
     // Update the cache of the guild's database.
     // Check for undefined only because the db can return null
-    if (this.cache === undefined) await this.updateCache().catch(e => msg.error(e, "failed to execute this command"));
-    if (msg.member.cache === undefined) await msg.member.updateCache().catch(e => msg.error(e, "failed to execute this command"));
-    if (msg.author.cache === undefined) await msg.author.updateCache().catch(e => msg.error(e, "failed to execute this command"));
-    if (msg.guild.cache === undefined) await msg.guild.updateCache().catch(e => msg.error(e, "failed to execute this command"));
+    if (this.cache === undefined) await this.updateCache().catch(e => msg.error(e, "execute this command"));
+    if (msg.member.cache === undefined) await msg.member.updateCache().catch(e => msg.error(e, "execute this command"));
+    if (msg.author.cache === undefined) await msg.author.updateCache().catch(e => msg.error(e, "execute this command"));
+    if (msg.guild.cache === undefined) await msg.guild.updateCache().catch(e => msg.error(e, "execute this command"));
 
     const keys = Array.from(this.inhibitors.keys());
     const len = keys.length;

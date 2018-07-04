@@ -20,13 +20,16 @@ Structures.extend("Message", Message => {
     }
 
     error(err, action) {
-      return this.channel.send({
+      this.channel.send({
         embed: {
           title: `${this.emojis.fail}Sorry ${this.author.username}, I have failed to ${action}`,
-          description: `\`\`\`js\n${err}\n\`\`\``,
+          description: `\`\`\`js\n${err.stack}\n\`\`\``,
           color: this.colors.fail
         }
-      }).catch(() => {}); // noop
+      }).catch(() => {
+        throw new Error(); // Throw an error to prevent rest break itself from sending more than 1 message in runCmd method.
+      });
+      throw new Error(); // Throw an error to prevent rest break itself from sending more than 1 message in runCmd method.
     }
 
     noArgs(action) {

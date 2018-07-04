@@ -4,7 +4,7 @@ const chalk = require("chalk");
 const figlet = require("figlet");
 
 module.exports = client => {
-  client.updateCache();
+  // client.updateCache();
 
   client.LePlayer = new LePlayer(client, { // Initialze LePlayer in the ready event to get the bot's user id.
     port: 6969,

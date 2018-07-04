@@ -39,18 +39,16 @@ module.exports.run = async (client, msg, args) => {
   data.disabledCommands.push(cmd.parentCommand || args[0]);
   cmd.command.options.aliases.forEach(a => data.disabledCommands.push(a));
 
-  await msg.guild.db.update({
+  msg.guild.db.update({
     disabledCommands: data.disabledCommands
-  })
-  .then(() => msg.guild.updateCache().catch(e => msg.error(e, "disable this command")))
-  .catch(e => msg.error(e, "disable this command"));
-  console.timeEnd("run time");
-  return msg.channel.send({
+  }).then(() => msg.guild.updateCache().then(() => msg.channel.send({
     embed: {
       title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,
       color: msg.colors.success
     }
-  });
+  })).catch(e => msg.error(e, "disable this command")))
+  .catch(e => msg.error(e, "disable this command"));
+  console.timeEnd("run time");
 };
 
 module.exports.options = {

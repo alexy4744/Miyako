@@ -1,6 +1,7 @@
 module.exports.run = async (client, msg) => {
   console.timeEnd("run time");
   const init = Date.now(); // Get the ms before editing the message.
+  let datebasePing = await client.rethink.ping().catch(() => datebasePing = "Failed");
   const message = await msg.channel.send({
     embed: {
       title: `⏱${msg.emojis.bar}Checking my latency!`,
@@ -13,13 +14,18 @@ module.exports.run = async (client, msg) => {
       title: `🏓${msg.emojis.bar}Pong!`,
       fields: [
         {
-          "name": "Latency \\⏰",
-          "value": String(Math.round(Date.now() - init)), // Get the time it took to edit the message.
+          "name": "Discord Latency \\⏱",
+          "value": `${String(Math.round(Date.now() - init))} ms`, // Get the time it took to edit the message.
           "inline": true
         },
         {
           "name": "Heartbeat \\💙",
-          "value": String(Math.round(client.ping)),
+          "value": `${String(Math.round(client.ping))} ms`,
+          "inline": true
+        },
+        {
+          "name": "Database Latency",
+          "value": `${String(datebasePing)} ms`,
           "inline": true
         }
       ],
