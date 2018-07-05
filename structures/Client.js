@@ -1,4 +1,5 @@
 /* eslint no-undefined: 0 */
+/* eslint guard-for-in: 0 */
 
 const { Client, Collection } = require("discord.js");
 const fs = require("fs-nextra");
@@ -35,8 +36,7 @@ module.exports = class Void extends Client {
       throw new Error(err);
     });
 
-    // Load all the events, inhibitors, commands and goodies.
-    for (const loader in loaders) loaders[loader](this, fs); // eslint-disable-line
+    for (const loader in loaders) loaders[loader](this, fs); // Load all the events, inhibitors, commands and goodies.
   }
 
   // Perform a check against all inhibitors before executing the command.

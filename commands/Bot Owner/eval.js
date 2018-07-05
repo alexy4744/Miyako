@@ -24,12 +24,12 @@ module.exports.run = async (client, msg, args) => {
       code = args.join(" ");
     }
     if (args[0].toLowerCase() === "async") code = `(async () => {\n  ${code.slice(6)}\n})();`;
-    let evaled = eval(code);
+    let evaled = clean(eval(code).replace(client.token, "SIKE"));
 
     if (isThenable(evaled)) evaled = await evaled;
 
     if (typeof evaled !== "string") {
-      rawOutput = util.inspect(evaled, {
+      evaled = util.inspect(evaled, {
         depth: 0,
         showHidden: true
       });
@@ -43,16 +43,15 @@ module.exports.run = async (client, msg, args) => {
 
     if (output) {
       console.log(consoleOutput);
-      const result = clean(rawOutput).replace(client.token, "SIKE");
-      if (result.length > 2048) {
+      if (evaled.length > 2048) {
         msg.channel.send("Your output was too long to be sent!", {
           files: [{
-            attachment: Buffer.from(result),
+            attachment: Buffer.from(evaled),
             name: "output.txt"
           }]
         }).catch(error => msg.error(error, "send this output as a text file!"));
       } else {
-        msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${result}\n\`\`\``);
+        msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled}\n\`\`\``);
       }
     }
   } catch (error) {

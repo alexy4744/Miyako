@@ -1,4 +1,5 @@
 /* eslint curly: 0*/
+
 const r = require("rethinkdb");
 
 module.exports = class Database {
@@ -18,13 +19,11 @@ module.exports = class Database {
   }
 
   ping() {
-    const init = Date.now();
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
-      r.now().run(conn, (err, timestamp) => {
-        if (err) reject(err);
-        else resolve(new Date(timestamp).getTime() - init);
-      });
+    return new Promise((resolve, reject) => {
+      const init = Date.now();
+      this.connect().then(() => {
+        resolve(Date.now() - init);
+      }).catch(e => reject(e));
     });
   }
 
