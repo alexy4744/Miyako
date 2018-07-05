@@ -1,5 +1,5 @@
 const { Structures } = require("discord.js");
-const RethinkDB = require("../db/methods");
+const RethinkDB = require("../database/methods");
 
 Structures.extend("Guild", Guild => {
   class VoidGuild extends Guild {

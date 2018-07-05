@@ -2,8 +2,8 @@
 
 const { Client, Collection } = require("discord.js");
 const fs = require("fs-nextra");
-const Database = require("../db/rethinkdb");
-const RethinkDB = require("../db/methods");
+const Database = require("../database/rethinkdb");
+const RethinkDB = require("../database/methods");
 const Structures = require("../structures/Structures");
 const loaders = require("../loaders/loader");
 
