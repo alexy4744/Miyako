@@ -6,11 +6,14 @@ module.exports = class Database {
     this.db = this.connect();
   }
 
-  async connect() {
-    return await r.connect({ // eslint-disable-line
-      db: "test"
-    }, err => {
-      if (err) throw new Error(err);
+  connect() {
+    return new Promise((resolve, reject) => {
+      r.connect({
+        db: "test"
+      }, (err, conn) => {
+        if (err) reject(err);
+        else resolve(conn);
+      });
     });
   }
 
