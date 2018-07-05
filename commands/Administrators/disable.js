@@ -29,7 +29,7 @@ module.exports.run = async (client, msg, args) => {
   } else if (data && data.disabledCommands.includes(args[0])) {
     return msg.channel.send({
       embed: {
-        title: `${msg.emojis.fail}The command "${args[0]}" has already been disabled in this guild!`,
+        title: `${msg.emojis.fail}"${args[0]}" has already been disabled in this guild!`,
         color: msg.colors.fail
       }
     });
@@ -41,14 +41,17 @@ module.exports.run = async (client, msg, args) => {
 
   msg.guild.db.update({
     disabledCommands: data.disabledCommands
-  }).then(() => msg.guild.updateCache().then(() => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,
-      color: msg.colors.success
-    }
-  })).catch(e => msg.error(e, "disable this command")))
-  .catch(e => msg.error(e, "disable this command"));
-  console.timeEnd("run time");
+  }).then(() => {
+    msg.guild.updateCache("disabledCommands", data.disabledCommands).then(() => { // eslint-disable-line
+      console.timeEnd("run time");
+      return msg.channel.send({
+        embed: {
+          title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,
+          color: msg.colors.success
+        }
+      });
+    }).catch(e => msg.error(e, "disable this command"));
+  }).catch(e => msg.error(e, "disable this command"));
 };
 
 module.exports.options = {

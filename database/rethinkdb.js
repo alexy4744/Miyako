@@ -175,20 +175,13 @@ module.exports = class Database {
     });
   }
 
-  wait(tableName) {
+  status(tableName) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
-      if (tableName !== null || tableName !== undefined) { // eslint-disable-line
-        r.table(tableName).wait().run(conn, (err, status) => {
-          if (err) reject(err);
-          else resolve(status);
-        });
-      } else {
-        r.db("test").wait().run(conn, (err, status) => {
-          if (err) reject(err);
-          else resolve(status);
-        });
-      }
+      r.table(tableName).status().run(conn, (err, status) => {
+        if (err) reject(err);
+        else resolve(status);
+      });
     });
   }
 };

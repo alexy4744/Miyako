@@ -8,11 +8,19 @@ Structures.extend("User", User => {
       this.db = new RethinkDB(this.client, "userData", this.id);
     }
 
-    updateCache() {
+    updateCache(key, value) {
       return new Promise((resolve, reject) => {
         this.db.get().then(data => {
           resolve(this.cache = data);
-        }).catch(e => reject(e));
+        }).catch(e => {
+          // If what ever reason it fails to get from database,
+          // manually update the key with the new value of the cache.
+          if (key && value && this.cache) this.cache[key] = value; // eslint-disable-line
+          else if (key && value && !this.cache) {
+            this.cache = {};
+            this.cache[key] = value;
+          } else reject(e); // eslint-disable-line
+        });
       });
     }
   }

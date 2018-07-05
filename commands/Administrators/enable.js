@@ -18,7 +18,7 @@ module.exports.run = async (client, msg, args) => {
   } else if (data && !data.disabledCommands.includes(args[0])) {
     return msg.channel.send({
       embed: {
-        title: `${msg.emojis.fail}The command "${args[0]}" is already enabled in this guild!`,
+        title: `${msg.emojis.fail}"${args[0]}" is already enabled in this guild!`,
         color: msg.colors.fail
       }
     });
@@ -29,18 +29,19 @@ module.exports.run = async (client, msg, args) => {
   // Filter the array currently stored in the db, so that it does not contain the command aliases or the name of it's parent command.
   const filteredCommands = data.disabledCommands.filter(command => !aliases.includes(command) && command !== args[0] && command !== cmd.parentCommand);
 
-  await msg.guild.db.update({
+  msg.guild.db.update({
     disabledCommands: filteredCommands
-  })
-  .then(() => msg.guild.updateCache().catch(e => msg.error(e, "enable this command")))
-  .catch(e => msg.error(e, "enable this command"));
-  console.timeEnd("run time");
-  return msg.channel.send({
-    embed: {
-      title: `${msg.emojis.success}I have succesfully enabled "${args[0]}"`,
-      color: msg.colors.success
-    }
-  });
+  }).then(() => {
+    msg.guild.updateCache("disabledCommands", filteredCommands).then(() => { // eslint-disable-line
+      console.timeEnd("run time");
+      return msg.channel.send({
+        embed: {
+          title: `${msg.emojis.success}I have succesfully enabled "${args[0]}"`,
+          color: msg.colors.success
+        }
+      });
+    }).catch(e => msg.error(e, "enable this command"))
+  }).catch(e => msg.error(e, "enable this command"));
 };
 
 module.exports.options = {
