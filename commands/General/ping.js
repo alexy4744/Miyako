@@ -2,6 +2,7 @@ module.exports.run = async (client, msg) => {
   console.timeEnd("run time");
   const init = Date.now(); // Get the ms before editing the message.
   let datebasePing = await client.rethink.ping().catch(() => datebasePing = "Failed");
+
   const message = await msg.channel.send({
     embed: {
       title: `⏱${msg.emojis.bar}Checking my latency!`,

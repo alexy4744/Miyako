@@ -14,7 +14,7 @@ module.exports = (client, msg, cmd) => {
     else { // eslint-disable-line
       return msg.channel.send({
         embed: {
-          title: `${msg.emojis.fail}This command can only be ran in ${types[cmd.command.options.runIn[i]].readable}!`,
+          title: `${msg.emojis.fail}This command can only be ran in ${types[cmd.command.options.runIn[i]]}!`,
           color: msg.colors.fail
         }
       });

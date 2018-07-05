@@ -1,5 +1,5 @@
 /* eslint curly: 0 */
-/* eslint no-lonely-if: 0*/
+/* eslint no-lonely-if: 0 */
 /* eslint no-use-before-define: 0 */
 
 module.exports = class RethinkDB {
@@ -11,7 +11,7 @@ module.exports = class RethinkDB {
 
   insert(object, disableRetry) {
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) {
           this.client.rethink.insert(this.tableName, object)
             .then(changes => resolve(changes))
@@ -21,7 +21,7 @@ module.exports = class RethinkDB {
             this._retry("insert", 1000, false, object)
               .then(changes => resolve(changes))
               .catch(e => reject(e));
-          } else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.insert()\""));
+          } else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#insert()\""));
         }
       }).catch(e => reject(e));
     });
@@ -29,7 +29,7 @@ module.exports = class RethinkDB {
 
   update(object, disableRetry) {
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) { // If it is ready.
           this.has().then(has => { // Check if it has this record.
             if (has) { // If it has, then directly update the datebase.
@@ -43,7 +43,7 @@ module.exports = class RethinkDB {
           }).catch(e => reject(e));
         } else {
           if (!disableRetry) retry();
-          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.update()\""));
+          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#update()\""));
         }
       }).catch(e => reject(e));
 
@@ -61,7 +61,7 @@ module.exports = class RethinkDB {
 
             attempts++; // Increase the number of tried attempts
 
-            this.wait(this.tableName).then(ready => { // Check again if its ready right after it inserts this new entry.
+            this.ready(this.tableName).then(ready => { // Check again if its ready right after it inserts this new entry.
               if (ready) { // If its ready again, then update the database.
                 this.has().then(has => { // Don't let this.has() retry itself just in case
                   if (has) {
@@ -98,7 +98,7 @@ module.exports = class RethinkDB {
 
   replace(object, disableRetry) { // check has = true third param this._retry()
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) {
           this.has().then(has => {
             if (has) {
@@ -109,7 +109,7 @@ module.exports = class RethinkDB {
           }).catch(e => reject(e));
         } else {
           if (!disableRetry) this._retry("replace", 1000, true).then(changes => resolve(changes)).catch(e => reject(e));
-          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.replace()\""));
+          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#replace()\""));
         }
       }).catch(e => reject(e));
     });
@@ -117,7 +117,7 @@ module.exports = class RethinkDB {
 
   remove(disableRetry) {
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) {
           this.has().then(has => {
             if (has) {
@@ -128,7 +128,7 @@ module.exports = class RethinkDB {
           }).catch(e => reject(e));
         } else {
           if (!disableRetry) this._retry("delete", 1000, true).then(changes => resolve(changes)).catch(e => reject(e));
-          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.remove()\""));
+          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#remove()\""));
         }
       }).catch(e => reject(e));
     });
@@ -136,14 +136,14 @@ module.exports = class RethinkDB {
 
   sync(disableRetry) {
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) {
           this.client.rethink.sync(this.tableName)
             .then(result => resolve(result))
             .catch(e => reject(e));
         } else {
           if (!disableRetry) this._retry("sync", 1000, false).then(results => resolve(results)).catch(e => reject(e));
-          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.sync()\""));
+          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#sync()\""));
         }
       }).catch(e => reject(e));
     });
@@ -152,12 +152,12 @@ module.exports = class RethinkDB {
   /* Data Fetching */
   get(disableRetry) {
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) {
           this.client.rethink.get(this.tableName, this.id).then(data => resolve(data)).catch(e => reject(e));
         } else {
-          if (!disableRetry) this._retry("get", 1000, true).then(data => resolve(data)).catch(e => reject(e));
-          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.get()\""));
+          if (!disableRetry) this._retry("get", 1000, false).then(data => resolve(data)).catch(e => reject(e));
+          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#get()\""));
         }
       }).catch(e => reject(e));
     });
@@ -165,12 +165,12 @@ module.exports = class RethinkDB {
 
   has(disableRetry) {
     return new Promise((resolve, reject) => {
-      this.wait(this.tableName).then(ready => {
+      this.ready(this.tableName).then(ready => {
         if (ready) {
           this.client.rethink.has(this.tableName, this.id).then(boolean => resolve(boolean)).catch(e => reject(e));
         } else {
           if (!disableRetry) this._retry("has", 500, false).then(boolean => resolve(boolean)).catch(e => reject(e));
-          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>.has()\""));
+          else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#has()\""));
         }
       }).catch(e => reject(e));
     });
@@ -178,7 +178,7 @@ module.exports = class RethinkDB {
 
   // Only wait for the whole database if I need to since its hella slow.
   // Waiting for one table is ~300-400 ms faster.
-  wait(tableName) {
+  ready(tableName) {
     return new Promise(async (resolve, reject) => {
       await this._checkTable().catch(e => reject(e));
       this.client.rethink.wait(tableName || null).then(async results => {
@@ -212,22 +212,23 @@ module.exports = class RethinkDB {
     return new Promise((resolve, reject) => {
       let attempts = 0;
       let completed = false;
+      if (!this.client.retryAttempts) return reject(new Error("<Client>#retryAttempts is undefined or null"));
 
       if (attempts < this.client.retryAttempts) {
         const retry = setInterval(() => { // eslint-disable-line
           if (attempts >= this.client.retryAttempts) {
             clearInterval(retry); // Stop counting the number of attempts
             // If the amount of attempts exceeds the limit and the database is still not ready, reject
-            if (!completed) reject(new Error(`Database is still not ready after ${attempts} attempts while ${method}ing, please try again later`));
+            if (!completed) reject(new Error(`Database is still not ready after ${attempts} attempts while ${method}ing, please contact FreezIn#4565`));
           }
 
           attempts++; // Increase the number of tried attempts
 
-          this.wait(this.tableName).then(b => { // Check again if its ready right after it inserts this new entry.
-            if (b) { // If its ready again, then update the database.
+          this.ready(this.tableName).then(b => { // Check if its ready for each attempt.
+            if (b) { // If its ready now, then update the database.
               if (checkHas) {
-                this.has().then(has => { // Don't let this.has() retry itself just in case
-                  if (has) {
+                this.has().then(has => {
+                  if (!has) {
                     this.client.rethink[method](this.tableName, this.id, object || null).then(results => {
                       clearInterval(interval);
                       completed = true;
@@ -249,7 +250,7 @@ module.exports = class RethinkDB {
                 });
               }
             }
-          });
+          }).catch(e => reject(e));
         }, interval);
       }
     });
