@@ -56,14 +56,14 @@ module.exports.run = async (client, msg, args) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: true, // If the command can be disabled per guild
-  description: "Disable commands for this guild",
-  nsfw: false,
-  aliases: [],
+  guarded: true,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: false,
+  cooldown: 5,
+  description: "Disable commands for this guild.",
+  aliases: [],
   userPermissions: ["administrator"],
   botPermissions: [],
-  runIn: [],
-  cooldown: 5
+  runIn: ["text"]
 };

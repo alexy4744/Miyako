@@ -26,14 +26,14 @@ module.exports.run = (client, msg) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Leave the guild's voice channel",
-  nsfw: false,
-  aliases: ["disconnect"],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: true,
+  cooldown: 5,
+  description: "Leave the guild's voice channel.",
+  aliases: ["disconnect"],
   userPermissions: [],
   botPermissions: [],
-  runIn: ["text"],
-  cooldown: 5
+  runIn: ["text"]
 };

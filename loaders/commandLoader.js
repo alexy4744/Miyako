@@ -1,10 +1,13 @@
 module.exports = (client, fs) => {
   /* Load all commands and aliases. */
   fs.readdir("./commands").then(folders => {
-    folders.map(folder => {
+    folders.forEach(folder => {
+      client.categories.add(folder);
+
       fs.readdir(`./commands/${folder}`).then(commands => {
-        commands.map(c => {
+        commands.forEach(c => {
           const cmd = require(`../commands/${folder}/${c}`);
+
           if (!cmd.options) console.error(`${c} must export an object called "options" module.exports.options = {}`); // eslint-disable-line
           else if (!cmd.run) console.error(`${c} must export a function called "run" module.exports.run = () => {}`); // eslint-disable-line
           else {
@@ -13,6 +16,7 @@ module.exports = (client, fs) => {
               category: folder,
               command: cmd
             });
+
             if (cmd.options && (cmd.options.aliases || cmd.options.aliases.length > 0)) { // Check if there are aliases for this command.
               for (let i = 0, len = cmd.options.aliases.length; i < len; i++) {
                 const cmdAlias = client.commands.get(c.slice(0, -3));

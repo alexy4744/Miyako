@@ -14,6 +14,7 @@ module.exports = class Void extends Client {
     this.inhibitors = new Collection();
     this.commands = new Collection();
     this.aliases = new Collection();
+    this.categories = new Set();
     this.userCooldowns = new Set();
     this.rethink = new Database();
     this.db = new RethinkDB(this, "voidData", "415313696102023169");

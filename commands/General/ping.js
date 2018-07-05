@@ -37,13 +37,14 @@ module.exports.run = async (client, msg) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Check the latency between the bot and Discord servers.",
-  nsfw: false,
-  aliases: ["latency", "pong"],
+  guarded: false,
   botOwnerOnly: false,
-  userPermissions: [],
+  nsfw: false,
+  checkVC: false,
+  cooldown: 5,
+  description: "View the latency and heartbeat of the bot.",
+  aliases: ["latency", "pong"],
+  userPermissions: ["administrator"],
   botPermissions: [],
-  runIn: [],
-  cooldown: 5
+  runIn: []
 };

@@ -65,14 +65,14 @@ module.exports.run = (client, msg, args) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Seek/Fast Foward the current track",
-  nsfw: false,
-  aliases: [],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: true,
+  cooldown: 5,
+  description: "Seek/fast forward the currently playing song.",
+  aliases: [],
   userPermissions: [],
   botPermissions: [],
-  runIn: ["text"],
-  cooldown: 5
+  runIn: ["text"]
 };

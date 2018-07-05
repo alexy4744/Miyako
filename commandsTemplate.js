@@ -4,15 +4,14 @@ module.exports.run = async (client, msg, args) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Template",
-  nsfw: false,
-  aliases: [],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: false,
-  disableCheck: true, // Overrides all other boolean
+  cooldown: 5,
+  description: "Template",
+  aliases: [],
   userPermissions: [],
   botPermissions: [],
-  runIn: [],
-  cooldown: 5
+  runIn: []
 };

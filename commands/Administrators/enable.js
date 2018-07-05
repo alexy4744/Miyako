@@ -40,20 +40,20 @@ module.exports.run = async (client, msg, args) => {
           color: msg.colors.success
         }
       });
-    }).catch(e => msg.error(e, "enable this command"))
+    }).catch(e => msg.error(e, "enable this command"));
   }).catch(e => msg.error(e, "enable this command"));
 };
 
 module.exports.options = {
   enabled: true,
-  guarded: true, // If the command can be disabled per guild
-  description: "Enable disabled commands for this guild",
-  nsfw: false,
-  aliases: [],
+  guarded: true,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: false,
+  cooldown: 5,
+  description: "Enable disabled commands for this guild.",
+  aliases: [],
   userPermissions: ["administrator"],
   botPermissions: [],
-  runIn: [],
-  cooldown: 5
+  runIn: ["text"]
 };

@@ -158,14 +158,14 @@ Author: **${songs[0].info.author}**\n
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Play a track or a stream from an available source",
-  nsfw: false,
-  aliases: [],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: true,
+  cooldown: 5,
+  description: "Play a song via the available sources.",
+  aliases: [],
   userPermissions: [],
-  botPermissions: ["CONNECT", "SPEAK"],
-  runIn: ["text"],
-  cooldown: 5
+  botPermissions: ["connect", "speak"],
+  runIn: ["text"]
 };

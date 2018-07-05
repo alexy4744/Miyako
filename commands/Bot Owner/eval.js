@@ -63,12 +63,13 @@ module.exports.run = async (client, msg, args) => {
 module.exports.options = {
   enabled: true,
   guarded: true,
-  description: "Evaluates JavaScript code",
-  nsfw: false,
-  aliases: ["ev"],
   botOwnerOnly: true,
+  nsfw: false,
+  checkVC: false,
+  cooldown: 5,
+  description: "Execute JavaScript code.",
+  aliases: ["ev"],
   userPermissions: [],
   botPermissions: [],
-  runIn: [],
-  cooldown: 5
+  runIn: []
 };

@@ -4,10 +4,10 @@ module.exports.run = async (client, msg) => {
   if (!data.devMode) data.devMode = true;
   else data.devMode = false;
 
-  await client.db.update({
+  client.db.update({
     devMode: data.devMode
   })
-  .then(() => client.updateCache().catch(e => msg.error(e, "activate/deactivate developer mode!")))
+  .then(() => client.updateCache("devMode", data.devMode).catch(e => msg.error(e, "activate/deactivate developer mode!")))
   .catch(error => msg.error(error, "activate/deactivate developer mode!"));
 
   return msg.channel.send({
@@ -22,12 +22,13 @@ module.exports.run = async (client, msg) => {
 module.exports.options = {
   enabled: true,
   guarded: true,
-  description: "Enable developer mode",
-  nsfw: false,
-  aliases: [],
   botOwnerOnly: true,
+  nsfw: false,
+  checkVC: false,
+  cooldown: 5,
+  description: "Enable developer mode.",
+  aliases: [],
   userPermissions: [],
   botPermissions: [],
-  runIn: [],
-  cooldown: 5
+  runIn: []
 };

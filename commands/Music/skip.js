@@ -26,14 +26,14 @@ module.exports.run = (client, msg) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Skip the currently playing song",
-  nsfw: false,
-  aliases: [],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: true,
+  cooldown: 5,
+  description: "Skip the song that is currently playing.",
+  aliases: [],
   userPermissions: [],
   botPermissions: [],
-  runIn: ["text"],
-  cooldown: 5
+  runIn: ["text"]
 };

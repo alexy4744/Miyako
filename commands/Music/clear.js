@@ -21,14 +21,14 @@ module.exports.run = (client, msg) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Clear the song queue",
-  nsfw: false,
-  aliases: [],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: true,
+  cooldown: 5,
+  description: "Clear the current song queue.",
+  aliases: [],
   userPermissions: [],
   botPermissions: [],
-  runIn: ["text"],
-  cooldown: 5
+  runIn: ["text"]
 };

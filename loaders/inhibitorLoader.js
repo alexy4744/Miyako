@@ -1,7 +1,7 @@
 module.exports = (client, fs) => {
   /* Load all command inhibitors. */
   fs.readdir("./inhibitors").then(inhibitors => {
-    inhibitors.map(i => {
+    inhibitors.forEach(i => {
       client.inhibitors.set(i.slice(0, -3), require(`../inhibitors/${i}`));
     });
   }).catch(error => {

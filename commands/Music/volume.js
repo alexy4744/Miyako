@@ -8,11 +8,9 @@ module.exports.run = (client, msg, args) => {
     });
   }
 
- const vol = args[0];
-
- client.LePlayer.volume(msg.guild.id, vol).then(v => msg.channel.send({
+ client.LePlayer.volume(msg.guild.id, args[0]).then(v => msg.channel.send({
     embed: {
-      title: `${vol < 1 ? "🔇" : vol < 50 ? "🔉" : "🔊"}${msg.emojis.bar}I have succesfully set the volume to ${v}%!`,
+      title: `${v < 1 ? "🔇" : v < 50 ? "🔉" : "🔊"}${msg.emojis.bar}I have succesfully set the volume to ${v}%!`,
       color: msg.colors.success
     }
   })).catch(error => msg.channel.send({
@@ -26,14 +24,14 @@ module.exports.run = (client, msg, args) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false, // If the command can be disabled per guild
-  description: "Adjust the volume of the player",
-  nsfw: false,
-  aliases: ["vol"],
+  guarded: false,
   botOwnerOnly: false,
+  nsfw: false,
   checkVC: true,
+  cooldown: 5,
+  description: "Adjust the volume of the player from 0 - 200%.",
+  aliases: ["vol"],
   userPermissions: [],
   botPermissions: [],
-  runIn: ["text"],
-  cooldown: 5
+  runIn: ["text"]
 };
