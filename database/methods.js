@@ -179,27 +179,13 @@ module.exports = class RethinkDB {
   // Only wait for the whole database if I need to since its hella slow.
   // Waiting for one table is ~300-400 ms faster.
   ready(tableName) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (!tableName) return reject(new Error(`The name of the table must be included in the ready method!`));
-      await this._checkTable().catch(e => reject(e));
       this.client.rethink.status(tableName).then(object => {
         const objectModel = `{"all_replicas_ready":true,"ready_for_outdated_reads":true,"ready_for_reads":true,"ready_for_writes":true}`;
         if (JSON.stringify(object.status) === objectModel) resolve(true);
         else resolve(false);
       }).catch(e => reject(e));
-    });
-  }
-
-  /* Check if the table exists, if not, then create it */
-  _checkTable() {
-    return new Promise(async (resolve, reject) => {
-      const tables = await this.client.rethink.tableList().catch(error => reject(error));
-
-      if (!tables.includes(this.tableName)) {
-        this.client.rethink.tableCreate(this.tableName).then(() => {
-          this.sync().then(() => resolve()).catch(error => reject(error));
-        }).catch(error => reject(error));
-      } else resolve();
     });
   }
 

@@ -1,6 +1,5 @@
 /* eslint no-undefined: 0 */
 /* eslint guard-for-in: 0 */
-
 const { Client, Collection } = require("discord.js");
 const fs = require("fs-nextra");
 const Database = require("../database/rethinkdb");
@@ -24,18 +23,6 @@ module.exports = class Void extends Client {
     this.prefix = options.prefix;
     this.retryAttempts = options.dbAttempts || 5;
 
-    this.db.get().then(data => {
-      if (data === null) {
-        this.db.insert({
-          id: "415313696102023169"
-        }).catch(err => {
-          throw new Error(err);
-        });
-      }
-    }).catch(err => {
-      throw new Error(err);
-    });
-
     for (const loader in loaders) loaders[loader](this, fs); // Load all the events, inhibitors, commands and goodies.
   }
 
@@ -50,7 +37,7 @@ module.exports = class Void extends Client {
      * --------------------------------------------------------------------------------------------------------
      * There will always be client and user objects, but not member and guild objects,
      * since the command could be sent in DMs rather than a guild text channel.
-    */
+     */
     if (this.cache === undefined) await this.updateCache().catch(e => msg.error(e, "execute this command"));
     if (msg.author.cache === undefined) await msg.author.updateCache().catch(e => msg.error(e, "execute this command"));
     if (msg.member && msg.member.cache === undefined) await msg.member.updateCache().catch(e => msg.error(e, "execute this command"));
@@ -77,23 +64,18 @@ module.exports = class Void extends Client {
   }
 
   // Update the client's cache.
-  updateCache(key, value, previousDB) {
+  updateCache(key, value) {
     return new Promise((resolve, reject) => {
       this.db.get().then(data => {
         resolve(this.cache = data);
       }).catch(e => {
         // If what ever reason it fails to get from database, try to manually update the key with the new value of the cache.
         if (key && value) {
-          try {
-            if (!this.cache) this.cache = {};
-            return resolve(this.cache[key] = value);
-          } catch (error) {
-            // Try to restore the database to it's previous state. Not failsafe since it would make sense
-            // that if it fails to get from database, replacing should also be a problem...
-            if (!previousDB) reject(error);
-            else this.db.replace(previousDB).then(() => reject(error)).catch(err => reject(err));
-          }
-        } else reject(e); // eslint-disable-line
+          if (!this.cache) this.cache = {};
+          else resolve(this.cache[key] = value);
+        } else {
+          this.db.replace(this.cache || {}).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
+        }
       });
     });
   }

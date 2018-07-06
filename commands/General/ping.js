@@ -44,7 +44,7 @@ module.exports.options = {
   cooldown: 5,
   description: "View the latency and heartbeat of the bot.",
   aliases: ["latency", "pong"],
-  userPermissions: ["administrator"],
+  userPermissions: [],
   botPermissions: [],
   runIn: []
 };
