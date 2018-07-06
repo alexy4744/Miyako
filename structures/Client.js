@@ -1,5 +1,6 @@
 /* eslint no-undefined: 0 */
 /* eslint guard-for-in: 0 */
+
 const { Client, Collection } = require("discord.js");
 const fs = require("fs-nextra");
 const Database = require("../database/rethinkdb");
@@ -74,7 +75,7 @@ module.exports = class Void extends Client {
           if (!this.cache) this.cache = {};
           else resolve(this.cache[key] = value);
         } else {
-          this.db.replace(this.cache || {}).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
+          this.db.replace(typeof this.cache === undefined ? {} : this.cache).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
         }
       });
     });

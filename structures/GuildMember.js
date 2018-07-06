@@ -1,3 +1,5 @@
+/* eslint no-undefined: 0 */
+
 const { Structures } = require("discord.js");
 const RethinkDB = require("../database/methods");
 
@@ -18,7 +20,7 @@ Structures.extend("GuildMember", GuildMember => {
             if (!this.cache) this.cache = {};
             else resolve(this.cache[key] = value);
           } else {
-            this.db.replace(this.cache || {}).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
+            this.db.replace(typeof this.cache === undefined ? {} : this.cache).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
           }
         });
       });
