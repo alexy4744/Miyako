@@ -1,5 +1,6 @@
 module.exports.run = async (client, msg) => {
   const data = await client.db.get().catch(error => msg.error(error, "activate/deactivate developer mode!"));
+  const previousDB = data; // Store the current database before it gets updated
 
   if (!data.devMode) data.devMode = true;
   else data.devMode = false;
@@ -7,7 +8,7 @@ module.exports.run = async (client, msg) => {
   client.db.update({
     devMode: data.devMode
   })
-  .then(() => client.updateCache("devMode", data.devMode).catch(e => msg.error(e, "activate/deactivate developer mode!")))
+  .then(() => client.updateCache("devMode", data.devMode, previousDB).catch(e => msg.error(e, "activate/deactivate developer mode!")))
   .catch(error => msg.error(error, "activate/deactivate developer mode!"));
 
   return msg.channel.send({

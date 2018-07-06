@@ -1,7 +1,7 @@
 /* eslint guard-for-in: 0 */
 
 module.exports.run = (client, msg) => {
-  if (msg.guild.member(client.user).hasPermission("ADD_REACTIONS")) msg.react("☑");
+  if (msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑");
   else msg.channel.send(`Help is on the way ${msg.author.toString()}...`);
 
   const help = {};

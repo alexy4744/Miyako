@@ -1,5 +1,7 @@
 /* eslint no-eval: 0 */
+
 const snekfetch = require("snekfetch");
+const util = require("util");
 
 module.exports.run = async (client, msg, args) => {
   // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
@@ -12,18 +14,19 @@ module.exports.run = async (client, msg, args) => {
     if (args[0] === "async") code = `(async () => {\n${code.slice(6)}\n})();`;
 
     let evaled = eval(code);
+    const type = evaled;
 
     if (isThenable(evaled)) evaled = await evaled;
 
     if (typeof evaled !== "string") {
-      evaled = require("util").inspect(evaled, {
+      evaled = util.inspect(evaled, {
         depth: 0,
         showHidden: true
       });
     }
 
     if (evaled.length < 2000) {
-      msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled.replace(client.token, "SIKE")}\n\`\`\``);
+      msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled.replace(client.token, "SIKE")}\n\`\`\`\n**Type**\n\`\`\`js\n${typeof type}\`\`\``);
     } else {
       snekfetch.post(`https://hastebin.com/documents`).send(evaled.replace(client.token, "SIKE")).then(url => { // eslint-disable-line
         return msg.channel.send(`Results have been uploaded onto Hastebin as it exceeded 2000 characters!\n**https://hastebin.com/${url.body.key}**`, {

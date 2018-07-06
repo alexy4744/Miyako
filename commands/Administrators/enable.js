@@ -9,6 +9,7 @@ module.exports.run = async (client, msg, args) => {
   }
 
   let data = await msg.guild.db.get().catch(e => msg.error(e, "enable this command"));
+  const previousDB = data; // Store the current database before it gets updated
 
   if (!data || !data.disabledCommands) {
     await msg.guild.db.update({
@@ -32,7 +33,7 @@ module.exports.run = async (client, msg, args) => {
   msg.guild.db.update({
     disabledCommands: filteredCommands
   }).then(() => {
-    msg.guild.updateCache("disabledCommands", filteredCommands).then(() => { // eslint-disable-line
+    msg.guild.updateCache("disabledCommands", filteredCommands, previousDB).then(() => { // eslint-disable-line
       console.timeEnd("run time");
       return msg.channel.send({
         embed: {

@@ -20,7 +20,7 @@ Structures.extend("Message", Message => {
     }
 
     error(err, action) {
-      this.channel.send({
+      this.channel.sendMessage({
         embed: {
           title: `${this.emojis.fail}Sorry ${this.author.username}, I have failed to ${action}`,
           description: `\`\`\`js\n${err.stack}\n\`\`\``,
@@ -33,7 +33,7 @@ Structures.extend("Message", Message => {
     }
 
     noArgs(action) {
-      return this.channel.send({
+      return this.channel.sendMessage({
         embed: {
           title: `${this.emojis.fail}${this.author.username}, you must ${action} in order to execute this command!`,
           color: this.colors.fail
