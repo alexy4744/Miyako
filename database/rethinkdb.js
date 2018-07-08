@@ -4,7 +4,7 @@ const r = require("rethinkdb");
 
 module.exports = class Database {
   constructor() {
-    this.connection = this.connect();
+    this.connection = this.connect().catch(error => error);
   }
 
   connect() {
