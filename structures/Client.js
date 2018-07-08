@@ -28,7 +28,7 @@ module.exports = class Void extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, cmd, args) {
+  runCmd(msg, cmd, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -39,29 +39,28 @@ module.exports = class Void extends Client {
      * There will always be client and user objects, but not member and guild objects,
      * since the command could be sent in DMs rather than a guild text channel.
      */
-    if (this.cache === undefined) await this.updateCache().catch(e => msg.error(e, "execute this command"));
-    if (msg.author.cache === undefined) await msg.author.updateCache().catch(e => msg.error(e, "execute this command"));
-    if (msg.member && msg.member.cache === undefined) await msg.member.updateCache().catch(e => msg.error(e, "execute this command"));
-    if (msg.guild && msg.guild.cache === undefined) await msg.guild.updateCache().catch(e => msg.error(e, "execute this command"));
+    if (this.cache === undefined) return msg.error("Client cache still does not exist", "execute this command!");
+    if (msg.author.cache === undefined) return msg.error("User cache still does not exist", "execute this command!");
+    if (msg.member && msg.member.cache === undefined) return msg.error("Member cache still does not exist", "execute this command!");
+    if (msg.guild && msg.guild.cache === undefined) return msg.error("Guild cache still does not exist", "execute this command!");
 
-    const keys = Array.from(this.inhibitors.keys());
-    const len = keys.length;
+    const inhibitors = Array.from(this.inhibitors.keys());
 
-    if (len < 1) return cmd.command.run(this, msg, args); // If there's no inhibitors, just run the command.
+    if (inhibitors.length < 1) return cmd.command.run(this, msg, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 
-    for (let i = 0; i < len; i++) { // Loop through all loaded inhibitors.
+    for (const inhibitor of inhibitors) { // Loop through all loaded inhibitors.
       try {
-        if (isNaN(count)) break; // If the inhibitor throws anything that is not a error, then the command should fail to execute.
-        count += this.inhibitors.get(keys[i])(this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
+        if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
+        count += this.inhibitors.get(inhibitor)(this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
         break;
       }
     }
 
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
-    if (count >= len) return cmd.command.run(this, msg, args);
+    if (count >= inhibitors.length) return cmd.command.run(this, msg, args);
   }
 
   // Update the client's cache.

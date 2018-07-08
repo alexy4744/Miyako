@@ -9,7 +9,6 @@
   "author": "FreezIn",
   "license": "ISC",
   "dependencies": {
-    "bufferutil": "^3.0.5",
     "chalk": "^2.4.1",
     "discord.js": "github:hydrabolt/discord.js",
     "erlpack": "github:discordapp/erlpack",
@@ -18,7 +17,6 @@
     "js-beautify": "^1.7.5",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
-    "node-opus": "^0.3.0",
     "rethinkdb": "^2.3.3",
     "snekfetch": "^4.0.4",
     "uws": "^10.148.1",
