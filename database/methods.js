@@ -169,7 +169,7 @@ module.exports = class RethinkDB extends Database {
   has(disableRetry) {
     return new Promise((resolve, reject) => {
       this.ready(this.tableName).then(ready => {
-        if (!ready) { // change back to true
+        if (ready) {
           this.hasDocument(this.tableName, this.id).then(boolean => resolve(boolean)).catch(e => reject(e));
         } else {
           console.log(disableRetry)
