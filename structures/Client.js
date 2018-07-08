@@ -3,7 +3,6 @@
 
 const { Client, Collection } = require("discord.js");
 const fs = require("fs-nextra");
-const Database = require("../database/rethinkdb");
 const RethinkDB = require("../database/methods");
 const Structures = require("../structures/Structures");
 const loaders = require("../loaders/loader");
@@ -17,7 +16,6 @@ module.exports = class Void extends Client {
     this.aliases = new Collection();
     this.categories = new Set();
     this.userCooldowns = new Set();
-    this.rethink = new Database();
     this.db = new RethinkDB(this, "voidData", "415313696102023169");
     this.structures = Structures;
     this.owner = options.owner;
@@ -39,6 +37,7 @@ module.exports = class Void extends Client {
      * There will always be client and user objects, but not member and guild objects,
      * since the command could be sent in DMs rather than a guild text channel.
      */
+
     if (this.cache === undefined) return msg.error("Client cache still does not exist", "execute this command!");
     if (msg.author.cache === undefined) return msg.error("User cache still does not exist", "execute this command!");
     if (msg.member && msg.member.cache === undefined) return msg.error("Member cache still does not exist", "execute this command!");

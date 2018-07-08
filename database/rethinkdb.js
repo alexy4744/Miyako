@@ -4,7 +4,7 @@ const r = require("rethinkdb");
 
 module.exports = class Database {
   constructor() {
-    this.db = this.connect();
+    this.connection = this.connect();
   }
 
   connect() {
@@ -93,7 +93,7 @@ module.exports = class Database {
 
   /* Data Manipulation */
 
-  insert(tableName, object) {
+  insertDocument(tableName, object) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.db("test").table(tableName).insert(object)
@@ -104,7 +104,7 @@ module.exports = class Database {
     });
   }
 
-  update(tableName, id, object) {
+  updateDocument(tableName, id, object) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.db("test").table(tableName).get(id)
@@ -116,7 +116,7 @@ module.exports = class Database {
     });
   }
 
-  replace(tableName, id, object) {
+  replaceDocument(tableName, id, object) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.db("test").table(tableName).get(id)
@@ -128,7 +128,7 @@ module.exports = class Database {
     });
   }
 
-  delete(tableName, id) {
+  deleteDocument(tableName, id) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.db("test").table(tableName).get(id)
@@ -140,7 +140,7 @@ module.exports = class Database {
     });
   }
 
-  sync(tableName) {
+  syncTable(tableName) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.table(tableName).sync().run(conn, (err, synced) => {
@@ -152,7 +152,7 @@ module.exports = class Database {
 
   /* Data Fetching */
 
-  get(tableName, id) {
+  getDocument(tableName, id) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.db("test").table(tableName).get(id)
@@ -164,7 +164,7 @@ module.exports = class Database {
   }
 
   // https://stackoverflow.com/questions/43782915/rethinkdb-check-if-record-exists
-  has(tableName, id) {
+  hasDocument(tableName, id) {
     return new Promise(async (resolve, reject) => {
       const conn = await this.connect().catch(e => reject(e));
       r.db("test").table(tableName).getAll(id)

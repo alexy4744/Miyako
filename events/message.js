@@ -6,7 +6,7 @@ module.exports = async (client, msg) => {
   if (msg.member && msg.member.cache === undefined) await msg.member.updateCache().catch(() => {});
   if (msg.guild && msg.guild.cache === undefined) await msg.guild.updateCache().catch(() => {});
 
-  const prefix = msg.guild && msg.guild.cache ? msg.guild.cache.prefix : "v$";
+  const prefix = msg.guild && msg.guild.cache ? msg.guild.cache.prefix ? msg.guild.cache.prefix : "v$" : "v$";
 
   if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
   if (msg.guild && !msg.guild.me.hasPermission("SEND_MESSAGES")) return; // If bot doesn't have the permissions to send messages, dont even check for command.

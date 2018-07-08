@@ -2,8 +2,11 @@
 /* eslint no-lonely-if: 0 */
 /* eslint no-use-before-define: 0 */
 
-module.exports = class RethinkDB {
+const Database = require("./rethinkdb");
+
+module.exports = class RethinkDB extends Database {
   constructor(client, tableName, id) {
+    super();
     this.client = client;
     this.tableName = tableName;
     this.id = id;
@@ -13,7 +16,7 @@ module.exports = class RethinkDB {
     return new Promise((resolve, reject) => {
       this.ready(this.tableName).then(ready => {
         if (ready) {
-          this.client.rethink.insert(this.tableName, object)
+          this.insertDocument(this.tableName, object)
             .then(changes => resolve(changes))
             .catch(e => reject(e));
         } else {
@@ -33,7 +36,7 @@ module.exports = class RethinkDB {
         if (ready) { // If it is ready.
           this.has().then(has => { // Check if it has this record.
             if (has) { // If it has, then directly update the datebase.
-              this.client.rethink.update(this.tableName, this.id, object)
+              this.updateDocument(this.tableName, this.id, object)
                 .then(changes => resolve(changes))
                 .catch(e => reject(e));
             } else { // If it doesn't have this record,
@@ -65,7 +68,7 @@ module.exports = class RethinkDB {
               if (ready) { // If its ready again, then update the database.
                 this.has().then(has => { // Don't let this.has() retry itself just in case
                   if (has) {
-                    this.client.rethink.update(this.tableName, this.id, object).then(changes => {
+                    this.updateDocument(this.tableName, this.id, object).then(changes => {
                       clearInterval(interval);
                       completed = true;
                       return resolve(changes);
@@ -102,7 +105,7 @@ module.exports = class RethinkDB {
         if (ready) {
           this.has().then(has => {
             if (has) {
-              this.client.rethink.replace(this.tableName, this.id, object)
+              this.replaceDocument(this.tableName, this.id, object)
                 .then(changes => resolve(changes))
                 .catch(e => reject(e));
             } else reject(new Error(`There is nothing to replace as this ID does not exist in ${this.tableName}!`));
@@ -121,7 +124,7 @@ module.exports = class RethinkDB {
         if (ready) {
           this.has().then(has => {
             if (has) {
-              this.client.rethink.delete(this.tableName, this.id)
+              this.deleteDocument(this.tableName, this.id)
                 .then(changes => resolve(changes))
                 .catch(e => reject(e));
             } else reject(new Error(`${this.id} cannot be removed from ${this.tableName} as it does not exists!`));
@@ -138,7 +141,7 @@ module.exports = class RethinkDB {
     return new Promise((resolve, reject) => {
       this.ready(this.tableName).then(ready => {
         if (ready) {
-          this.client.rethink.sync(this.tableName)
+          this.syncTable(this.tableName)
             .then(result => resolve(result))
             .catch(e => reject(e));
         } else {
@@ -154,7 +157,7 @@ module.exports = class RethinkDB {
     return new Promise((resolve, reject) => {
       this.ready(this.tableName).then(ready => {
         if (ready) {
-          this.client.rethink.get(this.tableName, this.id).then(data => resolve(data)).catch(e => reject(e));
+          this.getDocument(this.tableName, this.id).then(data => resolve(data)).catch(e => reject(e));
         } else {
           if (!disableRetry) this._retry("get", 1000, false).then(data => resolve(data)).catch(e => reject(e));
           else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#get()\""));
@@ -167,7 +170,7 @@ module.exports = class RethinkDB {
     return new Promise((resolve, reject) => {
       this.ready(this.tableName).then(ready => {
         if (ready) {
-          this.client.rethink.has(this.tableName, this.id).then(boolean => resolve(boolean)).catch(e => reject(e));
+          this.hasDocument(this.tableName, this.id).then(boolean => resolve(boolean)).catch(e => reject(e));
         } else {
           if (!disableRetry) this._retry("has", 500, false).then(boolean => resolve(boolean)).catch(e => reject(e));
           else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#has()\""));
@@ -181,7 +184,7 @@ module.exports = class RethinkDB {
   ready(tableName) {
     return new Promise((resolve, reject) => {
       if (!tableName) return reject(new Error(`The name of the table must be included in the ready method!`));
-      this.client.rethink.status(tableName).then(object => {
+      this.status(tableName).then(object => {
         const objectModel = `{"all_replicas_ready":true,"ready_for_outdated_reads":true,"ready_for_reads":true,"ready_for_writes":true}`;
         if (JSON.stringify(object.status) === objectModel) resolve(true);
         else resolve(false);
@@ -211,7 +214,7 @@ module.exports = class RethinkDB {
               if (checkHas) {
                 this.has().then(has => {
                   if (!has) {
-                    this.client.rethink[method](this.tableName, this.id, object || null).then(results => {
+                    this[method](this.tableName, this.id, object || null).then(results => {
                       clearInterval(interval);
                       completed = true;
                       return resolve(results);
@@ -222,7 +225,7 @@ module.exports = class RethinkDB {
                   } else reject(new Error(`${this.id} cannot be ${method}d as it does not exist in ${this.tableName} while retrying!`));
                 }).catch(e => reject(e));
               } else {
-                this.client.rethink[method](this.tableName, this.id, object || null).then(results => {
+                this[method](this.tableName, this.id, object || null).then(results => {
                   clearInterval(interval);
                   completed = true;
                   return resolve(results);

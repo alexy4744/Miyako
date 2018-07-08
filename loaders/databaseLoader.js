@@ -1,7 +1,7 @@
 module.exports = async client => {
   const tables = ["voidData", "guildData", "memberData", "userData"];
 
-  let tableList = await client.rethink.tableList().catch(error => {
+  let tableList = await client.db.tableList().catch(error => {
     throw new Error(error);
   });
 
@@ -25,12 +25,12 @@ module.exports = async client => {
         });
       }
 
-      tableList = await client.rethink.tableList().catch(error => {
+      tableList = await client.db.tableList().catch(error => {
         throw new Error(error);
       });
 
       if (!tableList.includes(tables[i])) {
-        await client.rethink.tableCreate(tables[i]).catch(error => {
+        await client.db.tableCreate(tables[i]).catch(error => {
           throw new Error(error);
         });
       }
