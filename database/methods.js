@@ -172,7 +172,6 @@ module.exports = class RethinkDB extends Database {
         if (ready) {
           this.hasDocument(this.tableName, this.id).then(boolean => resolve(boolean)).catch(e => reject(e));
         } else {
-          console.log(disableRetry)
           if (!disableRetry) this._retry("hasDocument", 500, false).then(boolean => resolve(boolean)).catch(e => reject(e));
           else reject(new Error("Database is not ready and retry is disabled, error occured on method \"<db>#has()\""));
         }

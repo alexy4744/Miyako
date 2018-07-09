@@ -15,7 +15,7 @@ module.exports.run = async (client, msg) => {
       title: `🏓${msg.emojis.bar}Pong!`,
       fields: [
         {
-          "name": "Discord Latency \\⏱",
+          "name": "Round Trip Latency \\⏱",
           "value": `${String(Math.round(Date.now() - init))} ms`, // Get the time it took to edit the message.
           "inline": true
         },
