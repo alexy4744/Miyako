@@ -3,7 +3,7 @@
 module.exports.run = (client, msg) => {
   if (msg.channel.type !== "dm") {
     if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => {});
-    else msg.channel.send(`Help is on the way ${msg.author.toString()}...`);
+    else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
   }
 
   const help = {};
@@ -42,7 +42,7 @@ module.exports.run = (client, msg) => {
 
 module.exports.options = {
   enabled: true,
-  guarded: false,
+  guarded: true,
   botOwnerOnly: false,
   nsfw: false,
   checkVC: false,
