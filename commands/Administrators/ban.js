@@ -131,6 +131,7 @@ module.exports.options = {
   checkVC: false,
   cooldown: 5,
   description: "Ban a member, with optional reasoning and number of days of messages to delete.",
+  usage: (prefix, client) => `${prefix}ban ${client.user.username}`,
   aliases: [],
   userPermissions: ["administrator"],
   botPermissions: ["ban_members"],
