@@ -1,17 +1,19 @@
 module.exports = (sX, sY) => {
-  /* Take the current letter and concatenate it with the letter before it
+  /* Uses the Sørensen–Dice index algorithm to measure the similarity between two strings
+   * https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
+   * Take the current letter and concatenate it with the letter before it accounting for whitespaces
    * "Array" becomes ["Ar", "rr", "ra", "ay"]
    * "Object" becomes ["Ob", "bj", "je", "ec", "ct"]
-   * "All right" becomes ["Al", "ll", "lr", "ri", "ig", "gh", "ht"]
+   * "All right" becomes ["al", "ll", "l", "r", "ri", "ig", "gh", "ht"]
    */
 
   const sXBigrams = [];
   const sYBigrams = [];
   const matchingBigrams = [];
 
-  // If the current letter is a whitespace, remove it and concatenate it with the next letter
-  for (let x = 0; x < sX.length - 1; x++) sXBigrams.push(sX[x].replace(/\s/g, "") + sX[x + 1]);
-  for (let y = 0; y < sY.length - 1; y++) sYBigrams.push(sY[y].replace(/\s/g, "") + sY[y + 1]);
+  // Remove any whitespace for the current pair of characters
+  for (let x = 0; x < sX.length - 1; x++) sXBigrams.push(sX[x].replace(/\s/g, "") + sX[x + 1].replace(/\s/g, ""));
+  for (let y = 0; y < sY.length - 1; y++) sYBigrams.push(sY[y].replace(/\s/g, "") + sY[y + 1].replace(/\s/g, ""));
 
   // If both strings are the same length, it doesn't matter which length I should use.
   if (sXBigrams.length === sYBigrams.length) {
