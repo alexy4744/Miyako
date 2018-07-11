@@ -10,7 +10,7 @@ module.exports.run = async (client, msg, args) => {
 
   const cmd = client.commands.get(args[0]) || client.aliases.get(args[0]);
 
-  if (cmd.command.options.guarded) { // Check if the command can be disabled per guild.
+  if (cmd.options.guarded) { // Check if the command can be disabled per guild.
     return msg.channel.send({
       embed: {
         title: `${msg.emojis.fail}This command cannot be disabled!`,
@@ -35,9 +35,8 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-  // Only aliases has the parentCommand property, if it doesn't, that means args[0] is already the parentCommand.
-  data.disabledCommands.push(cmd.parentCommand || args[0]);
-  cmd.command.options.aliases.forEach(a => data.disabledCommands.push(a));
+  data.disabledCommands.push(cmd.options.name || args[0]);
+  cmd.options.aliases.forEach(a => data.disabledCommands.push(a));
 
   msg.guild.db.update({
     disabledCommands: data.disabledCommands

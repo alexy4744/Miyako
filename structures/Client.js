@@ -28,6 +28,7 @@ module.exports = class Void extends Client {
 
   // Perform a check against all inhibitors before executing the command.
   runCmd(msg, cmd, args) {
+    // console.log(cmd)
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -46,7 +47,7 @@ module.exports = class Void extends Client {
 
     const inhibitors = Array.from(this.inhibitors.keys());
 
-    if (inhibitors.length < 1) return cmd.command.run(this, msg, args); // If there's no inhibitors, just run the command.
+    if (inhibitors.length < 1) return cmd.run(this, msg, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 
@@ -60,7 +61,7 @@ module.exports = class Void extends Client {
     }
 
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
-    if (count >= inhibitors.length) return cmd.command.run(this, msg, args);
+    if (count >= inhibitors.length) return cmd.run(this, msg, args);
   }
 
   /**

@@ -26,9 +26,8 @@ module.exports.run = async (client, msg, args) => {
   }
 
   const cmd = client.commands.get(args[0]) || client.aliases.get(args[0]);
-  const aliases = cmd.command.options.aliases;
   // Filter the array currently stored in the db, so that it does not contain the command aliases or the name of it's parent command.
-  const filteredCommands = data.disabledCommands.filter(command => !aliases.includes(command) && command !== args[0] && command !== cmd.parentCommand);
+  const filteredCommands = data.disabledCommands.filter(command => !cmd.options.aliases.includes(command) && command !== args[0] && command !== cmd.options.name);
 
   msg.guild.db.update({
     disabledCommands: filteredCommands

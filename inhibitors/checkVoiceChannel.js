@@ -1,5 +1,5 @@
 module.exports = (client, msg, cmd) => {
-  if (!cmd.command.options.checkVC) return 1;
+  if (!cmd.options.checkVC) return 1;
   if (!msg.member.voiceChannel) {
     return msg.channel.send({
       embed: {

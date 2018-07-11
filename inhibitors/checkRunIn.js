@@ -1,5 +1,5 @@
 module.exports = (client, msg, cmd) => {
-  const runIn = cmd.command.options.runIn;
+  const runIn = cmd.options.runIn;
   const len = runIn.length;
 
   if (len < 1) return 1;
@@ -14,7 +14,7 @@ module.exports = (client, msg, cmd) => {
     else { // eslint-disable-line
       return msg.channel.send({
         embed: {
-          title: `${msg.emojis.fail}This command can only be ran in ${types[cmd.command.options.runIn[i]]}!`,
+          title: `${msg.emojis.fail}This command can only be ran in ${types[cmd.options.runIn[i]]}!`,
           color: msg.colors.fail
         }
       });
