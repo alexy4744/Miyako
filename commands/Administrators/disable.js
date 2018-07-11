@@ -25,6 +25,7 @@ module.exports.run = async (client, msg, args) => {
     await msg.guild.db.update({
       disabledCommands: []
     }).catch(e => msg.error(e, "disable this command"));
+    await msg.guild.updateCache("disabledCommands", []).catch(e => msg.error(e, "disable this command"));
     data = await msg.guild.db.get().catch(e => msg.error(e, "disable this command")); // reassign data with the updated object containing the disabledCommands array for this guild.
   } else if (data && data.disabledCommands.includes(args[0])) {
     return msg.channel.send({

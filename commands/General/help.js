@@ -1,16 +1,11 @@
 /* eslint guard-for-in: 0 */
 
 module.exports.run = (client, msg) => {
-  if (msg.channel.type !== "dm") {
-    if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => {});
-    else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
-  }
-
   const help = {};
   const sendHelp = [];
 
   for (const cmd of client.commands) {
-    const options = cmd[1].command.options;
+    const options = cmd[1].options;
     let skipCMD = false;
 
     if (msg.channel.type === "text" && (options.runIn.length < 1 || options.runIn.includes("text"))) {
@@ -22,13 +17,13 @@ module.exports.run = (client, msg) => {
       if (!msg.channel.nsfw && options.nsfw) continue;
       if (msg.author.id !== client.owner && options.botOwnerOnly) continue;
 
-      if (!help[cmd[1].category]) help[cmd[1].category] = {};
-      help[cmd[1].category][cmd[0]] = cmd[1].command.options.description;
+      if (!help[cmd[1].options.category]) help[cmd[1].options.category] = {};
+      help[cmd[1].options.category][cmd[0]] = cmd[1].options.description;
     } else if (msg.channel.type === "dm" && (options.runIn.length < 1 || options.runIn[0] === "dm")) { // The only way for a command to be DM only is if the first element of the array is DM
       if (options.nsfw || (msg.author.id !== client.owner && options.botOwnerOnly)) continue;
 
-      if (!help[cmd[1].category]) help[cmd[1].category] = {};
-      help[cmd[1].category][cmd[0]] = cmd[1].command.options.description;
+      if (!help[cmd[1].options.category]) help[cmd[1].options.category] = {};
+      help[cmd[1].options.category][cmd[0]] = cmd[1].options.description;
     }
   }
 
@@ -37,7 +32,12 @@ module.exports.run = (client, msg) => {
     for (const cmd in help[category]) sendHelp.push(`\`${cmd}\` **-** ${help[category][cmd]}\n`);
   }
 
-  return msg.author.send(sendHelp);
+  msg.author.send(sendHelp).then(() => {
+    if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => msg.channel.send(`Help is on the way, ${msg.author.toString()}...`));
+    else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
+  }).catch(() => {
+    msg.channel.send(`${msg.author.toString}, I could not DM you. Please check that your DMs are not disabled!`)
+  });
 };
 
 module.exports.options = {
