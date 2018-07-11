@@ -1,7 +1,7 @@
 module.exports = (sX, sY) => {
-  /* Uses the Sørensen–Dice index algorithm to measure the similarity between two strings
+  /* Uses the Sørensen–Dice index algorithm to measure the similarity between two strings.
    * https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
-   * Take the current letter and concatenate it with the letter before it accounting for whitespaces
+   * Take the current letter and concatenate it with the letter before it accounting for whitespaces.
    * "Array" becomes ["Ar", "rr", "ra", "ay"]
    * "Object" becomes ["Ob", "bj", "je", "ec", "ct"]
    * "All right" becomes ["al", "ll", "l", "r", "ri", "ig", "gh", "ht"]
