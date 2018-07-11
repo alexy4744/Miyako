@@ -63,7 +63,12 @@ module.exports = class Void extends Client {
     if (count >= inhibitors.length) return cmd.command.run(this, msg, args);
   }
 
-  // Update the client's cache.
+  /**
+   * Update the client's cache.
+   * @param {String} key The key to manually update the cache by.
+   * @param {String} value The value to set the key manually by.
+   * @returns {Promise<Object>} The updated key of the client's cache.
+   */
   updateCache(key, value) {
     return new Promise((resolve, reject) => {
       this.db.get().then(data => {

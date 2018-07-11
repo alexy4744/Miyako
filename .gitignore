@@ -1,5 +1,6 @@
 # Bot files
 config.json*
+process.env*
 
 # Lavalink
 Lavalink.jar*

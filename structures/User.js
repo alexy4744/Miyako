@@ -10,6 +10,12 @@ Structures.extend("User", User => {
       this.db = new RethinkDB(this.client, "userData", this.id);
     }
 
+    /**
+     * Update the user's cache.
+     * @param {String} key The key to manually update the cache by.
+     * @param {String} value The value to set the key manually by.
+     * @returns {Promise<Object>} The updated key of the user's cache.
+     */
     updateCache(key, value) {
       return new Promise((resolve, reject) => {
         this.db.get().then(data => {

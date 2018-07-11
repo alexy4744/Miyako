@@ -10,6 +10,12 @@ Structures.extend("GuildMember", GuildMember => {
       this.db = new RethinkDB(this.client, "memberData", this.id);
     }
 
+    /**
+     * Update the member's cache.
+     * @param {String} key The key to manually update the cache by.
+     * @param {String} value The value to set the key manually by.
+     * @returns {Promise<Object>} The updated key of the member's cache.
+     */
     updateCache(key, value) {
       return new Promise((resolve, reject) => {
         this.db.get().then(data => {

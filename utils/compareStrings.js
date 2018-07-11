@@ -7,6 +7,9 @@ module.exports = (sX, sY) => {
    * "All right" becomes ["al", "ll", "l", "r", "ri", "ig", "gh", "ht"]
    */
 
+  if (!sX || typeof sX !== "string") throw new Error("The first parameter must be a string!");
+  if (!sY || typeof sY !== "string") throw new Error("The second parameter must be a string!");
+
   const sXBigrams = [];
   const sYBigrams = [];
   const matchingBigrams = [];
