@@ -14,6 +14,8 @@ module.exports.run = async (client, msg, args) => {
 
   const data = await client.db.get().catch(error => msg.error(error, "globally disable this command!"));
 
+  if (!data || !data.globallyDisabled) data.globallyDisabled = [];
+
   if (data.globallyDisabled.includes(cmd.options.name)) {
     return msg.channel.send({
       embed: {
@@ -23,7 +25,7 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-  if (!data || !data.globallyDisabled) data.globallyDisabled = [];
+
   data.globallyDisabled.push(cmd.options.name);
   for (const alias of cmd.options.aliases) data.globallyDisabled.push(alias);
 

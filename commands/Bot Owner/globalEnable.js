@@ -14,6 +14,8 @@ module.exports.run = async (client, msg, args) => {
 
   const data = await client.db.get().catch(error => msg.error(error, "globally enable this command!"));
 
+  if (!data || !data.globallyDisabled) data.globallyDisabled = [];
+
   if (!data.globallyDisabled.includes(cmd.options.name)) {
     return msg.channel.send({
       embed: {
@@ -23,7 +25,6 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-  if (!data || !data.globallyDisabled) data.globallyDisabled = [];
   data.globallyDisabled = data.globallyDisabled.filter(command => !cmd.options.aliases.includes(command) && command !== args[0] && command !== cmd.options.name);
 
   client.db.update({
