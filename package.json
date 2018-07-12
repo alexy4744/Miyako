@@ -1,13 +1,17 @@
 {
   "name": "void",
   "version": "1.0.0",
-  "description": "Discord bot geared towards moderation",
+  "description": "Discord bot for moderation",
   "main": "Void.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexy4744/Void.git"
+  },
   "author": "FreezIn",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",
     "discord.js": "github:hydrabolt/discord.js",
@@ -23,9 +27,12 @@
     "ws": "^5.2.1",
     "zlib-sync": "^0.1.4"
   },
+  "bugs": {
+    "url": "https://github.com/alexy4744/Void/issues"
+  },
+  "homepage": "https://github.com/alexy4744/Void#readme",
   "devDependencies": {
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint": "^5.1.0",
     "eslint-plugin-import": "^2.13.0"
   }
 }

@@ -5,7 +5,6 @@ process.env*
 # Lavalink
 Lavalink.jar*
 startLavalink.bat*
-application.yml*
 
 # RethinkDB
 rethinkdb.exe*

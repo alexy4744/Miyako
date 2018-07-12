@@ -53,7 +53,6 @@ module.exports = class Void extends Client {
 
     for (const inhibitor of inhibitors) { // Loop through all loaded inhibitors.
       try {
-        console.log(inhibitor)
         if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
         count += this.inhibitors.get(inhibitor)(this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
