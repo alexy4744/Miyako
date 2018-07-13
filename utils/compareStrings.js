@@ -38,9 +38,9 @@ module.exports = (sX, sY) => {
   }
 
   return {
-    sXBigrams: sXBigrams,
-    sYBigrams: sYBigrams,
-    matchingBigrams: matchingBigrams,
+    sXBigrams,
+    sYBigrams,
+    matchingBigrams,
     finalOutcome: (2 * matchingBigrams.length) / (sXBigrams.length + sYBigrams.length)
   };
 };
