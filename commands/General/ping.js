@@ -1,7 +1,7 @@
 module.exports.run = async (client, msg) => {
   console.timeEnd("run time");
   const init = Date.now(); // Get the ms before editing the message.
-  let datebasePing = await client.db.ping().catch(() => datebasePing = "Failed");
+  const datebasePing = await client.db.ping().catch(() => "Failed");
 
   const message = await msg.channel.send({
     embed: {
