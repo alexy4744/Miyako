@@ -20,7 +20,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Shuffle the song queue.",
+  description: () => `Shuffle the song queue.`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

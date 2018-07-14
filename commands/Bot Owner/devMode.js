@@ -26,7 +26,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: false,
   cooldown: 5,
-  description: "Enable developer mode.",
+  description: () => `Activate developer mode to prevent anyone else to execute commands except the bot owner`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

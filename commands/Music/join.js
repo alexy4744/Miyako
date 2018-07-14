@@ -60,7 +60,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: false,
   cooldown: 5,
-  description: "Join the member's voice channel.",
+  description: () => `Join the member's voice channel.`,
   aliases: [],
   userPermissions: [],
   botPermissions: ["connect", "speak"],

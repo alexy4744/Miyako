@@ -20,7 +20,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Loop the current song.",
+  description: () => `Loop the current song.`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

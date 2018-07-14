@@ -64,7 +64,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: false,
   cooldown: 5,
-  description: "View the current statistics of the bot.",
+  description: msg => `View the current statistics and system information of ${msg.client.user.toString()}`,
   aliases: ["botinfo", "botstats"],
   userPermissions: [],
   botPermissions: [],

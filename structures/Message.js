@@ -4,6 +4,7 @@ Structures.extend("Message", Message => {
   class VoidMessage extends Message {
     _patch(data) {
       super._patch(data);
+      this.prefix = this.guild ? this.guild.cache ? this.guild.cache.prefix : "v$" : "v$";
       this.emojis = {
         success: "✅  ｜   ",
         fail: "❌  ｜   ",

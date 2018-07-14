@@ -31,7 +31,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Skip the song that is currently playing.",
+  description: () => `Skip the currently playing song.`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

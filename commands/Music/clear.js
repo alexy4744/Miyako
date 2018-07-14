@@ -26,7 +26,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Clear the current song queue.",
+  description: () => `Clear the current song queue`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

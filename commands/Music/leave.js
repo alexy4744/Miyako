@@ -31,7 +31,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Leave the guild's voice channel.",
+  description: () => `Leave the guild's voice channel`,
   aliases: ["disconnect"],
   userPermissions: [],
   botPermissions: [],

@@ -38,7 +38,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Pause the current song.",
+  description: () => `Pause the current song.`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

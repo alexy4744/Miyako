@@ -38,7 +38,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: true,
   cooldown: 5,
-  description: "Resume the currently paused song.",
+  description: () => `Resume the current song if it's paused.`,
   aliases: [],
   userPermissions: [],
   botPermissions: [],

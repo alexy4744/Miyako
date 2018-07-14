@@ -42,7 +42,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: false,
   cooldown: 5,
-  description: "View the latency and heartbeat of the bot.",
+  description: msg => `View the latency of ${msg.client.user.toString()}`,
   aliases: ["latency", "pong"],
   userPermissions: [],
   botPermissions: [],
