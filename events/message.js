@@ -16,6 +16,8 @@ module.exports = async (client, msg) => {
 
   if (client.commands.has(cmd) || client.aliases.has(cmd)) {
     console.time("run time");
-    return client.runCmd(msg, client.commands.get(cmd) || client.aliases.get(cmd), args);
+    client.runCmd(msg, client.commands.get(cmd) || client.aliases.get(cmd), args);
   }
+
+  if (client.monitors.size > 0) for (const monitor of client.monitors) monitor[1](client, msg);
 };

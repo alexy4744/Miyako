@@ -101,7 +101,7 @@ module.exports.options = {
   description: "Ban a member, with optional reasoning and number of days of messages to delete.",
   usage: (prefix, client) => `${prefix}unban ${client.user.username}`,
   aliases: [],
-  userPermissions: ["administrator"],
+  userPermissions: ["ban_members"],
   botPermissions: ["ban_members"],
   runIn: ["text"]
 };

@@ -1,24 +1,26 @@
 /* eslint no-undefined: 0 */
 /* eslint guard-for-in: 0 */
 
-const { Client, Collection } = require("discord.js");
+const Discord = require("discord.js");
 const fs = require("fs-nextra");
 const RethinkDB = require("../database/methods");
 const Structures = require("../structures/Structures");
 const loaders = require("../loaders/loader");
 
-module.exports = class Void extends Client {
+module.exports = class Void extends Discord.Client {
   constructor(options = {}) {
     super();
-    this.events = new Collection();
-    this.inhibitors = new Collection();
-    this.commands = new Collection();
-    this.aliases = new Collection();
+    this.events = new Discord.Collection();
+    this.inhibitors = new Discord.Collection();
+    this.commands = new Discord.Collection();
+    this.aliases = new Discord.Collection();
+    this.monitors = new Discord.Collection();
     this.categories = new Set();
     this.userCooldowns = new Set();
     this.db = new RethinkDB(this, "voidData", "415313696102023169");
     this.utils = {};
     this.structures = Structures;
+    this.Discord = Discord;
     this.owner = options.owner;
     this.prefix = options.prefix;
     this.retryAttempts = options.dbAttempts || 5;
@@ -28,7 +30,6 @@ module.exports = class Void extends Client {
 
   // Perform a check against all inhibitors before executing the command.
   runCmd(msg, cmd, args) {
-    // console.log(cmd)
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method

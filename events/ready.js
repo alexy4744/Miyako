@@ -34,8 +34,6 @@ module.exports = client => {
   }, (err, art) => {
     if (err) return;
     console.log(chalk.keyword("cyan")(art));
-    readyMessage.forEach(msg => {
-      console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`);
-    });
+    readyMessage.forEach(msg => console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`));
   });
 };

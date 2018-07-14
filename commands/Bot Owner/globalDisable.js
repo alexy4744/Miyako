@@ -25,7 +25,6 @@ module.exports.run = async (client, msg, args) => {
     });
   }
 
-
   data.globallyDisabled.push(cmd.options.name);
   for (const alias of cmd.options.aliases) data.globallyDisabled.push(alias);
 

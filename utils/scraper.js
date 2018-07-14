@@ -16,13 +16,13 @@ module.exports = (url, selector, fn, args = []) => new Promise(async (resolve, r
   const $ = await request({
     url: url,
     headers: {
-      // Fake user-agent lol because so that the "browser" is supported on some sites.
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
+      // Fake user-agent lol so that the "browser" is supported on some sites.
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3489.0 Safari/537.36"
     },
     transform: body => cheerio.load(body)
   }).catch(e => reject(e));
 
-  const metadata = await parseAll($).then(() => metadata.url = url).catch(e => reject(e));
+  const metadata = await parseAll($).catch(e => reject(e));
 
   if (!selector && !fn) resolve(metadata); // eslint-disable-line
   else resolve({ // eslint-disable-line
