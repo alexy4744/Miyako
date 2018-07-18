@@ -36,7 +36,6 @@ module.exports.run = async (client, msg, args) => {
     prefix: newPrefix
   }).then(() => {
     msg.guild.updateCache("prefix", newPrefix).then(() => { // eslint-disable-line
-      console.timeEnd("run time");
       return msg.channel.send({
         embed: {
           title: `${msg.emojis.success}I have succesfully re-assigned the prefix to "${newPrefix}"`,

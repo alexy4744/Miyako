@@ -2,13 +2,13 @@
   "name": "void",
   "version": "1.0.0",
   "description": "Discord bot for moderation",
-  "main": "Void.js",
+  "main": "Miyako.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alexy4744/Void.git"
+    "url": "git+https://github.com/alexy4744/Miyako.git"
   },
   "author": "FreezIn",
   "license": "MIT",
@@ -31,9 +31,9 @@
     "zlib-sync": "^0.1.4"
   },
   "bugs": {
-    "url": "https://github.com/alexy4744/Void/issues"
+    "url": "https://github.com/alexy4744/Miyako/issues"
   },
-  "homepage": "https://github.com/alexy4744/Void#readme",
+  "homepage": "https://github.com/alexy4744/Miyako#readme",
   "devDependencies": {
     "eslint": "^5.1.0",
     "eslint-plugin-import": "^2.13.0"

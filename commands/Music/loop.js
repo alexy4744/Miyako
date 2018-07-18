@@ -4,13 +4,7 @@ module.exports.run = (client, msg) => {
       title: `🔂${msg.emojis.bar}Looping has been enabled for this song!`,
       color: msg.colors.default
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to loop this song!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, "loop this song!"));
 };
 
 module.exports.options = {

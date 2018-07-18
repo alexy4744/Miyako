@@ -22,13 +22,7 @@ module.exports.run = (client, msg) => {
       title: `⏯${msg.emojis.bar}I have resumed the player!`,
       color: msg.colors.success
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to resume the player!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, "resume the player!"));
 };
 
 module.exports.options = {

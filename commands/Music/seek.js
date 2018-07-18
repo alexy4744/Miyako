@@ -54,13 +54,7 @@ module.exports.run = (client, msg, args) => {
         color: msg.colors.success
       }
     });
-  }).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to seek this song!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  }).catch(e => msg.error(e, "seek this song!"));
 };
 
 module.exports.options = {

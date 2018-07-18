@@ -3,10 +3,6 @@
 const r = require("rethinkdb");
 
 module.exports = class Database {
-  constructor() {
-    this.connection = this.connect().catch(error => error);
-  }
-
   connect() {
     return new Promise((resolve, reject) => {
       r.connect({
@@ -31,7 +27,12 @@ module.exports = class Database {
 
   dbList() {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.dbList().run(conn, (err, dbs) => {
         if (err) reject(err);
         else resolve(dbs);
@@ -41,7 +42,12 @@ module.exports = class Database {
 
   dbCreate(dbName) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.dbCreate(dbName).run(conn, (err, changes) => {
         if (err) reject(err);
         else resolve(changes);
@@ -51,7 +57,12 @@ module.exports = class Database {
 
   dbDelete(dbName) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.dbDrop(dbName).run(conn, (err, changes) => {
         if (err) reject(err);
         else resolve(changes);
@@ -63,7 +74,12 @@ module.exports = class Database {
 
   tableCreate(tableName) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").tableCreate(tableName).run(conn, (err, changes) => {
         if (err) reject(err);
         else resolve(changes);
@@ -73,7 +89,12 @@ module.exports = class Database {
 
   tableDrop(tableName) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").tableDrop(tableName).run(conn, (err, changes) => {
         if (err) reject(err);
         else resolve(changes);
@@ -83,7 +104,12 @@ module.exports = class Database {
 
   tableList() {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").tableList().run(conn, (err, tables) => {
         if (err) reject(err);
         else resolve(tables);
@@ -95,7 +121,12 @@ module.exports = class Database {
 
   insertDocument(tableName, object) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").table(tableName).insert(object)
         .run(conn, (err, changes) => {
           if (err) reject(err);
@@ -106,7 +137,12 @@ module.exports = class Database {
 
   updateDocument(tableName, id, object) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").table(tableName).get(id)
         .update(object)
         .run(conn, (err, changes) => {
@@ -118,7 +154,12 @@ module.exports = class Database {
 
   replaceDocument(tableName, id, object) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").table(tableName).get(id)
         .replace(object)
         .run(conn, (err, changes) => {
@@ -130,7 +171,12 @@ module.exports = class Database {
 
   deleteDocument(tableName, id) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").table(tableName).get(id)
         .delete()
         .run(conn, (err, changes) => {
@@ -142,7 +188,12 @@ module.exports = class Database {
 
   syncTable(tableName) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.table(tableName).sync().run(conn, (err, synced) => {
         if (err) reject(err);
         else resolve(synced);
@@ -154,7 +205,12 @@ module.exports = class Database {
 
   getDocument(tableName, id) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").table(tableName).get(id)
         .run(conn, (err, data) => {
           if (err) reject(err);
@@ -166,7 +222,12 @@ module.exports = class Database {
   // https://stackoverflow.com/questions/43782915/rethinkdb-check-if-record-exists
   hasDocument(tableName, id) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.db("test").table(tableName).getAll(id)
         .count()
         .eq(1)
@@ -179,7 +240,12 @@ module.exports = class Database {
 
   status(tableName) {
     return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => reject(e));
+      const conn = await this.connect().catch(e => ({
+        "error": e
+      }));
+
+      if (conn.error) return reject(conn.error);
+
       r.table(tableName).status().run(conn, (err, status) => {
         if (err) reject(err);
         else resolve(status);

@@ -43,7 +43,6 @@ module.exports.run = async (client, msg, args) => {
     disabledCommands: data.disabledCommands
   }).then(() => {
     msg.guild.updateCache("disabledCommands", data.disabledCommands).then(() => { // eslint-disable-line
-      console.timeEnd("run time");
       return msg.channel.send({
         embed: {
           title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,

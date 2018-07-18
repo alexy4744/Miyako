@@ -1,5 +1,5 @@
 module.exports.run = async (client, msg, args) => {
-  const bannedMembers = await msg.guild.fetchBans().catch(e => msg.error(e, "fetch the ban log!"));
+  const bannedMembers = await msg.guild.fetchBans().catch(e => msg.error(e, "fetch banned members!"));
 
   if (bannedMembers.size < 1) {
     return msg.channel.send({
@@ -74,8 +74,8 @@ module.exports.run = async (client, msg, args) => {
             await confirmationMessage.delete().catch(() => {});
             return msg.channel.send({
               embed: {
-                title: `${msg.emojis.success}Command has been successfully cancelled!`,
-                color: msg.colors.success
+                title: `☑${msg.emojis.bar}I have cancelled the command!`,
+                color: msg.colors.default
               }
             });
           }
@@ -101,7 +101,7 @@ module.exports.options = {
   description: () => `Unban a member their user ID, or by searching for a banned member using their username`,
   usage: msg => [`${msg.client.user.id}`, `${msg.author.username}`],
   aliases: [],
-  userPermissions: ["ban_members"],
-  botPermissions: ["ban_members"],
+  userPermissions: ["BAN_MEMBERS"],
+  botPermissions: ["BAN_MEMBERS"],
   runIn: ["text"]
 };

@@ -6,7 +6,13 @@ module.exports.run = (client, msg, args) => {
     msg.channel.send({
       embed: {
         title: args[0],
-        description: cmd.description(msg),
+        description: `${cmd.description(msg)}\n\u200B`,
+        fields: [
+          {
+            "name": "Usage",
+            "value": `${client.utils.is.function(cmd.usage) ? client.utils.is.array(cmd.usage(msg)) ? cmd.usage(msg).map(u => `${msg.prefix + args[0]} ${u}`).join("\n") : `${msg.prefix + args[0]} ${cmd.usage(msg)}` : msg.prefix + args[0]}`
+          }
+        ],
         color: msg.colors.default
       }
     });
@@ -46,7 +52,7 @@ module.exports.run = (client, msg, args) => {
       if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => msg.channel.send(`Help is on the way, ${msg.author.toString()}...`));
       else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
     }).catch(() => {
-      msg.channel.send(`${msg.author.toString}, I could not DM you. Please check that your DMs are not disabled!`)
+      msg.channel.send(`${msg.author.toString}, I could not DM you. Please check that your DMs are not disabled!`);
     });
   }
 };

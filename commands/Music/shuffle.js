@@ -4,13 +4,7 @@ module.exports.run = (client, msg) => {
       title: `🔀${msg.emojis.bar}I have shuffled the queue!`,
       color: msg.colors.default
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to shuffle the queue!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, "shuffle the queue!"));
 };
 
 module.exports.options = {

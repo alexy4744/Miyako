@@ -9,7 +9,6 @@ module.exports.run = (client, msg) => {
   }
 
   const myMessages = msg.guild.myMessages.get(msg.channel.id);
-  const initalSize = myMessages.length;
   let counter = 0;
 
   myMessages.forEach(async message => {
@@ -28,10 +27,10 @@ module.exports.run = (client, msg) => {
   if (counter >= myMessages.length) {
     msg.channel.send({
       embed: {
-        title: `${msg.emojis.success}I have sucessfully deleted ${initalSize - msg.guild.myMessages.get(msg.channel.id).length} messages!`,
+        title: `${msg.emojis.success}I have sucessfully deleted my messages!`,
         color: msg.colors.success
       }
-    });
+    }).then(m => m.delete({ timeout: 10000 }).catch(() => {}));
   }
 };
 
@@ -42,9 +41,9 @@ module.exports.options = {
   nsfw: false,
   checkVC: false,
   cooldown: 30,
-  description: msg => `Delete an x amount of messages sent by ${msg.client.user.toString()}`,
+  description: msg => `Delete an x amount of messages sent by ${msg.client.user.toString()} in ${msg.channel.toString()}`,
   aliases: [],
   userPermissions: ["manage_messages"],
   botPermissions: [],
-  runIn: []
+  runIn: ["text"]
 };

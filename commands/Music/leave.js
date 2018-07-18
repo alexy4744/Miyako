@@ -15,13 +15,7 @@ module.exports.run = (client, msg) => {
       title: `${msg.emojis.success}I have sucessfully disconnected from #${voiceChannel.name}`,
       color: msg.colors.success
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}I have failed to disconnect from #${voiceChannel.name}`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, `disconnect from #${voiceChannel.name}!`));
 };
 
 module.exports.options = {

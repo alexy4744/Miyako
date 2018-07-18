@@ -4,10 +4,6 @@ const snekfetch = require("snekfetch");
 const util = require("util");
 
 module.exports.run = async (client, msg, args) => {
-  // https://github.com/dirigeants/klasa/blob/master/src/lib/util/util.js
-  const isFunction = input => typeof input === "function";
-  const isThenable = input => (input instanceof Promise) || (Boolean(input) && isFunction(input.then) && isFunction(input.catch));
-
   try {
     let code = args.join(" ");
 
@@ -16,7 +12,7 @@ module.exports.run = async (client, msg, args) => {
     let evaled = eval(code);
     const type = evaled;
 
-    if (isThenable(evaled)) evaled = await evaled;
+    if (client.utils.is.thenable(evaled)) evaled = await evaled;
 
     if (typeof evaled !== "string") {
       evaled = util.inspect(evaled, {

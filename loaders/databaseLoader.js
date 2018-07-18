@@ -1,5 +1,5 @@
 module.exports = async client => {
-  const tables = ["voidData", "guildData", "memberData", "userData"];
+  const tables = ["clientData", "guildData", "memberData", "userData"];
 
   let tableList = await client.db.tableList().catch(error => {
     throw new Error(error);

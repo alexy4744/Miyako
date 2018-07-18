@@ -1,5 +1,4 @@
 module.exports.run = async (client, msg) => {
-  console.timeEnd("run time");
   const init = Date.now(); // Get the ms before editing the message.
   const datebasePing = await client.db.ping().catch(() => "Failed");
 

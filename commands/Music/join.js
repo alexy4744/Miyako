@@ -24,7 +24,7 @@ module.exports.run = (client, msg) => {
     return msg.channel.send({
       embed: {
         title: `${msg.emojis.fail}Sorry ${msg.author.username}, #${memberVoiceChannel.name} is currently full!`,
-        description: `There are currently **${memberVoiceChannel.members.size}** members connected to this voice channel! Please make room in order for me to join this voice channel.`,
+        description: `There are currently **${memberVoiceChannel.members.size}** members connected to this voice channel! Please make room in order for me to join #${memberVoiceChannel.name}.`,
         color: msg.colors.fail
       }
     });
@@ -44,13 +44,7 @@ module.exports.run = (client, msg) => {
       title: `${msg.emojis.success}I have sucessfully joined #${memberVoiceChannel.name}`,
       color: msg.colors.success
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}I have failed to join #${memberVoiceChannel.name}`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, `join #${memberVoiceChannel.name}!`));
 };
 
 module.exports.options = {

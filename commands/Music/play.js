@@ -141,13 +141,7 @@ Author: **${songs[0].info.author}**\n
           }
         });
       }
-    }).catch(error => msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to play this track!`,
-        description: `\`\`\`js\n${error}\n\`\`\``,
-        color: msg.colors.fail
-      }
-    }));
+    }).catch(e => msg.error(e, "play this track!"));
   } else msg.channel.send({ // eslint-disable-line
     embed: {
       title: `▶${msg.emojis.bar}${songs[0].info.title} has been added to the queue!`,

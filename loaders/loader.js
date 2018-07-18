@@ -1,8 +1,11 @@
-module.exports = {
-  commandLoader: require("./commandLoader"),
-  databaseLoader: require("./databaseLoader"),
-  eventLoader: require("./eventLoader"),
-  monitorLoader: require("./monitorLoader"),
-  inhibitorLoader: require("./inhibitorLoader"),
-  utilitiesLoader: require("./utilitiesLoader")
+const fs = require("fs-nextra");
+
+module.exports = client => {
+  require("./commandLoader")(client, fs);
+  require("./databaseLoader")(client, fs);
+  require("./eventLoader")(client, fs);
+  require("./monitorLoader")(client, fs);
+  require("./inhibitorLoader")(client, fs);
+  require("./utilitiesLoader")(client, fs);
+  return null;
 };

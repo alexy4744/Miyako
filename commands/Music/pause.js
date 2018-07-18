@@ -22,13 +22,7 @@ module.exports.run = (client, msg) => {
       title: `⏸${msg.emojis.bar}I have paused the player!`,
       color: msg.colors.success
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to pause the player!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, "pause the player!"));
 };
 
 module.exports.options = {

@@ -1,35 +1,29 @@
 /* eslint no-undefined: 0 */
 /* eslint guard-for-in: 0 */
 
-const Discord = require("discord.js");
-const fs = require("fs-nextra");
+const { Client, Collection } = require("discord.js");
 const RethinkDB = require("../database/methods");
-const Structures = require("../structures/Structures");
-const loaders = require("../loaders/loader");
+require("../structures/Structures");
 
-module.exports = class Void extends Discord.Client {
+module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    this.events = new Discord.Collection();
-    this.inhibitors = new Discord.Collection();
-    this.commands = new Discord.Collection();
-    this.aliases = new Discord.Collection();
-    this.monitors = new Discord.Collection();
-    this.categories = new Set();
+    this.events = new Collection();
+    this.inhibitors = new Collection();
+    this.commands = new Collection();
+    this.aliases = new Collection();
+    this.monitors = new Collection();
     this.userCooldowns = new Set();
-    this.db = new RethinkDB(this, "voidData", "415313696102023169");
+    this.db = new RethinkDB("clientData", options.id);
     this.utils = {};
-    this.structures = Structures;
-    this.Discord = Discord;
     this.owner = options.owner;
     this.prefix = options.prefix;
-    this.retryAttempts = options.dbAttempts || 5;
 
-    for (const loader in loaders) loaders[loader](this, fs); // Load all the events, inhibitors, commands and goodies.
+    require("../loaders/loader")(this);
   }
 
   // Perform a check against all inhibitors before executing the command.
-  runCmd(msg, cmd, args) {
+  async runCmd(msg, cmd, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -41,16 +35,42 @@ module.exports = class Void extends Discord.Client {
      * since the command could be sent in DMs rather than a guild text channel.
      */
 
-    if (this.cache === undefined) return msg.error("Client cache still does not exist", "execute this command!");
-    if (msg.author.cache === undefined) return msg.error("User cache still does not exist", "execute this command!");
-    if (msg.member && msg.member.cache === undefined) return msg.error("Member cache still does not exist", "execute this command!");
-    if (msg.guild && msg.guild.cache === undefined) return msg.error("Guild cache still does not exist", "execute this command!");
+    if (this.cache === undefined) {
+      const clientCache = await this.updateCache().catch(e => ({
+        "error": e
+      }));
+      if (clientCache === null) return msg.fail(`Client cache cannot be null`, `execute this command!`);
+      if (clientCache.error) return msg.error(clientCache.error, `execute this command!`);
+    }
+
+    if (msg.author.cache === undefined) {
+      const userCache = await msg.author.updateCache().catch(e => ({
+        "error": e
+      }));
+      console.log(userCache)
+      if (userCache !== null && userCache.error) return msg.error(userCache.error, `execute this command!`);
+    }
+
+    if (msg.member && msg.member.cache === undefined) {
+      const memberCache = await msg.member.updateCache().catch(e => ({
+        "error": e
+      }));
+      if (memberCache !== null && memberCache.error) return msg.error(memberCache.error, `execute this command!`);
+    }
+
+    if (msg.guild && msg.guild.cache === undefined) {
+      const guildCache = await msg.guild.updateCache().catch(e => ({
+        "error": e
+      }));
+      if (guildCache !== null && guildCache.error) return msg.error(guildCache.error, `execute this command!`);
+    }
 
     const inhibitors = Array.from(this.inhibitors.keys());
 
     if (inhibitors.length < 1) return cmd.run(this, msg, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
+    msg.cmd = cmd.options.name;
 
     for (const inhibitor of inhibitors) { // Loop through all loaded inhibitors.
       try {
@@ -76,12 +96,13 @@ module.exports = class Void extends Discord.Client {
       this.db.get().then(data => {
         resolve(this.cache = data);
       }).catch(e => {
-        // If what ever reason it fails to get from database, try to manually update the key with the new value of the cache.
+        // If what ever reason it fails to get from database, try to manually update the key with the new value for the cache.
         if (key && value) {
           if (!this.cache) this.cache = {};
           else resolve(this.cache[key] = value);
         } else {
-          this.db.replace(typeof this.cache === undefined ? {} : this.cache).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
+          if (this.cache === undefined) reject(e); // eslint-disable-line
+          else this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
         }
       });
     });

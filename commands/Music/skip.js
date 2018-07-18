@@ -15,13 +15,7 @@ module.exports.run = (client, msg) => {
       title: `${msg.emojis.success}I have skipped ${beforeSkip.info.title}`,
       color: msg.colors.success
     }
-  })).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to skip this song!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  })).catch(e => msg.error(e, "skip this song!"));
 };
 
 module.exports.options = {

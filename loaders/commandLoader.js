@@ -2,8 +2,6 @@ module.exports = (client, fs) => {
   /* Load all commands and aliases. */
   fs.readdir("./commands").then(folders => {
     folders.forEach(folder => {
-      client.categories.add(folder);
-
       fs.readdir(`./commands/${folder}`).then(commands => {
         commands.forEach(c => {
           const cmd = require(`../commands/${folder}/${c}`);

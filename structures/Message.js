@@ -1,16 +1,19 @@
 const { Structures } = require("discord.js");
 
 Structures.extend("Message", Message => {
-  class VoidMessage extends Message {
+  class MiyakoMessage extends Message {
     _patch(data) {
       super._patch(data);
       this.prefix = this.guild ? this.guild.cache ? this.guild.cache.prefix : "v$" : "v$";
+
       this.emojis = {
         success: "✅  ｜   ",
+        check: "☑  ｜   ",
         fail: "❌  ｜   ",
         pending: "⏳  ｜   ",
         bar: "  ｜   "
       };
+
       this.colors = {
         success: 0x76B354,
         fail: 0xDE2E43,
@@ -20,17 +23,44 @@ Structures.extend("Message", Message => {
       };
     }
 
-    error(err, action) {
-      this.channel.send({
+    success(action, description) {
+      return this.channel.send({
         embed: {
-          title: `${this.emojis.fail}Sorry ${this.author.username}, I have failed to ${action}`,
-          description: `\`\`\`js\n${err.stack}\n\`\`\``,
+          title: `${this.emojis.success}${action}`,
+          description: description ? description : null,
+          color: this.colors.success
+        }
+      });
+    }
+
+    fail(action, description) {
+      return this.channel.send({
+        embed: {
+          title: `${this.emojis.fail}${action}`,
+          description: description ? description : null,
           color: this.colors.fail
         }
-      }).catch(() => {
-        throw new Error(); // Throw an error to prevent rest break itself from sending more than 1 message in runCmd method.
       });
-      throw new Error(); // Throw an error to prevent rest break itself from sending more than 1 message in runCmd method.
+    }
+
+    cancelledCommand(description) {
+      return this.channel.send({
+        embed: {
+          title: `${this.emojis.check}This command has been cancelled!`,
+          description: description ? description : null,
+          color: this.colors.default
+        }
+      });
+    }
+
+    error(err, action) {
+      return this.channel.send({
+        embed: {
+          title: `${this.emojis.fail}Sorry ${this.author.username}, I have failed to ${action}`,
+          description: `\`\`\`js\n${err}\n\`\`\``,
+          color: this.colors.fail
+        }
+      });
     }
 
     noArgs(action) {
@@ -39,9 +69,9 @@ Structures.extend("Message", Message => {
           title: `${this.emojis.fail}${this.author.username}, you must ${action} in order to execute this command!`,
           color: this.colors.fail
         }
-      }).catch(() => {}); // noop
+      });
     }
   }
 
-  return VoidMessage;
+  return MiyakoMessage;
 });

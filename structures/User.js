@@ -4,10 +4,10 @@ const { Structures } = require("discord.js");
 const RethinkDB = require("../database/methods");
 
 Structures.extend("User", User => {
-  class VoidUser extends User {
+  class MiyakoUser extends User {
     _patch(data) {
       super._patch(data);
-      this.db = new RethinkDB(this.client, "userData", this.id);
+      this.db = new RethinkDB("userData", this.id);
     }
 
     /**
@@ -26,12 +26,13 @@ Structures.extend("User", User => {
             if (!this.cache) this.cache = {};
             else resolve(this.cache[key] = value);
           } else {
-            this.db.replace(typeof this.cache === undefined ? {} : this.cache).then(() => reject(e)).catch(err => reject(err)); // Restore the database to match the current cache.
+            if (this.cache === undefined) reject(e); // eslint-disable-line
+            else this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
           }
         });
       });
     }
   }
 
-  return VoidUser;
+  return MiyakoUser;
 });

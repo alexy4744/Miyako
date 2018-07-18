@@ -29,7 +29,7 @@ module.exports = client => {
     `🚀  ${client.user.tag} is ${chalk.green("ready!")} Serving for ${client.guilds.size} guilds and ${client.users.size} users!`
   ];
 
-  figlet.text("Void", {
+  return figlet.text(client.user.username, {
     font: "Alpha"
   }, (err, art) => {
     if (err) return;

@@ -10,13 +10,7 @@ module.exports.run = (client, msg) => {
         color: msg.colors.success
       }
     });
-  }).catch(error => msg.channel.send({
-    embed: {
-      title: `${msg.emojis.fail}Sorry ${msg.author.username}, I have failed to clear the queue!`,
-      description: `\`\`\`js\n${error}\n\`\`\``,
-      color: msg.colors.fail
-    }
-  }));
+  }).catch(e => msg.error(e, "clear the queue!"));
 };
 
 module.exports.options = {

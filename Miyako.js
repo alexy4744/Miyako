@@ -1,11 +1,12 @@
 const { token, owner, prefix } = require("./config.json");
-const Void = require("./structures/Client");
-const client = new Void({
+const Miyako = require("./structures/Client");
+const client = new Miyako({
   owner: owner,
-  prefix: prefix
+  prefix: prefix,
+  id: "415313696102023169"
 });
 
-client.on("ready", () => client.events.get("ready")(client));
+client.once("ready", () => client.events.get("ready")(client));
 client.on("error", error => client.events.get("error")(error));
 client.on("guildCreate", guild => client.events.get("guildCreate")(guild));
 client.on("message", msg => client.events.get("message")(client, msg));
@@ -19,5 +20,5 @@ process.on("unhandledRejection", (reason, p) => {
 });
 
 process.on("uncaughtException", error => {
-  throw new Error(error);
+  throw new Error(error.stack);
 });
