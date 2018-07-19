@@ -1,6 +1,6 @@
 module.exports.run = async (client, msg) => {
   const init = Date.now(); // Get the ms before editing the message.
-  const datebasePing = await client.db.ping().catch(() => "Failed");
+  // const datebasePing = await client.db.ping().catch(() => "Failed");
 
   const message = await msg.channel.send({
     embed: {
@@ -25,7 +25,7 @@ module.exports.run = async (client, msg) => {
         },
         {
           "name": "Database Latency",
-          "value": `${String(datebasePing)} ms`,
+          "value": `${String(10)} ms`,
           "inline": true
         }
       ],

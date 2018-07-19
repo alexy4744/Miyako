@@ -5,8 +5,8 @@ const RethinkDB = require("../database/methods");
 
 Structures.extend("User", User => {
   class MiyakoUser extends User {
-    _patch(data) {
-      super._patch(data);
+    constructor(...args) {
+      super(...args);
       this.db = new RethinkDB("userData", this.id);
     }
 

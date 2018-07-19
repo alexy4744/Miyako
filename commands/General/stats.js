@@ -13,7 +13,7 @@ module.exports.run = async (client, msg) => msg.channel.send({
 **Created On**: ${moment(client.user.createdAt).format("dddd, MMMM Do YYYY, hh:mm:ss A")}\n
 **Uptime**: ${moment.duration(client.uptime).format(" D [days], H [hours], m [minutes], s [seconds]")}\n
 **Users**: \`${client.users.size.toLocaleString()}\`\n
-**Servers**: \`${client.guilds.size.toLocaleString()}\`\n
+**Guilds**: \`${client.guilds.size.toLocaleString()}\`\n
 **Channels**: \`${client.channels.size.toLocaleString()}\`\n
 **Emojis**: \`${client.emojis.size.toLocaleString()}\`\n
 **Commands**: \`${client.commands.size.toLocaleString()}\`\n\u200B`

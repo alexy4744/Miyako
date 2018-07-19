@@ -3,7 +3,9 @@ const Miyako = require("./structures/Client");
 const client = new Miyako({
   owner: owner,
   prefix: prefix,
-  id: "415313696102023169"
+  id: "415313696102023169",
+  disabledEvents: ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
+  disableEveryone: true
 });
 
 client.once("ready", () => client.events.get("ready")(client));

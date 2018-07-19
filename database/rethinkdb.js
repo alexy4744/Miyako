@@ -1,255 +1,133 @@
 /* eslint curly: 0*/
 
-const r = require("rethinkdb");
+const r = require("rethinkdbdash")();
 
 module.exports = class Database {
-  connect() {
-    return new Promise((resolve, reject) => {
-      r.connect({
-        db: "test"
-      }, (err, conn) => {
-        if (err) reject(err);
-        else resolve(conn);
-      });
-    });
-  }
-
-  ping() {
-    return new Promise((resolve, reject) => {
-      const init = Date.now();
-      this.connect().then(() => {
-        resolve(Date.now() - init);
-      }).catch(e => reject(e));
-    });
-  }
-
   /* Database Manipulation */
-
   dbList() {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.dbList().run(conn, (err, dbs) => {
-        if (err) reject(err);
-        else resolve(dbs);
-      });
+    return new Promise((resolve, reject) => {
+      r.dbList().run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   dbCreate(dbName) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.dbCreate(dbName).run(conn, (err, changes) => {
-        if (err) reject(err);
-        else resolve(changes);
-      });
+    return new Promise((resolve, reject) => {
+      r.dbCreate(dbName).run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   dbDelete(dbName) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.dbDrop(dbName).run(conn, (err, changes) => {
-        if (err) reject(err);
-        else resolve(changes);
-      });
+    return new Promise((resolve, reject) => {
+      r.dbDrop(dbName).run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   /* Table Manipulation */
-
   tableCreate(tableName) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.db("test").tableCreate(tableName).run(conn, (err, changes) => {
-        if (err) reject(err);
-        else resolve(changes);
-      });
+    return new Promise((resolve, reject) => {
+      r.db("test").tableCreate(tableName).run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   tableDrop(tableName) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.db("test").tableDrop(tableName).run(conn, (err, changes) => {
-        if (err) reject(err);
-        else resolve(changes);
-      });
+    return new Promise((resolve, reject) => {
+      r.db("test").tableDrop(tableName).run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   tableList() {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.db("test").tableList().run(conn, (err, tables) => {
-        if (err) reject(err);
-        else resolve(tables);
-      });
+    return new Promise((resolve, reject) => {
+      r.db("test").tableList().run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   /* Data Manipulation */
-
   insertDocument(tableName, object) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
+    return new Promise((resolve, reject) => {
       r.db("test").table(tableName).insert(object)
-        .run(conn, (err, changes) => {
-          if (err) reject(err);
-          else resolve(changes);
-        });
+        .run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   updateDocument(tableName, id, object) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
+    return new Promise((resolve, reject) => {
       r.db("test").table(tableName).get(id)
         .update(object)
-        .run(conn, (err, changes) => {
-          if (err) reject(err);
-          else resolve(changes);
-        });
+        .run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   replaceDocument(tableName, id, object) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
+    return new Promise((resolve, reject) => {
       r.db("test").table(tableName).get(id)
         .replace(object)
-        .run(conn, (err, changes) => {
-          if (err) reject(err);
-          else resolve(changes);
-        });
+        .run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   deleteDocument(tableName, id) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
+    return new Promise((resolve, reject) => {
       r.db("test").table(tableName).get(id)
         .delete()
-        .run(conn, (err, changes) => {
-          if (err) reject(err);
-          else resolve(changes);
-        });
+        .run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   syncTable(tableName) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.table(tableName).sync().run(conn, (err, synced) => {
-        if (err) reject(err);
-        else resolve(synced);
-      });
+    return new Promise((resolve, reject) => {
+      r.table(tableName).sync().run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   /* Data Fetching */
-
   getDocument(tableName, id) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
+    return new Promise((resolve, reject) => {
       r.db("test").table(tableName).get(id)
-        .run(conn, (err, data) => {
-          if (err) reject(err);
-          else resolve(data);
-        });
+        .run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   // https://stackoverflow.com/questions/43782915/rethinkdb-check-if-record-exists
   hasDocument(tableName, id) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
+    return new Promise((resolve, reject) => {
       r.db("test").table(tableName).getAll(id)
         .count()
         .eq(1)
-        .run(conn, (err, boolean) => {
-          if (err) reject(err);
-          else resolve(boolean);
-        });
+        .run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 
   status(tableName) {
-    return new Promise(async (resolve, reject) => {
-      const conn = await this.connect().catch(e => ({
-        "error": e
-      }));
-
-      if (conn.error) return reject(conn.error);
-
-      r.table(tableName).status().run(conn, (err, status) => {
-        if (err) reject(err);
-        else resolve(status);
-      });
+    return new Promise((resolve, reject) => {
+      r.table(tableName).status().run()
+        .then(res => resolve(res))
+        .catch(e => reject(e));
     });
   }
 };

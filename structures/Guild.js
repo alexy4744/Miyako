@@ -7,8 +7,8 @@ const RethinkDB = require("../database/methods");
 
 Structures.extend("Guild", Guild => {
   class MiyakoGuild extends Guild {
-    _patch(data) {
-      super._patch(data);
+    constructor(...args) {
+      super(...args);
       this.db = new RethinkDB("guildData", this.id);
     }
 

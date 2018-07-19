@@ -18,6 +18,8 @@ module.exports = class Miyako extends Client {
     this.utils = {};
     this.owner = options.owner;
     this.prefix = options.prefix;
+    this.options.disabledEvents = options.disabledEvents;
+    this.options.disableEveryone = options.disableEveryone;
 
     require("../loaders/loader")(this);
   }
@@ -47,7 +49,7 @@ module.exports = class Miyako extends Client {
       const userCache = await msg.author.updateCache().catch(e => ({
         "error": e
       }));
-      console.log(userCache)
+
       if (userCache !== null && userCache.error) return msg.error(userCache.error, `execute this command!`);
     }
 
@@ -83,6 +85,10 @@ module.exports = class Miyako extends Client {
 
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
     if (count >= inhibitors.length) return cmd.run(this, msg, args);
+
+    function cacheChecker(object) {
+
+    }
   }
 
   /**

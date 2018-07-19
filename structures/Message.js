@@ -2,8 +2,8 @@ const { Structures } = require("discord.js");
 
 Structures.extend("Message", Message => {
   class MiyakoMessage extends Message {
-    _patch(data) {
-      super._patch(data);
+    constructor(...args) {
+      super(...args);
       this.prefix = this.guild ? this.guild.cache ? this.guild.cache.prefix : "v$" : "v$";
 
       this.emojis = {
