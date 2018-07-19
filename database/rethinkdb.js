@@ -1,5 +1,3 @@
-/* eslint curly: 0*/
-
 const r = require("rethinkdbdash")();
 
 module.exports = class Database {
