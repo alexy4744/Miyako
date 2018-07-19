@@ -1,14 +1,15 @@
 /* eslint no-use-before-define: 0 */
 /* eslint no-confusing-arrow: 0 */
 
+const moment = require("moment");
+
 module.exports.run = async (client, msg, args) => {
   const member = msg.mentions.members.size > 0 ? msg.mentions.members.first() : args[0] !== undefined ? args[0] : null; // eslint-disable-line
   args = args.filter(arg => (member instanceof Object) ? arg !== member.toString() : arg !== member); // Remove member from array of arguments
   const days = !isNaN(args[0]) ? parseInt(args[0]) : null; // eslint-disable-line
-  // const days = args[0].length === 2 ? !isNaN(args[0][0])
   const reason = days ? args.slice(1).join(" ") : args.join(" "); // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
 
-  if (days && days < 1) return msg.fail(`Sorry ${msg.author.username}, timed bans must be at least 1 day, but not greater than !`);
+  if (days && days < 1) return msg.fail(`Sorry ${msg.author.username}, timed bans must be at least 1 day!`);
 
   if (member) {
     if (msg.guild.members.has(args[0])) { // If it is a user snowflake
@@ -23,6 +24,9 @@ module.exports.run = async (client, msg, args) => {
         embed: {
           title: `${msg.emojis.pending}Are you sure you want to ban ${guildMember.user.tag}?`,
           description: `**User ID**: \`${guildMember.user.id}\`\n\nYou have **15** seconds to respond with ${yes} to ban this member, or ${no} to cancel this command.`,
+          thumbnail: {
+            "url": guildMember.user.getAvatar()
+          },
           color: msg.colors.pending
         }
       });
@@ -81,13 +85,15 @@ module.exports.run = async (client, msg, args) => {
 
       if (!clientData || !(clientData.bannedMembers instanceof Object)) clientData.bannedMembers = {};
 
+      const bannedUntil = !isNaN(days) ? Date.now() + (days * 8.64e+7) : null;
+
       clientData.bannedMembers[guildMember.id] = {
         "guildId": msg.guild.id,
         "reason": reason.length > 0 ? reason : null,
         "bannedBy": msg.author.id,
         "bannedOn": Date.now(),
         // 1 day is equivalent to 8.64e+7 ms, so multiply it by number of days specified and add that to the current date, and we get when to unban this member.
-        "bannedUntil": !isNaN(days) ? Date.now() + (days * 8.64e+7) : null
+        "bannedUntil": bannedUntil
       };
 
       const databaseUpdate = await client.db.update({
@@ -104,7 +110,7 @@ module.exports.run = async (client, msg, args) => {
 
       guildMember.ban({
         "reason": reason.length < 1 ? null : reason
-      }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `**Reason**: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `**Banned Until**: ${days}` : ``}`))
+      }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `**Reason**: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `**Banned Until**: ${moment(bannedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
         .catch(async e => { // If it fails to ban this member, the database must be reverted before this member was added to the ban list.
           delete clientData.bannedMembers[guildMember.id];
           await client.db.update({

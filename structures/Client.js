@@ -1,5 +1,6 @@
 /* eslint no-undefined: 0 */
 /* eslint guard-for-in: 0 */
+/* eslint no-use-before-define: 0 */
 
 const { Client, Collection } = require("discord.js");
 const RethinkDB = require("../database/methods");
@@ -10,6 +11,7 @@ module.exports = class Miyako extends Client {
     super();
     this.events = new Collection();
     this.inhibitors = new Collection();
+    this.finalizers = new Collection();
     this.commands = new Collection();
     this.aliases = new Collection();
     this.monitors = new Collection();
@@ -37,6 +39,10 @@ module.exports = class Miyako extends Client {
      * since the command could be sent in DMs rather than a guild text channel.
      */
 
+    // Declaring a _this variable for this as the cmdRun function cannot point to cannot point to this client class inside.
+    const _this = this; // eslint-disable-line
+
+    // TO-DO: Simplify this cache checking
     if (this.cache === undefined) {
       const clientCache = await this.updateCache().catch(e => ({
         "error": e
@@ -69,10 +75,9 @@ module.exports = class Miyako extends Client {
 
     const inhibitors = Array.from(this.inhibitors.keys());
 
-    if (inhibitors.length < 1) return cmd.run(this, msg, args); // If there's no inhibitors, just run the command.
+    if (inhibitors.length < 1) return cmdRun(); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
-    msg.cmd = cmd.options.name;
 
     for (const inhibitor of inhibitors) { // Loop through all loaded inhibitors.
       try {
@@ -84,10 +89,19 @@ module.exports = class Miyako extends Client {
     }
 
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
-    if (count >= inhibitors.length) return cmd.run(this, msg, args);
+    if (count >= inhibitors.length) return cmdRun();
 
-    function cacheChecker(object) {
+    function cmdRun() {
+      msg.cmd = cmd.options.name;
+      cmd.run(_this, msg, args);
 
+      const finalizers = Array.from(_this.finalizers.keys());
+
+      if (finalizers.length < 1) return null;
+
+      for (const finalizer of finalizers) _this.finalizers.get(finalizer)(_this).catch(e => console.error(e));
+
+      return null;
     }
   }
 
@@ -105,8 +119,8 @@ module.exports = class Miyako extends Client {
         // If what ever reason it fails to get from database, try to manually update the key with the new value for the cache.
         if (key && value) {
           if (!this.cache) this.cache = {};
-          else resolve(this.cache[key] = value);
-        } else {
+          return resolve(this.cache[key] = value);
+        } else { // eslint-disable-line
           if (this.cache === undefined) reject(e); // eslint-disable-line
           else this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
         }

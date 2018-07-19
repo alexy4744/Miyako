@@ -23,7 +23,7 @@ module.exports.run = async (client, msg, args) => {
   const data = await msg.guild.db.get().catch(e => msg.error(e, "re-assign the prefix"));
 
   // Default prefix is v$, so if there's no entry for this guild, then the prefix must be the default.
-  if (((!data || !data.prefix) && newPrefix === "v$") || (data && data.prefix === newPrefix)) {
+  if (((!data || !data.prefix) && newPrefix === client.prefix) || (data && data.prefix === newPrefix)) {
     return msg.channel.send({
       embed: {
         title: `${msg.emojis.fail}"${newPrefix}" is already the current prefix!`,

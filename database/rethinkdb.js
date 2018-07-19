@@ -1,6 +1,15 @@
 const r = require("rethinkdbdash")();
 
 module.exports = class Database {
+  ping() {
+    return new Promise((resolve, reject) => {
+      const init = Date.now();
+      r.now().run()
+        .then(now => resolve(now - init))
+        .catch(e => reject(e));
+    });
+  }
+
   /* Database Manipulation */
   dbList() {
     return new Promise((resolve, reject) => {

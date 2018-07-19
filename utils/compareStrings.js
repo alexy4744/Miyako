@@ -10,6 +10,9 @@ module.exports = (sX, sY) => {
   if (!sX || typeof sX !== "string") throw new Error("The first parameter must be a string!");
   if (!sY || typeof sY !== "string") throw new Error("The second parameter must be a string!");
 
+  sX = sX.toLowerCase();
+  sY = sY.toLowerCase();
+
   const sXBigrams = [];
   const sYBigrams = [];
   const matchingBigrams = [];

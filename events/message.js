@@ -1,7 +1,7 @@
 /* eslint no-undefined: 0 */
 
 module.exports = async (client, msg) => {
-  if (msg.guild && msg.guild.cache === undefined) await msg.guild.updateCache().then(() => null).catch(() => { });
+  if (msg.guild && msg.guild.cache === undefined) await msg.guild.updateCache().catch(() => null);
 
   const prefix = msg.guild ? msg.guild.cache ? msg.guild.cache.prefix ? msg.guild.cache.prefix : client.prefix : client.prefix : client.prefix;
 
