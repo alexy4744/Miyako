@@ -12,7 +12,7 @@ module.exports.run = async (client, msg, args) => {
   if (data.error) return msg.error(data.error, "re-assign the prefix");
 
   // Default prefix is v$, so if there's no entry for this guild, then the prefix must be the default.
-  if (((!data || !data.prefix) && newPrefix === client.prefix) || (data && data.prefix === newPrefix)) return msg.fail(`"${newPrefix}" is already the current prefix!`);
+  if ((!data.prefix && newPrefix === client.prefix) || data.prefix === newPrefix) return msg.fail(`"${newPrefix}" is already the current prefix!`);
 
   return msg.guild.db.update({
     "prefix": newPrefix

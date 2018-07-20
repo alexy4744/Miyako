@@ -1,18 +1,13 @@
 module.exports.run = async (client, msg, args) => {
   if (!client.commands.has(args[0]) && !client.aliases.has(args[0])) return msg.fail(`Please enter a valid command to be enabled!`);
 
-  let data = await msg.guild.db.get().catch(e => ({
+  const data = await msg.guild.db.get().catch(e => ({
     "error": e
   }));
 
   if (data.error) return msg.error(data.error, "enable this command");
 
-  if (!data || !data.disabledCommands) {
-    data = {
-      "id": msg.guild.id,
-      "disabledCommands": []
-    };
-  }
+  if (!data.disabledCommands) data.disabledCommands = [];
 
   // No need to check aliases, etc because if a command is disabled, it's parent name and aliases will be in this array.
   if (!data.disabledCommands.includes(args[0])) return msg.fail(`${msg.author.username}, "${args[0]}" is already enabled!`);

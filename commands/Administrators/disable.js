@@ -5,18 +5,13 @@ module.exports.run = async (client, msg, args) => {
 
   if (cmd.options.guarded) return msg.fail(`${msg.author.username}, this command cannot be disabled!`);
 
-  let data = await msg.guild.db.get().catch(e => ({
+  const data = await msg.guild.db.get().catch(e => ({
     "error": e
   }));
 
   if (data.error) return msg.error(data.error, "disable this command");
 
-  if (!data || !(data.disabledCommands instanceof Array)) {
-    data = {
-      "id": msg.guild.id,
-      "disabledCommands": []
-    };
-  }
+  if (!data.disabledCommands) data.disabledCommands = [];
 
   // Both aliases and parent name would be in this array if the command is disabled
   if (data.disabledCommands.includes(args[0])) return msg.fail(`${msg.author.username}, "${args[0]}" is already disabled!`);

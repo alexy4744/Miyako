@@ -1,5 +1,5 @@
 module.exports.run = async (client, msg, args) => {
-  let cmd = args.join(" ");
+  let cmd = args[0];
 
   if (!client.commands.has(cmd) && !client.aliases.has(cmd)) return msg.fail(`"${cmd}" is not a valid command!`);
 

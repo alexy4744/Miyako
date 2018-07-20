@@ -113,7 +113,7 @@ module.exports = class Database {
     return new Promise((resolve, reject) => {
       r.db("test").table(tableName).get(id)
         .run()
-        .then(res => resolve(res))
+        .then(res => resolve(res === null ? {} : res)) // Make my life easier so that I don't have to check for null
         .catch(e => reject(e));
     });
   }

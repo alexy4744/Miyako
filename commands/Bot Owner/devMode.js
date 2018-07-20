@@ -9,7 +9,7 @@ module.exports.run = async (client, msg) => {
   else data.devMode = false;
 
   return client.db.update({
-    devMode: data.devMode
+    "devMode": data.devMode
   }).then(() => client.updateCache("devMode", data.devMode)
     .then(() => msg.channel.send({
       embed: {

@@ -1,5 +1,5 @@
 module.exports.run = (client, msg, args) => {
-  const thingToReload = args.join(" ");
+  const thingToReload = args[0];
 
   if (client.commands.has(thingToReload) || client.aliases.has(thingToReload)) {
     try {
