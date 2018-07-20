@@ -39,7 +39,7 @@ module.exports = class Miyako extends Client {
      * since the command could be sent in DMs rather than a guild text channel.
      */
 
-    // Declaring a _this variable for this as the cmdRun function cannot point to cannot point to this client class inside.
+    // Declaring a reference for this because cmdRun() cannot access this client class.
     const _this = this; // eslint-disable-line
 
     // TO-DO: Simplify this cache checking
@@ -47,7 +47,7 @@ module.exports = class Miyako extends Client {
       const clientCache = await this.updateCache().catch(e => ({
         "error": e
       }));
-      if (clientCache === null) return msg.fail(`Client cache cannot be null`, `execute this command!`);
+      if (clientCache === null) return msg.error(`Client cache cannot be null`, `execute this command!`);
       if (clientCache.error) return msg.error(clientCache.error, `execute this command!`);
     }
 

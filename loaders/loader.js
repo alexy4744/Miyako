@@ -8,5 +8,4 @@ module.exports = client => {
   require("./monitorLoader")(client, fs);
   require("./inhibitorLoader")(client, fs);
   require("./utilitiesLoader")(client, fs);
-  return null;
 };

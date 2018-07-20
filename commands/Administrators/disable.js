@@ -1,56 +1,35 @@
 module.exports.run = async (client, msg, args) => {
-  if (!client.commands.has(args[0]) && !client.aliases.has(args[0])) {
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}Please enter a valid command to be disabled!`,
-        color: msg.colors.fail
-      }
-    });
-  }
+  if (!client.commands.has(args[0]) && !client.aliases.has(args[0])) return msg.fail(`Please enter a valid command to be disabled!`);
 
   const cmd = client.commands.get(args[0]) || client.aliases.get(args[0]);
 
-  if (cmd.options.guarded) { // Check if the command can be disabled per guild.
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}This command cannot be disabled!`,
-        color: msg.colors.fail
-      }
-    });
+  if (cmd.options.guarded) return msg.fail(`${msg.author.username}, this command cannot be disabled!`);
+
+  let data = await msg.guild.db.get().catch(e => ({
+    "error": e
+  }));
+
+  if (data.error) return msg.error(data.error, "disable this command");
+
+  if (!data || !(data.disabledCommands instanceof Array)) {
+    data = {
+      "id": msg.guild.id,
+      "disabledCommands": []
+    };
   }
 
-  let data = await msg.guild.db.get().catch(e => msg.error(e, "disable this command"));
-
-  if (!data || !data.disabledCommands) {
-    await msg.guild.db.update({
-      disabledCommands: []
-    }).catch(e => msg.error(e, "disable this command"));
-    await msg.guild.updateCache("disabledCommands", []).catch(e => msg.error(e, "disable this command"));
-    data = await msg.guild.db.get().catch(e => msg.error(e, "disable this command")); // reassign data with the updated object containing the disabledCommands array for this guild.
-  } else if (data && data.disabledCommands.includes(args[0])) {
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}"${args[0]}" has already been disabled in this guild!`,
-        color: msg.colors.fail
-      }
-    });
-  }
+  // Both aliases and parent name would be in this array if the command is disabled
+  if (data.disabledCommands.includes(args[0])) return msg.fail(`${msg.author.username}, "${args[0]}" is already disabled!`);
 
   data.disabledCommands.push(cmd.options.name || args[0]);
-  cmd.options.aliases.forEach(a => data.disabledCommands.push(a));
+  cmd.options.aliases.forEach(alias => data.disabledCommands.push(alias));
 
-  msg.guild.db.update({
-    disabledCommands: data.disabledCommands
-  }).then(() => {
-    msg.guild.updateCache("disabledCommands", data.disabledCommands).then(() => { // eslint-disable-line
-      return msg.channel.send({
-        embed: {
-          title: `${msg.emojis.success}I have successfully disabled the command "${args[0]}"`,
-          color: msg.colors.success
-        }
-      });
-    }).catch(e => msg.error(e, "disable this command"));
-  }).catch(e => msg.error(e, "disable this command"));
+  return msg.guild.db.update({
+    "disabledCommands": data.disabledCommands
+  }).then(() => msg.guild.updateCache("disabledCommands", data.disabledCommands)
+    .then(() => msg.success(`I have successfully disabled "${args[0]}"`))
+    .catch(e => msg.error(e, "disable this command")))
+    .catch(e => msg.error(e, "disable this command"));
 };
 
 module.exports.options = {

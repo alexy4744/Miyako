@@ -9,7 +9,7 @@ module.exports.run = (client, msg, args) => {
       for (const alias of cmd.options.aliases) client.aliases.delete(alias);
 
       const category = cmd.options.category;
-      cmd = require(`../${cmd.options.category}/${cmd.options.name}`)
+      cmd = require(`../${cmd.options.category}/${cmd.options.name}`);
 
       cmd.options.name = thingToReload;
       cmd.options.category = category;
@@ -39,20 +39,10 @@ module.exports.run = (client, msg, args) => {
       return msg.error(error, `reload this utility!`);
     }
   } else {
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}"${thingToReload}" is not a valid command, inhibitor or a utility!`,
-        color: msg.colors.fail
-      }
-    });
+    return msg.fail(`"${thingToReload}" is not a valid command, inhibitor or a utility!`);
   }
 
-  return msg.channel.send({
-    embed: {
-      title: `${msg.emojis.success}"${thingToReload}" has been succesfully reloaded!`,
-      color: msg.colors.success
-    }
-  });
+  return msg.success(`"${thingToReload}" has been succesfully reloaded!`);
 };
 
 module.exports.options = {

@@ -1,8 +1,10 @@
 module.exports.run = (client, msg, args) => {
   const amount = !isNaN(args[0]) ? parseInt(args[0]) : 100;
 
-  msg.channel.bulkDelete(amount)
-    .then(messages => msg.success(`I have successfully deleted ${messages.size} messages!`)).then(m => m.delete({ timeout: 10000 }).catch(() => {}))
+  return msg.channel.bulkDelete(amount)
+    .then(messages => msg.success(`I have successfully deleted ${messages.size} messages!`))
+    .then(m => m.delete({ timeout: 10000 })
+    .catch(() => {}))
     .catch(e => msg.error(e, `delete ${amount} message(s) in #${msg.channel.name}`));
 };
 

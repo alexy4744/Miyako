@@ -52,7 +52,7 @@ module.exports.run = (client, msg, args) => {
       if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => msg.channel.send(`Help is on the way, ${msg.author.toString()}...`));
       else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
     }).catch(() => {
-      msg.channel.send(`${msg.author.toString}, I could not DM you. Please check that your DMs are not disabled!`);
+      msg.channel.send(`${msg.author.toString()}, I could not DM you. Please check that your DMs are not disabled!`);
     });
   }
 };

@@ -1,12 +1,5 @@
 module.exports.run = (client, msg) => {
-  if (!msg.guild.myMessages || msg.guild.myMessages.length < 1) {
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}There are no messages to delete!`,
-        color: msg.colors.fail
-      }
-    });
-  }
+  if (!msg.guild.myMessages || msg.guild.myMessages.length < 1) return msg.fail(`There are no messages to delete!`);
 
   const myMessages = msg.guild.myMessages.get(msg.channel.id);
   let counter = 0;
@@ -24,14 +17,7 @@ module.exports.run = (client, msg) => {
     }
   });
 
-  if (counter >= myMessages.length) {
-    msg.channel.send({
-      embed: {
-        title: `${msg.emojis.success}I have sucessfully deleted my messages!`,
-        color: msg.colors.success
-      }
-    }).then(m => m.delete({ timeout: 10000 }).catch(() => {}));
-  }
+  if (counter >= myMessages.length) return msg.success(`I have successfully deleted my messages!`).then(m => m.delete({ timeout: 10000 }).catch(() => {}));
 };
 
 module.exports.options = {

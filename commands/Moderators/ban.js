@@ -108,19 +108,19 @@ module.exports.run = async (client, msg, args) => {
 
       if (databaseUpdate.error || updateCache.error) return msg.error(databaseUpdate.error ? databaseUpdate.error : updateCache.error, `ban ${guildMember.user.tag}!`);
 
-      guildMember.ban({
+      return guildMember.ban({
         "reason": reason.length < 1 ? null : reason
       }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `**Reason**: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `**Banned Until**: ${moment(bannedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
         .catch(async e => { // If it fails to ban this member, the database must be reverted before this member was added to the ban list.
           delete clientData.bannedMembers[guildMember.id];
           await client.db.update({
             "bannedMembers": clientData.bannedMembers
-          }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers).catch(() => { }))
+          }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers)
+            .then(() => msg.error(e, `ban ${guildMember.user.tag}!`))
+            .catch(() => { }))
             .catch(() => { });
-
-          return msg.error(e, `ban ${guildMember.user.tag}!`);
         });
-    } else {
+    } else { // eslint-disable-line
       return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);
     }
   }
