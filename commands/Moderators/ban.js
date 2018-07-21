@@ -79,46 +79,63 @@ module.exports.run = async (client, msg, args) => {
   async function ban(guildMember) {
     // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
     if (guildMember.bannable) {
-      const clientData = await client.db.get().catch(e => ({
-        "error": e
-      }));
+      // 1 day is equivalent to 8.64e+7 ms, so multiply it by number of days specified and add that to the current date, and we get when to unban this member.
+      const bannedUntil = !isNaN(days) ? Date.now() + (days * 8.64e+7) + 5000 : null; // Always add 5000 since the bot only checks for timed bans every 5 seconds.
 
-      if (!clientData || !(clientData.bannedMembers instanceof Object)) clientData.bannedMembers = {};
+      // Only save it to the database if this is a timed ban.
+      if (bannedUntil) {
+        const clientData = await client.db.get().catch(e => ({
+          "error": e
+        }));
 
-      const bannedUntil = !isNaN(days) ? Date.now() + (days * 8.64e+7) : null;
+        if (clientData.error) return msg.error(clientData.error, `ban ${guildMember.user.tag}!`);
+        if (!(clientData.bannedMembers instanceof Array)) clientData.bannedMembers = [];
 
-      clientData.bannedMembers[guildMember.id] = {
-        "guildId": msg.guild.id,
-        "reason": reason.length > 0 ? reason : null,
-        "bannedBy": msg.author.id,
-        "bannedOn": Date.now(),
-        // 1 day is equivalent to 8.64e+7 ms, so multiply it by number of days specified and add that to the current date, and we get when to unban this member.
-        "bannedUntil": bannedUntil
-      };
+        // If this user is not found in the array of banned members.
+        if (clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id) < 0) { // eslint-disable-line
+          clientData.bannedMembers.push({
+            "memberId": guildMember.id,
+            "guildId": msg.guild.id,
+            "reason": reason.length > 0 ? reason : null,
+            "bannedBy": msg.author.id,
+            "bannedOn": Date.now(),
+            "bannedUntil": bannedUntil
+          });
 
-      const databaseUpdate = await client.db.update({
-        "bannedMembers": clientData.bannedMembers
-      }).catch(e => ({
-        "error": e
-      }));
-
-      const updateCache = await client.updateCache("bannedMembers", client.bannedMembers).catch(e => ({
-        "error": e
-      }));
-
-      if (databaseUpdate.error || updateCache.error) return msg.error(databaseUpdate.error ? databaseUpdate.error : updateCache.error, `ban ${guildMember.user.tag}!`);
+          try {
+            await client.db.update({
+              "bannedMembers": clientData.bannedMembers
+            });
+            await client.updateCache("bannedMembers", client.bannedMembers);
+          } catch (error) {
+            return msg.error(error, `ban ${guildMember.user.tag}!`);
+          }
+        }
+      }
 
       return guildMember.ban({
         "reason": reason.length < 1 ? null : reason
       }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `**Reason**: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `**Banned Until**: ${moment(bannedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
-        .catch(async e => { // If it fails to ban this member, the database must be reverted before this member was added to the ban list.
-          delete clientData.bannedMembers[guildMember.id];
-          await client.db.update({
-            "bannedMembers": clientData.bannedMembers
-          }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers)
-            .then(() => msg.error(e, `ban ${guildMember.user.tag}!`))
-            .catch(() => { }))
-            .catch(() => { });
+        .catch(e => {
+          // Only restore database if it is a timed ban.
+          // Ignoring errors because I can check if this member is actually banned later in my loop
+          if (bannedUntil) {
+            client.db.get().then(clientData => {
+              const index = clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id);
+
+              if (index > -1) {
+                clientData.bannedMembers.splice(index, 1);
+                client.db.update({
+                  "bannedMembers": clientData.bannedMembers
+                }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers)
+                  .then(() => msg.error(e, `ban ${guildMember.user.tag}!`))
+                  .catch(() => { }))
+                  .catch(() => { });
+              }
+            }).catch(() => { });
+          }
+
+          return msg.error(e, `ban ${guildMember.user.tag}!`); // eslint-disable-line
         });
     } else { // eslint-disable-line
       return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);

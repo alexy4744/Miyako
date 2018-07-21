@@ -47,7 +47,7 @@ module.exports = class Miyako extends Client {
       const clientCache = await this.updateCache().catch(e => ({
         "error": e
       }));
-      if (clientCache === null) return msg.error(`Client cache cannot be null`, `execute this command!`);
+
       if (clientCache.error) return msg.error(clientCache.error, `execute this command!`);
     }
 
@@ -56,21 +56,21 @@ module.exports = class Miyako extends Client {
         "error": e
       }));
 
-      if (userCache !== null && userCache.error) return msg.error(userCache.error, `execute this command!`);
+      if (userCache.error) return msg.error(userCache.error, `execute this command!`);
     }
 
     if (msg.member && msg.member.cache === undefined) {
       const memberCache = await msg.member.updateCache().catch(e => ({
         "error": e
       }));
-      if (memberCache !== null && memberCache.error) return msg.error(memberCache.error, `execute this command!`);
+      if (memberCache.error) return msg.error(memberCache.error, `execute this command!`);
     }
 
     if (msg.guild && msg.guild.cache === undefined) {
       const guildCache = await msg.guild.updateCache().catch(e => ({
         "error": e
       }));
-      if (guildCache !== null && guildCache.error) return msg.error(guildCache.error, `execute this command!`);
+      if (guildCache.error) return msg.error(guildCache.error, `execute this command!`);
     }
 
     const inhibitors = Array.from(this.inhibitors.keys());

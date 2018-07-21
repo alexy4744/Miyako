@@ -1,32 +1,20 @@
-module.exports.run = async (client, msg, args) => {
-  const bannedMembers = await msg.guild.fetchBans().catch(e => msg.error(e, "fetch banned members!"));
+/* eslint no-use-before-define: 0 */
 
-  if (bannedMembers.size < 1) {
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.fail}There are no banned members in this guild!`,
-        color: msg.colors.fail
-      }
-    });
-  }
+module.exports.run = async (client, msg, args) => {
+  const bannedMembers = await msg.guild.fetchBans().catch(e => ({
+    "error": e
+  }));
+
+  if (bannedMembers.error) return msg.error(bannedMembers.error, "fetch banned members!");
+  if (bannedMembers.size < 1) return msg.fail(`There are no banned members in this guild!`);
 
   if (!isNaN(args[0]) && args[0].length === 18) { // If it is a user snowflake
     if (bannedMembers.has(args[0])) {
       const guyToUnban = bannedMembers.get(args[0]);
-      msg.guild.members.unban(guyToUnban.user).then(guy => msg.channel.send({
-        embed: {
-          title: `${msg.emojis.success}${guy.tag}(${guy.id}) has been unbanned by ${msg.author.tag}!`, // eslint-disable-line
-          color: msg.colors.success
-        }
-      })).catch(e => msg.error(e, `unban ${guyToUnban.user.username}!`));
-    } else {
-      msg.channel.send({
-        embed: {
-          title: `${msg.emojis.fail}I cannot find any banned members with the user ID **${args[0]}**!`,
-          color: msg.colors.fail
-        }
-      });
-    }
+      msg.guild.members.unban(guyToUnban.user)
+        .then(() => msg.success(`${guyToUnban.user.tag}(${guyToUnban.user.id}) has been unbanned by ${msg.author.tag}!`))
+        .catch(e => msg.error(e, `unban ${guyToUnban.user.username}!`));
+    } else msg.fail(`I cannot find any banned members with the user ID **${args[0]}**!`); // eslint-disable-line
   } else {
     const lastMember = Array.from(bannedMembers.values()).pop();
     let outcome = 0;
@@ -44,50 +32,84 @@ module.exports.run = async (client, msg, args) => {
     }
 
     if (currentMember === lastMember) {
-      msg.channel.send({
+      const yes = msg.guild.me.hasPermission("ADD_REACTIONS") ? "👌" : `YES`;
+      const no = msg.guild.me.hasPermission("ADD_REACTIONS") ? "❌" : `NO`;
+      const m = await msg.channel.send({
         embed: {
           title: `${msg.emojis.pending}Are you sure you want to unban ${currentMember.user.tag}?`,
-          description: `**User ID**: \`${currentMember.user.id}\`\n\nYou have **15** seconds to respond with \`YES\` to unban this member, or \`NO\` to cancel this command.`,
+          description: `**User ID**: \`${currentMember.user.id}\`\n\nYou have **15** seconds to respond with ${yes} to unban this member, or ${no} to cancel this command.`,
           thumbnail: {
-            "url": currentMember.user.displayAvatarURL()
+            "url": currentMember.user.getAvatar()
           },
           color: msg.colors.pending
         }
-      }).then(confirmationMessage => {
-        const filter = message => (message.content === "YES" || message.content === "NO") && message.author.id === msg.author.id;
-        msg.channel.awaitMessages(filter, {
-          max: 1,
-          time: 15000,
-          errors: ["time"]
-        }).then(async m => {
-          if (m.first().content === "YES") {
-            msg.guild.members.unban(currentMember.user).then(async guy => {
-              await confirmationMessage.delete().catch(() => {});
-              msg.channel.send({
-                embed: {
-                  title: `${msg.emojis.success}${guy.tag} has been successfully unbanned by ${msg.author.tag}!`,
-                  color: msg.colors.success
-                }
-              });
-            }).catch(e => msg.error(e, `unban ${currentMember.user.tag}`));
-          } else if (m.first().content === "NO") {
-            await confirmationMessage.delete().catch(() => {});
-            return msg.channel.send({
-              embed: {
-                title: `☑${msg.emojis.bar}I have cancelled the command!`,
-                color: msg.colors.default
-              }
-            });
-          }
-        }).catch(() => msg.channel.send({
-          embed: {
-            title: `${msg.emojis.fail}This command has been cancelled!`,
-            description: `I did not receive a \`YES\` or \`NO\` input from ${msg.author.username} within **15** seconds, therefore, I have cancelled the command.`,
-            color: msg.colors.fail
-          }
-        }));
       });
+
+      if (m.guild.me.hasPermission("ADD_REACTIONS")) {
+        const filter = (reaction, user) => (reaction.emoji.name === yes || reaction.emoji.name === no) && user.id === msg.author.id;
+
+        await m.react(yes);
+        await m.react(no);
+
+        m.awaitReactions(filter, {
+          "time": 15000,
+          "max": 1,
+          "maxEmojis": 1,
+          "maxUsers": 1,
+          "errors": ["time"]
+        }).then(async emoji => {
+          await m.delete().catch(() => { });
+
+          if (emoji.first().emoji.name === yes) return unban(currentMember);
+          else if (emoji.first().emoji.name === no) return m.cancelledCommand();
+        }).catch(async () => {
+          await m.delete().catch(() => { });
+          return m.cancelledCommand(`${msg.author.toString()} did not react with ${yes} or ${no} within **15** seconds, therefore this command has been cancelled!`);
+        });
+      } else {
+        const y = yes.replace(/`/gi, "");
+        const n = no.replace(/`/gi, "");
+        const filter = message => (message.content === y || message.content === n) && message.author.id === msg.author.id;
+
+        m.channel.awaitMessages(filter, {
+          "time": 15000,
+          "max": 1,
+          "errors": ["time"]
+        }).then(async message => {
+          await m.delete().catch(() => { });
+
+          if (message.first().content === y) return unban(currentMember);
+          else if (message.first().content === n) return m.cancelledCommand();
+        }).catch(async () => {
+          await m.delete().catch(() => { });
+          return m.cancelledCommand(`${msg.author.toString()} did not react with ${yes} or ${no} within **15** seconds, therefore this command has been cancelled!`);
+        });
+      }
     }
+  }
+
+  function unban(member) {
+    // Unban first because i can always check if this member still exists because i can skip in loop later.
+    return msg.guild.members.unban(member.user).then(async () => {
+      // Don't really care if it anything errors in here, I can always remove it later while checking for timed bans.
+      const clientData = await client.db.get().catch(() => ({
+        "error": "(ノಠ益ಠ)ノ彡┻━┻"
+      }));
+
+      if (!clientData.error && clientData.bannedMembers instanceof Array) {
+        const index = clientData.bannedMembers.findIndex(el => el.memberId === member.user.id);
+
+        if (index > -1) {
+          clientData.bannedMembers.splice(index, 1);
+          client.db.update({
+            "bannedMembers": clientData.bannedMembers
+          }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers).catch(() => null))
+            .catch(e => console.log(e));
+        }
+      }
+
+      return msg.success(`I have successfully unbanned ${member.user.tag}!`);
+    }).catch(e => msg.error(e, `unban ${member.user.tag}!`));
   }
 };
 

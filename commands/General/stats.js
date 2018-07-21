@@ -17,7 +17,7 @@ module.exports.run = async (client, msg) => msg.channel.send({
 **Channels**: \`${client.channels.size.toLocaleString()}\`\n
 **Emojis**: \`${client.emojis.size.toLocaleString()}\`\n
 **Commands**: \`${client.commands.size.toLocaleString()}\`\n
-**Commands Ran**: \`${client.cache.commandsRan.toLocaleString()}\`\n\u200B`
+**Commands Ran**: \`${client.cache ? client.cache.commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
       },
       {
         "name": `🖥${msg.emojis.bar}System Information`,
