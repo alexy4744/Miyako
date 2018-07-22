@@ -7,5 +7,6 @@ module.exports = client => {
   require("./finalizerLoader")(client, fs);
   require("./monitorLoader")(client, fs);
   require("./inhibitorLoader")(client, fs);
+  require("./tasksLoader")(client, fs);
   require("./utilitiesLoader")(client, fs);
 };

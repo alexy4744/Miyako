@@ -19,68 +19,6 @@ module.exports = client => {
     else client.LePlayer.stop(guild.guildId);
   });
 
-  setInterval(async () => {
-    if (client.cache && client.cache.bannedMembers) {
-      for (const member of client.cache.bannedMembers) {
-        if (!member.bannedUntil) continue; // If there is no date
-        if (Date.now() >= member.bannedUntil) { // If the current date is already passed the specified ban duration, unban this member.
-          if (client.guilds.has(member.guildId)) { // If the bot is still in the guild the member that was originally banned in.
-            const fetchedUser = await client.users.fetch(member.memberId).catch(e => ({
-              "error": e
-            }));
-
-            if (fetchedUser.error) {
-              // If this user does not exist in Discord anymore, remove it from the database.
-              if (fetchedUser.error.message === "Unknown User") {
-                const clientData = await client.db.get().catch(() => ({
-                  "error": ":("
-                }));
-
-                if (clientData.error) continue; // If it errors, skip this iteration and try to remove it again in the next interval.
-
-                const index = clientData.bannedMembers.findIndex(el => el.memberId === member.memberId);
-
-                if (index > -1) {
-                  clientData.bannedMembers.splice(index, 1);
-                  client.db.update({
-                    "bannedMembers": clientData.bannedMembers
-                  }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers).catch(() => { }))
-                    .catch(() => { });
-                }
-              }
-
-              continue;
-            } else {
-              try {
-                await client.guilds.get(member.guildId).members.unban(fetchedUser);
-              } catch (error) {
-                // If it fails to unban this member, put this member back into the database, so that it can try unbanning this member again in the next interval.
-                const clientData = await client.db.get().catch(() => ({
-                  "error": ":("
-                }));
-
-                if (clientData.error) continue;
-                if (clientData.bannedMembers.findIndex(el => el.memberId === member.memberId) < 0) {
-                  try {
-                    clientData.bannedMembers.push(member);
-                    await client.db.update({
-                      "bannedMembers": clientData.bannedMembers
-                    });
-                    await client.updateCache("bannedMembers", clientData.bannedMembers);
-                  } catch (err) {
-                    continue;
-                  }
-                }
-
-                continue;
-              }
-            }
-          } else continue; // eslint-disable-line
-        }
-      }
-    }
-  }, 5000);
-
   const readyMessage = [
     `✔  ${client.events.size} events ${chalk.green("loaded!")}`,
     `✔  ${client.inhibitors.size} inhibitors ${chalk.green("loaded!")}`,
