@@ -6,7 +6,7 @@ module.exports.run = async (client, msg, args) => {
   args = args.filter(arg => (member instanceof Object) ? arg !== member.toString() : arg !== member); // Remove member from array of arguments
   const days = !isNaN(args[0]) ? parseInt(args[0]) : null; // eslint-disable-line
   const reason = days ? args.slice(1).join(" ") : args.join(" "); // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
-
+  console.log(days)
   if (!(member instanceof Object)) { // If its not a user mention
     if (msg.guild.members.has(member)) { // If it is a user snowflake
       member = msg.guild.members.get(member);
