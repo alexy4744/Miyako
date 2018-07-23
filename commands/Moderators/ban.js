@@ -99,7 +99,7 @@ module.exports.run = async (client, msg, args) => {
             "reason": reason.length > 0 ? reason : null,
             "bannedBy": msg.author.id,
             "bannedOn": Date.now(),
-            "bannedUntil": Date.now() + 10000
+            "bannedUntil": bannedUntil
           });
 
           try {

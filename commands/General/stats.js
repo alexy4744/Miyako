@@ -31,12 +31,12 @@ module.exports.run = async (client, msg) => msg.channel.send({
       {
         "name": `🔗${msg.emojis.bar}Links`,
         "value": `
-**Invite URL**: ${await client.generateInvite().then(link => link.replace("permissions=0", "permissions=8")).catch(() => "Failed to generate an invite link")}\n
-**Github Repository**:`
+**Invite URL**: **${await client.generateInvite().then(link => link.replace("permissions=0", "permissions=8")).catch(() => "Failed to generate an invite link")}**\n
+**Github Repository**: **https://github.com/alexy4744/Miyako**`
       }
     ],
     thumbnail: {
-      "url": client.user.displayAvatarURL({ size: 1024 })
+      "url": client.user.getAvatar()
     },
     color: msg.colors.default
   }

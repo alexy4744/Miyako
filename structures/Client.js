@@ -4,7 +4,7 @@
 
 const { Client, Collection } = require("discord.js");
 const RethinkDB = require("../database/methods");
-require("../structures/Structures");
+require("../structures/Structures")();
 
 module.exports = class Miyako extends Client {
   constructor(options = {}) {

@@ -8,13 +8,8 @@ module.exports.run = async (client, msg, args) => {
   if (bannedMembers.error) return msg.error(bannedMembers.error, "fetch banned members!");
   if (bannedMembers.size < 1) return msg.fail(`There are no banned members in this guild!`);
 
-  if (!isNaN(args[0]) && args[0].length === 18) { // If it is a user snowflake
-    if (bannedMembers.has(args[0])) {
-      const guyToUnban = bannedMembers.get(args[0]);
-      msg.guild.members.unban(guyToUnban.user)
-        .then(() => msg.success(`${guyToUnban.user.tag}(${guyToUnban.user.id}) has been unbanned by ${msg.author.tag}!`))
-        .catch(e => msg.error(e, `unban ${guyToUnban.user.username}!`));
-    } else msg.fail(`I cannot find any banned members with the user ID **${args[0]}**!`); // eslint-disable-line
+  if (bannedMembers.has(args[0])) { // If it is a user snowflake
+    unban(bannedMembers.get(args[0]));
   } else {
     const lastMember = Array.from(bannedMembers.values()).pop();
     let outcome = 0;
@@ -103,8 +98,8 @@ module.exports.run = async (client, msg, args) => {
           clientData.bannedMembers.splice(index, 1);
           client.db.update({
             "bannedMembers": clientData.bannedMembers
-          }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers).catch(() => null))
-            .catch(e => console.log(e));
+          }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers).catch(() => { }))
+            .catch(() => { });
         }
       }
 

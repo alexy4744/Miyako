@@ -2,7 +2,7 @@
 /* eslint curly: 0 */
 
 module.exports = client => {
-  client.setInterval(async () => {
+  client.setInterval(async () => { // Using setInterval from client so that if the client gets destroyed, it will stop the interval.
     if (client.cache && client.cache.bannedMembers) {
       for (const member of client.cache.bannedMembers) {
         if (!member.bannedUntil) continue; // If it is not a timed ban.
@@ -24,7 +24,7 @@ module.exports = client => {
               continue;
             } else {
               client.guilds.get(member.guildId).members.unban(fetchedUser)
-                .then(() => removeFromDatabase(clientData, member))
+                .then(() => removeFromDatabase(clientData, member)) // Unban the guy and then remove it from the database.
                 .catch(e => {
                   // If this ban doesn't exist and it is still in the database, then remove it, else add it back in and try removing this entry in the next iteration.
                   if (e.message === "Unknown Ban") removeFromDatabase(clientData, member);
