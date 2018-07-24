@@ -4,7 +4,7 @@ Structures.extend("Message", Message => {
   class MiyakoMessage extends Message {
     constructor(...args) {
       super(...args);
-      this.prefix = this.guild ? this.guild.cache ? this.guild.cache.prefix : "v$" : "v$";
+      this.prefix = this.guild ? this.guild.cache ? this.guild.cache.prefix !== undefined ? this.guild.cache.prefix : this.client.prefix : this.client.prefix : this.client.prefix;
 
       this.emojis = {
         success: "✅  ｜   ",

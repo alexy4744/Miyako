@@ -20,9 +20,17 @@ module.exports = (url, selector, fn, args = []) => new Promise(async (resolve, r
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3489.0 Safari/537.36"
     },
     transform: body => cheerio.load(body)
-  }).catch(e => reject(e));
+  }).catch(e => ({
+    "error": e
+  }));
 
-  const metadata = await parseAll($).catch(e => reject(e));
+  if ($.error) return reject($.error);
+
+  const metadata = await parseAll($).catch(e => ({
+    "error": e
+  }));
+
+  if (metadata.error) return reject(metadata.error);
 
   if (!selector && !fn) resolve(metadata); // eslint-disable-line
   else resolve({ // eslint-disable-line

@@ -5,12 +5,20 @@ module.exports.run = (client, msg, args) => {
     const cmd = client.commands.get(args[0]).options || client.aliases.get(args[0]).options;
     msg.channel.send({
       embed: {
-        title: args[0],
+        title: args[0].charAt(0).toUpperCase() + args[0].slice(1),
         description: `${cmd.description(msg)}\n\u200B`,
         fields: [
           {
             "name": "Usage",
-            "value": `${client.utils.is.function(cmd.usage) ? client.utils.is.array(cmd.usage(msg)) ? cmd.usage(msg).map(u => `${msg.prefix + args[0]} ${u}`).join("\n") : `${msg.prefix + args[0]} ${cmd.usage(msg)}` : msg.prefix + args[0]}`
+            "value": `${client.utils.is.function(cmd.usage) ? client.utils.is.array(cmd.usage(msg)) ? cmd.usage(msg).map(u => `${msg.prefix + args[0]} ${u}`).join("\n") : `${msg.prefix + args[0]} ${cmd.usage(msg)}` : msg.prefix + args[0]}\n\u200B`
+          },
+          {
+            "name": "Cooldown",
+            "value": `${cmd.cooldown} seconds\n\u200B`
+          },
+          {
+            "name": "Aliases",
+            "value": `${cmd.aliases.length > 0 ? `${cmd.aliases.map(a => `\`${a}\``).join(", ")}` : `None`}`
           }
         ],
         color: msg.colors.default

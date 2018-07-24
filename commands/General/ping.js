@@ -40,7 +40,7 @@ module.exports.options = {
   nsfw: false,
   checkVC: false,
   cooldown: 5,
-  description: msg => `View the latency of ${msg.client.user.toString()}`,
+  description: msg => `View the database, websocket and Discord API latency of ${msg.client.user.toString()}`,
   aliases: ["latency", "pong"],
   userPermissions: [],
   botPermissions: [],

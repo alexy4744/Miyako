@@ -3,7 +3,7 @@ module.exports.run = async (client, msg, args) => {
 
   const cmd = client.commands.get(args[0]) || client.aliases.get(args[0]);
 
-  if (cmd.options.guarded) return msg.fail(`${msg.author.username}, this command cannot be disabled!`);
+  if (cmd.options.guarded) return msg.fail(`${msg.author.username}, this command is guarded and cannot be disabled!`);
 
   const data = await msg.guild.db.get().catch(e => ({
     "error": e

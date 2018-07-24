@@ -9,6 +9,8 @@ module.exports.run = async (client, msg, args) => {
   const days = args[0] ? client.utils.stringToMillis.isValid(args[0]) ? client.utils.stringToMillis.convert(args[0]).ms : null : null; // eslint-disable-line
   const reason = days ? args.slice(1).join(" ") : args.join(" ").length > 0 ? args.join(" ") : null; // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
 
+  if (!member) return msg.fail(`Please mention the member or enter their username/ID in order for me to mute them!`);
+
   if (!(member instanceof Object)) { // If its not a user mention
     if (msg.guild.members.has(member)) member = msg.guild.members.get(member);
     else member = msg.guild.findMember(member);
