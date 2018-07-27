@@ -9,7 +9,8 @@ module.exports = client => {
     ytAPIkey: yt,
     twitchAPIkey: twitch
   });
-
+  // console.log(new (client.commands.get("ping"))(client).client) // msg args
+  // console.log(client.commands)
   client.LePlayer.on("error", error => console.error(error));
 
   client.LePlayer.on("finished", guild => {
@@ -28,11 +29,11 @@ module.exports = client => {
     `🚀  ${client.user.tag} is ${chalk.green("ready!")} Serving for ${client.guilds.size} guilds and ${client.users.size} users!`
   ];
 
-  return figlet.text(client.user.username, {
-    font: "Alpha"
-  }, (err, art) => {
-    if (err) return;
-    console.log(chalk.keyword("cyan")(art));
-    readyMessage.forEach(msg => console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`));
-  });
+  // return figlet.text(client.user.username, {
+  //   font: "Alpha"
+  // }, (err, art) => {
+  //   if (err) return;
+  //   console.log(chalk.keyword("cyan")(art));
+  //   readyMessage.forEach(msg => console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`));
+  // });
 };

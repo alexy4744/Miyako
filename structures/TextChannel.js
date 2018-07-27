@@ -4,7 +4,7 @@ Structures.extend("TextChannel", TextChannel => {
   class MiyakoChannel extends TextChannel {
     // https://github.com/discordjs/discord.js/blob/master/src/structures/interfaces/TextBasedChannel.js#L110
     async send(...params) {
-      const msg = await super.send(...params).catch(() => {}); // Ignore any errors while sending the message
+      const msg = await super.send(...params).catch(e => console.log(e)); // Ignore any errors while sending the message
       if (msg) {
         if (!msg.guild.myMessages) msg.guild.myMessages = new Collection();
         if (!msg.guild.myMessages.has(msg.channel.id)) msg.guild.myMessages.set(msg.channel.id, []);

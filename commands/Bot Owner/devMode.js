@@ -1,37 +1,42 @@
-module.exports.run = async (client, msg) => {
-  const data = await client.db.get().catch(e => ({
-    "error": e
-  }));
+const Command = require("../../modules/Command");
 
-  if (data.error) return msg.error(data.error, "activate/deactivate developer mode!");
+module.exports = class Ping extends Command {
+  constructor(...args) {
+    super(...args, {
+      enabled: true,
+      guarded: true,
+      botOwnerOnly: true,
+      nsfw: false,
+      cooldown: 5,
+      description: () => `Activate developer mode to prevent anyone else to execute commands except the bot owner`,
+      aliases: [],
+      userPermissions: [],
+      botPermissions: [],
+      runIn: []
+    });
+  }
 
-  if (!data.devMode) data.devMode = true;
-  else data.devMode = false;
+  async run(msg, args) {
+    const data = await this.client.db.get().catch(e => ({
+      "error": e
+    }));
 
-  return client.db.update({
-    "devMode": data.devMode
-  }).then(() => client.updateCache("devMode", data.devMode)
-    .then(() => msg.channel.send({
-      embed: {
-        title: `⚙${msg.emojis.bar}Developer Mode has been ${data.devMode === true ? `activated` : `deactivated`}!`,
-        description: data.devMode ? `Commands will not respond to anyone except the bot owner, ${client.users.get(client.owner).toString()}.` : null,
-        color: msg.colors.default
-      }
-    }))
-    .catch(e => msg.error(e, "activate/deactivate developer mode!")))
-    .catch(error => msg.error(error, "activate/deactivate developer mode!"));
-};
+    if (data.error) return msg.error(data.error, "activate/deactivate developer mode!");
 
-module.exports.options = {
-  enabled: true,
-  guarded: true,
-  botOwnerOnly: true,
-  nsfw: false,
-  checkVC: false,
-  cooldown: 5,
-  description: () => `Activate developer mode to prevent anyone else to execute commands except the bot owner`,
-  aliases: [],
-  userPermissions: [],
-  botPermissions: [],
-  runIn: []
+    if (!data.devMode) data.devMode = true;
+    else data.devMode = false;
+
+    return this.client.db.update({
+      "devMode": data.devMode
+    }).then(() => this.client.updateCache("devMode", data.devMode)
+      .then(() => msg.channel.send({
+        embed: {
+          title: `⚙${msg.emojis.bar}Developer Mode has been ${data.devMode === true ? `activated` : `deactivated`}!`,
+          description: data.devMode ? `Commands will not respond to anyone except the bot owner, ${this.client.users.get(this.client.owner).toString()}.` : null,
+          color: msg.colors.default
+        }
+      }))
+      .catch(e => msg.error(e, "activate/deactivate developer mode!")))
+      .catch(error => msg.error(error, "activate/deactivate developer mode!"));
+  }
 };

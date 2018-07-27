@@ -1,35 +1,40 @@
-module.exports.run = (client, msg) => {
-  if (!msg.guild.myMessages || msg.guild.myMessages.length < 1) return msg.fail(`There are no messages to delete!`);
+const Command = require("../../modules/Command");
 
-  const myMessages = msg.guild.myMessages.get(msg.channel.id);
-  let counter = 0;
+module.exports = class Ping extends Command {
+  constructor(...args) {
+    super(...args, {
+      enabled: true,
+      guarded: false,
+      botOwnerOnly: false,
+      nsfw: false,
+      cooldown: 30,
+      description: msg => `Delete an x amount of messages sent by ${msg.client.user.toString()} in ${msg.channel.toString()}`,
+      aliases: [],
+      userPermissions: ["manage_messages"],
+      botPermissions: [],
+      runIn: ["text"]
+    });
+  }
 
-  myMessages.forEach(async message => {
-    counter++;
-    const fetchedMessage = await msg.channel.messages.fetch(message).catch(() => null);
+  run(msg, args) {
+    if (!msg.guild.myMessages || msg.guild.myMessages.length < 1) return msg.fail(`There are no messages to delete!`);
 
-    if (fetchedMessage === null) return; // eslint-disable-line
-    else { // eslint-disable-line
-      const isDeleted = await fetchedMessage.delete().catch(() => null);
+    const myMessages = msg.guild.myMessages.get(msg.channel.id);
+    let counter = 0;
 
-      if (isDeleted === null) return; // eslint-disable-line
-      else msg.guild.myMessages.set(msg.channel.id, myMessages.splice(counter, 1)); // eslint-disable-line
-    }
-  });
+    myMessages.forEach(async message => {
+      counter++;
+      const fetchedMessage = await msg.channel.messages.fetch(message).catch(() => null);
 
-  if (counter >= myMessages.length) return msg.success(`I have successfully deleted my messages!`).then(m => m.delete({ timeout: 10000 }).catch(() => {}));
-};
+      if (fetchedMessage === null) return; // eslint-disable-line
+      else { // eslint-disable-line
+        const isDeleted = await fetchedMessage.delete().catch(() => null);
 
-module.exports.options = {
-  enabled: true,
-  guarded: false,
-  botOwnerOnly: false,
-  nsfw: false,
-  checkVC: false,
-  cooldown: 30,
-  description: msg => `Delete an x amount of messages sent by ${msg.client.user.toString()} in ${msg.channel.toString()}`,
-  aliases: [],
-  userPermissions: ["manage_messages"],
-  botPermissions: [],
-  runIn: ["text"]
+        if (isDeleted === null) return; // eslint-disable-line
+        else msg.guild.myMessages.set(msg.channel.id, myMessages.splice(counter, 1)); // eslint-disable-line
+      }
+    });
+
+    if (counter >= myMessages.length) return msg.success(`I have successfully deleted my messages!`).then(m => m.delete({ timeout: 10000 }).catch(() => { }));
+  }
 };

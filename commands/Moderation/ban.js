@@ -1,159 +1,131 @@
 /* eslint no-use-before-define: 0 */
 /* eslint no-confusing-arrow: 0 */
 
+const Command = require("../../modules/Command");
 const moment = require("moment");
 
-module.exports.run = async (client, msg, args) => {
-  const member = msg.mentions.members.size > 0 ? msg.mentions.members.first() : args[0] !== undefined ? args[0] : null; // eslint-disable-line
-  args = args.filter(arg => (member instanceof Object) ? arg !== member.toString() : arg !== member); // Remove member from array of arguments
-  const days = !isNaN(args[0]) ? parseInt(args[0]) : null; // eslint-disable-line
-  const reason = days ? args.slice(1).join(" ") : args.join(" "); // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
-
-  if (days && days < 1) return msg.fail(`Sorry ${msg.author.username}, timed bans must be at least 1 day!`);
-
-  if (member) {
-    if (msg.guild.members.has(args[0])) { // If it is a user snowflake
-      return ban(msg.guild.members.get(args[0]));
-    } else if (member instanceof Object) { // If it is a object, then it has to be a mention, since it is the only time "member" is a member object
-      ban(member);
-    } else { // If it is a username
-      const yes = msg.guild.me.hasPermission("ADD_REACTIONS") ? "👌" : `YES`;
-      const no = msg.guild.me.hasPermission("ADD_REACTIONS") ? "❌" : `NO`;
-      const guildMember = msg.guild.findMember(member);
-      const m = await msg.channel.send({
-        embed: {
-          title: `${msg.emojis.pending}Are you sure you want to ban ${guildMember.user.tag}?`,
-          description: `**User ID**: \`${guildMember.user.id}\`\n\nYou have **15** seconds to respond with ${yes} to ban this member, or ${no} to cancel this command.`,
-          thumbnail: {
-            "url": guildMember.user.getAvatar()
-          },
-          color: msg.colors.pending
-        }
-      });
-
-      if (m.guild.me.hasPermission("ADD_REACTIONS")) {
-        const filter = (reaction, user) => (reaction.emoji.name === yes || reaction.emoji.name === no) && user.id === msg.author.id;
-
-        await m.react(yes);
-        await m.react(no);
-
-        m.awaitReactions(filter, {
-          "time": 15000,
-          "max": 1,
-          "maxEmojis": 1,
-          "maxUsers": 1,
-          "errors": ["time"]
-        }).then(async emoji => {
-          await m.delete().catch(() => { });
-
-          if (emoji.first().emoji.name === yes) return ban(guildMember);
-          else if (emoji.first().emoji.name === no) return m.cancelledCommand();
-        }).catch(async () => {
-          await m.delete().catch(() => { });
-          return m.cancelledCommand(`${msg.author.toString()} did not react with ${yes} or ${no} within **15** seconds, therefore this command has been cancelled!`);
-        });
-      } else {
-        const y = yes.replace(/`/gi, "");
-        const n = no.replace(/`/gi, "");
-        const filter = message => (message.content === y || message.content === n) && message.author.id === msg.author.id;
-
-        m.channel.awaitMessages(filter, {
-          "time": 15000,
-          "max": 1,
-          "errors": ["time"]
-        }).then(async message => {
-          await m.delete().catch(() => { });
-
-          if (message.first().content === y) return ban(guildMember);
-          else if (message.first().content === n) return m.cancelledCommand();
-        }).catch(async () => {
-          await m.delete().catch(() => { });
-          return m.cancelledCommand(`${msg.author.toString()} did not react with ${yes} or ${no} within **15** seconds, therefore this command has been cancelled!`);
-        });
-      }
-    }
-  } else {
-    return msg.fail(`Please mention the member or enter their username/ID in order for me to ban them!`);
+module.exports = class Ping extends Command {
+  constructor(...args) {
+    super(...args, {
+      enabled: true,
+      guarded: false,
+      botOwnerOnly: false,
+      nsfw: false,
+      cooldown: 5,
+      description: () => `Ban a member with optional reasoning and days of messages to delete.`,
+      usage: msg => [`${msg.this.client.user.toString()}`, `${msg.author.toString()} 7`, `${msg.this.client.user.toString()} 3 this bot sucks`],
+      aliases: [],
+      userPermissions: ["BAN_MEMBERS"],
+      botPermissions: ["BAN_MEMBERS"],
+      runIn: ["text"]
+    });
   }
 
-  async function ban(guildMember) {
-    // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
-    if (guildMember.bannable) {
-      // 1 day is equivalent to 8.64e+7 ms, so multiply it by number of days specified and add that to the current date, and we get when to unban this member.
-      const bannedUntil = !isNaN(days) ? Date.now() + (days * 8.64e+7) + 5000 : null; // Always add 5000 since the bot only checks for timed bans every 5 seconds.
+  async run(msg, args) {
+    const member = msg.mentions.members.size > 0 ? msg.mentions.members.first() : args[0] !== undefined ? args[0] : null; // eslint-disable-line
+    args = args.filter(arg => (member instanceof Object) ? arg !== member.toString() : arg !== member); // Remove member from array of arguments
+    const days = args[0] ? this.client.utils.stringToMillis.isValid(args[0]) ? this.client.utils.stringToMillis.convert(args[0]).ms : null : null; // eslint-disable-line
+    const reason = days ? args.slice(1).join(" ") : args.join(" ").length > 0 ? args.join(" ") : null; // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
 
-      // Only save it to the database if this is a timed ban.
-      if (bannedUntil) {
-        const clientData = await client.db.get().catch(e => ({
+    if (member) {
+      if (msg.guild.members.has(args[0])) { // If it is a user snowflake
+        return ban(msg.guild.members.get(args[0]));
+      } else if (member instanceof Object) { // If it is a object, then it has to be a mention, since it is the only time "member" is a member object
+        ban(member);
+      } else { // If it is a username
+        const guildMember = msg.guild.findMember(member);
+
+        if (!guildMember.bannable) return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);
+
+        const message = await msg.channel.send({
+          embed: {
+            title: `${msg.emojis.pending}Are you sure you want to ban ${guildMember.user.tag}?`,
+            description: `User ID: \`${guildMember.id}\`\n\nRespond with **${msg.guild.me.hasPermission("ADD_REACTIONS") ? "👌" : "YES"}** to ban this member or **${msg.guild.me.hasPermission("ADD_REACTIONS") ? "❌" : "NO"}** to cancel the command within **15** seconds`,
+            thumbnail: {
+              "url": guildMember.user.getAvatar(512)
+            },
+            color: msg.colors.pending
+          }
+        });
+
+        const confirmation = await message.prompt(msg.author.id, {
+          "emojis": {
+            "yes": "👌"
+          }
+        }).catch(e => ({
           "error": e
         }));
 
-        if (clientData.error) return msg.error(clientData.error, `ban ${guildMember.user.tag}!`);
-        if (!(clientData.bannedMembers instanceof Array)) clientData.bannedMembers = [];
+        if (confirmation.error) return msg.cancelledCommand(`${msg.author.toString()} has failed to provide a response within **15** seconds, therefore I have cancelled the command!`);
+        if (confirmation) return ban(guildMember);
+        return msg.cancelledCommand();
+      }
+    } else {
+      return msg.fail(`Please mention the member or enter their username/ID in order for me to ban them!`);
+    }
 
-        // If this user is not found in the array of banned members.
-        if (clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id) < 0) { // eslint-disable-line
-          clientData.bannedMembers.push({
-            "memberId": guildMember.id,
-            "guildId": msg.guild.id,
-            "reason": reason.length > 0 ? reason : null,
-            "bannedBy": msg.author.id,
-            "bannedOn": Date.now(),
-            "bannedUntil": bannedUntil
-          });
+    async function ban(guildMember) {
+      // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
+      if (guildMember.bannable) {
+        if (days) { // Only save it to the database if this is a timed ban.
+          const clientData = await this.client.db.get().catch(e => ({
+            "error": e
+          }));
 
-          try {
-            await client.db.update({
-              "bannedMembers": clientData.bannedMembers
+          if (clientData.error) return msg.error(clientData.error, `ban ${guildMember.user.tag}!`);
+          if (!(clientData.bannedMembers instanceof Array)) clientData.bannedMembers = [];
+
+          // If this user is not found in the array of banned members.
+          if (clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id) < 0) { // eslint-disable-line
+            clientData.bannedMembers.push({
+              "memberId": guildMember.id,
+              "guildId": msg.guild.id,
+              "reason": reason.length > 0 ? reason : null,
+              "bannedBy": msg.author.id,
+              "bannedOn": Date.now(),
+              "bannedUntil": days ? Date.now() + days : null
             });
-            await client.updateCache("bannedMembers", client.bannedMembers);
-          } catch (error) {
-            return msg.error(error, `ban ${guildMember.user.tag}!`);
+
+            try {
+              await this.client.db.update({
+                "bannedMembers": clientData.bannedMembers
+              });
+              await this.client.updateCache("bannedMembers", this.client.bannedMembers);
+            } catch (error) {
+              return msg.error(error, `ban ${guildMember.user.tag}!`);
+            }
           }
         }
+
+        return guildMember.ban({
+          "reason": reason.length < 1 ? null : reason
+        }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
+          .catch(e => {
+            // Only revert database if it is a timed ban.
+            // Ignoring errors because I can check if this member is actually banned later in my loop
+            if (days) {
+              this.client.db.get().then(async clientData => {
+                const index = clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id);
+
+                if (index > -1) {
+                  try {
+                    clientData.bannedMembers.splice(index, 1);
+                    await this.client.db.update({
+                      "bannedMembers": clientData.bannedMembers
+                    });
+                    await this.client.updateCache("bannedMembers", clientData.bannedMembers);
+                  } catch (error) {
+                    // noop
+                  }
+                }
+              }).catch(() => { });
+            }
+
+            return msg.error(e, `ban ${guildMember.user.tag}!`); // eslint-disable-line
+          });
+      } else { // eslint-disable-line
+        return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);
       }
-
-      return guildMember.ban({
-        "reason": reason.length < 1 ? null : reason
-      }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `**Reason**: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `**Banned Until**: ${moment(bannedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
-        .catch(e => {
-          // Only restore database if it is a timed ban.
-          // Ignoring errors because I can check if this member is actually banned later in my loop
-          if (bannedUntil) {
-            client.db.get().then(clientData => {
-              const index = clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id);
-
-              if (index > -1) {
-                clientData.bannedMembers.splice(index, 1);
-                client.db.update({
-                  "bannedMembers": clientData.bannedMembers
-                }).then(() => client.updateCache("bannedMembers", clientData.bannedMembers)
-                  .then(() => msg.error(e, `ban ${guildMember.user.tag}!`))
-                  .catch(() => { }))
-                  .catch(() => { });
-              }
-            }).catch(() => { });
-          }
-
-          return msg.error(e, `ban ${guildMember.user.tag}!`); // eslint-disable-line
-        });
-    } else { // eslint-disable-line
-      return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);
     }
   }
-};
-
-module.exports.options = {
-  enabled: true,
-  guarded: false,
-  botOwnerOnly: false,
-  nsfw: false,
-  checkVC: false,
-  cooldown: 5,
-  description: () => `Ban a member with optional reasoning and days of messages to delete.`,
-  usage: msg => [`${msg.client.user.toString()}`, `${msg.author.toString()} 7`, `${msg.client.user.toString()} 3 this bot sucks`],
-  aliases: [],
-  userPermissions: ["BAN_MEMBERS"],
-  botPermissions: ["BAN_MEMBERS"],
-  runIn: ["text"]
 };

@@ -15,7 +15,7 @@ module.exports = class Miyako extends Client {
     this.categories = new Collection();
     this.commands = new Collection();
     this.aliases = new Collection();
-    this.monitors = new Collection();
+    this.modules = new Collection();
     this.tasks = new Collection();
     this.userCooldowns = new Set();
     this.db = new RethinkDB("clientData", options.id);
@@ -24,6 +24,7 @@ module.exports = class Miyako extends Client {
     this.prefix = options.prefix;
     this.options.disabledEvents = options.disabledEvents;
     this.options.disableEveryone = options.disableEveryone;
+    this.options.fetchAllMembers = options.fetchAllMembers;
 
     require("../loaders/loader")(this);
   }
@@ -94,14 +95,15 @@ module.exports = class Miyako extends Client {
     if (count >= inhibitors.length) return cmdRun();
 
     function cmdRun() {
+      console.log("yo")
       msg.cmd = cmd.options.name;
-      cmd.run(_this, msg, args);
+      cmd.run(msg, args);
 
       const finalizers = Array.from(_this.finalizers.keys());
 
       if (finalizers.length < 1) return null;
 
-      for (const finalizer of finalizers) _this.finalizers.get(finalizer)(_this).catch(e => console.error(e));
+      for (const finalizer of finalizers) _this.finalizers.get(finalizer)(_this);
 
       return null;
     }
