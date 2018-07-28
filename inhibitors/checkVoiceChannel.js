@@ -7,10 +7,10 @@ module.exports = (client, msg, cmd) => {
         color: msg.colors.fail
       }
     });
-  } else if (client.LePlayer.guilds.has(msg.guild.id) && msg.member.voiceChannel.id !== client.LePlayer.guilds.get(msg.guild.id).channelId) {
+  } else if (msg.guild.queue && msg.member.voiceChannel.id !== msg.guild.queue.channelId) {
     return msg.channel.send({
       embed: {
-        title: `${msg.emojis.fail}You must join #${msg.guild.channels.get(client.LePlayer.guilds.get(msg.guild.id).channelId).name} in order to execute this command!`,
+        title: `${msg.emojis.fail}You must join #${msg.guild.channels.get(msg.guild.queue.channelId).name} in order to execute this command!`,
         color: msg.colors.fail
       }
     });

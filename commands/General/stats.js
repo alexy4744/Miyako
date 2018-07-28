@@ -11,7 +11,7 @@ module.exports = class Ping extends Command {
       botOwnerOnly: false,
       nsfw: false,
       cooldown: 5,
-      description: msg => `View the current statistics and system information of ${msg.this.client.user.toString()}`,
+      description: msg => `View the current statistics and system information of ${msg.client.user.toString()}`,
       aliases: ["botinfo", "botstats"],
       userPermissions: [],
       botPermissions: [],
@@ -35,7 +35,7 @@ module.exports = class Ping extends Command {
 **Channels**: \`${this.client.channels.size.toLocaleString()}\`\n
 **Emojis**: \`${this.client.emojis.size.toLocaleString()}\`\n
 **Commands**: \`${this.client.commands.size.toLocaleString()}\`\n
-**Commands Ran**: \`${this.client.cache ? this.client.cache.commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
+**Commands Ran**: \`${this.client.cache && this.client.cache.commandsRan ? this.client.cache.commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
           },
           {
             "name": `🖥${msg.emojis.bar}System Information`,
@@ -50,7 +50,7 @@ module.exports = class Ping extends Command {
             "name": `🔗${msg.emojis.bar}Links`,
             "value": `
 **Invite URL**: **${await this.client.generateInvite().then(link => link.replace("permissions=0", "permissions=8")).catch(() => "Failed to generate an invite link")}**\n
-**Github Repository**: **https://github.com/alexy4744/Miyako**`
+**Github Repository**: **https://github.com/alexy4744/${this.client.user.username}**`
           }
         ],
         thumbnail: {

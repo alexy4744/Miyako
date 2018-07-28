@@ -1,33 +1,32 @@
-const { yt, twitch } = require("../config.json");
-const LePlayer = require("LePlayer");
-const chalk = require("chalk");
-const figlet = require("figlet");
+// const chalk = require("chalk");
+// const figlet = require("figlet");
 
 module.exports = client => {
-  client.LePlayer = new LePlayer(client, { // Initialze LePlayer in the ready event to get the bot's user id.`
-    cleanUpOnClose: true,
-    ytAPIkey: yt,
-    twitchAPIkey: twitch
-  });
-  // console.log(new (client.commands.get("ping"))(client).client) // msg args
-  // console.log(client.commands)
-  client.LePlayer.on("error", error => console.error(error));
+  client.player.once("finished", guild => {
+    guild.player.queue.shift();
 
-  client.LePlayer.on("finished", guild => {
-    if (!guild.looped) guild.queue.shift();
-    if (guild.queue.length > 0) client.LePlayer.play(guild.guildId, guild.queue[0].track); // eslint-disable-line
-    else client.LePlayer.stop(guild.guildId);
+    if (guild.player.queue.length > 0) {
+      client.player.send({
+        "op": "play",
+        "guildId": guild.id,
+        "track": guild.player.queue[0].track
+      });
+    } else {
+      guild.player.playing = false;
+    }
   });
 
-  const readyMessage = [
-    `✔  ${client.events.size} events ${chalk.green("loaded!")}`,
-    `✔  ${client.inhibitors.size} inhibitors ${chalk.green("loaded!")}`,
-    `✔  ${client.commands.size} commands ${chalk.green("loaded!")}`,
-    `✔  ${client.aliases.size} command aliases ${chalk.green("loaded!")}`,
-    `${client.LePlayer ? `🥙  LePlayer has been ${chalk.green("initialized!")}` : ``}`,
-    `⏱  All loaded in ${((Date.now() - client.readyAt) / 1000).toFixed(2) > 1 ? chalk.red(((Date.now() - client.readyAt) / 1000).toFixed(2)) : chalk.green(((Date.now() - client.readyAt) / 1000).toFixed(2))} seconds!`,
-    `🚀  ${client.user.tag} is ${chalk.green("ready!")} Serving for ${client.guilds.size} guilds and ${client.users.size} users!`
-  ];
+  client.player.once("error", err => console.error(err));
+
+  // const readyMessage = [
+  //   `✔  ${client.events.size} events ${chalk.green("loaded!")}`,
+  //   `✔  ${client.inhibitors.size} inhibitors ${chalk.green("loaded!")}`,
+  //   `✔  ${client.commands.size} commands ${chalk.green("loaded!")}`,
+  //   `✔  ${client.aliases.size} command aliases ${chalk.green("loaded!")}`,
+  //   `${client.LePlayer ? `🥙  LePlayer has been ${chalk.green("initialized!")}` : ``}`,
+  //   `⏱  All loaded in ${((Date.now() - client.readyAt) / 1000).toFixed(2) > 1 ? chalk.red(((Date.now() - client.readyAt) / 1000).toFixed(2)) : chalk.green(((Date.now() - client.readyAt) / 1000).toFixed(2))} seconds!`,
+  //   `🚀  ${client.user.tag} is ${chalk.green("ready!")} Serving for ${client.guilds.size} guilds and ${client.users.size} users!`
+  // ];
 
   // return figlet.text(client.user.username, {
   //   font: "Alpha"

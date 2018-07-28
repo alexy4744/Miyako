@@ -4,6 +4,7 @@
 
 const { Client, Collection } = require("discord.js");
 const RethinkDB = require("../database/methods");
+const Lavalink = require("../music/Lavalink");
 require("../structures/Structures")();
 
 module.exports = class Miyako extends Client {
@@ -18,19 +19,20 @@ module.exports = class Miyako extends Client {
     this.modules = new Collection();
     this.tasks = new Collection();
     this.userCooldowns = new Set();
+    this.player = new Lavalink(this);
     this.db = new RethinkDB("clientData", options.id);
     this.utils = {};
     this.owner = options.owner;
     this.prefix = options.prefix;
     this.options.disabledEvents = options.disabledEvents;
     this.options.disableEveryone = options.disableEveryone;
-    this.options.fetchAllMembers = options.fetchAllMembers;
+    // this.options.fetchAllMembers = options.fetchAllMembers;
 
     require("../loaders/loader")(this);
   }
 
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, cmd, args) {
+  async runCmd(msg, Command, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -42,6 +44,7 @@ module.exports = class Miyako extends Client {
      * since the command could be sent in DMs rather than a guild text channel.
      */
 
+    const cmd = new Command(this);
     // Declaring a reference for this because cmdRun() cannot access this client class.
     const _this = this; // eslint-disable-line
 
@@ -95,8 +98,6 @@ module.exports = class Miyako extends Client {
     if (count >= inhibitors.length) return cmdRun();
 
     function cmdRun() {
-      console.log("yo")
-      msg.cmd = cmd.options.name;
       cmd.run(msg, args);
 
       const finalizers = Array.from(_this.finalizers.keys());

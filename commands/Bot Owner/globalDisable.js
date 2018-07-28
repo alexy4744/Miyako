@@ -8,7 +8,7 @@ module.exports = class Ping extends Command {
       botOwnerOnly: true,
       nsfw: false,
       cooldown: 5,
-      description: () => `Globally disable a command across all guilds`,
+      description: msg => `Globally disable a command across all(${msg.client.guilds.size}) guilds`,
       usage: () => [`ping`],
       aliases: ["gdisable"],
       userPermissions: [],

@@ -13,6 +13,7 @@
   "author": "FreezIn",
   "license": "MIT",
   "dependencies": {
+    "bufferutil": "^4.0.0",
     "chalk": "^2.4.1",
     "cheerio": "^1.0.0-rc.2",
     "discord.js": "github:hydrabolt/discord.js",
@@ -26,7 +27,6 @@
     "request-promise-native": "^1.0.5",
     "rethinkdbdash": "^2.3.31",
     "snekfetch": "^4.0.4",
-    "uws": "^10.148.1",
     "ws": "^5.2.1",
     "zlib-sync": "^0.1.4"
   },
