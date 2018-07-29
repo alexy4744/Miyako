@@ -10,9 +10,10 @@ module.exports = class Join extends Music {
       guarded: false,
       botOwnerOnly: false,
       nsfw: false,
+      checkVC: true,
       cooldown: 5,
       description: () => `Play a track from an available source.`,
-      usage: msg => [`${msg.this.client.user.id}`, `${msg.author.username}`],
+      usage: () => [`Illenium Afterlife`, `Echos Fiction`],
       aliases: [],
       userPermissions: [],
       botPermissions: ["CONNECT", "SPEAK"],
@@ -23,7 +24,7 @@ module.exports = class Join extends Music {
   async run(msg, args) {
     if (args.length < 1) return msg.fail(`You must enter a link or a search query for me to play!`);
 
-    if (!msg.guild.player || isNaN(msg.guild.player.channelId)) {
+    if (!msg.guild.player || !msg.guild.player.channelId) {
       this.join(msg);
       msg.guild.player = {
         queue: [],

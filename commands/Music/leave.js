@@ -10,7 +10,6 @@ module.exports = class Join extends Music {
       checkVC: true,
       cooldown: 5,
       description: () => `Leave the voice channel.`,
-      usage: msg => [`${msg.this.client.user.id}`, `${msg.author.username}`],
       aliases: [],
       userPermissions: [],
       botPermissions: [],
@@ -19,11 +18,7 @@ module.exports = class Join extends Music {
   }
 
   run(msg) {
-    // if (msg.guild.queue) {
-    //   if (!msg.guild.channels.has(msg.guild.queue.channelId) || !msg.guild.queue.channelId) return msg.fail(`I am currently not connected to any voice channels!`);
-    // } else {
-    //   return msg.fail(`I am currently not connected to any voice channels!`);
-    // }
+    if (!msg.guild.player || (msg.guild.player && !msg.guild.player.channelId)) return msg.fail(`I am currently not connected to any voice channels!`);
 
     this.leave(msg);
 

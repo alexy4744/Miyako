@@ -13,26 +13,27 @@ module.exports = class Miyako extends Client {
     this.events = new Collection();
     this.inhibitors = new Collection();
     this.finalizers = new Collection();
-    this.categories = new Collection();
     this.commands = new Collection();
     this.aliases = new Collection();
-    this.modules = new Collection();
     this.tasks = new Collection();
+    this.categories = new Set();
     this.userCooldowns = new Set();
-    this.player = new Lavalink(this);
+    this.player = new Lavalink(this, {
+      "id": "415313696102023169"
+    });
     this.db = new RethinkDB("clientData", options.id);
     this.utils = {};
     this.owner = options.owner;
     this.prefix = options.prefix;
     this.options.disabledEvents = options.disabledEvents;
     this.options.disableEveryone = options.disableEveryone;
-    // this.options.fetchAllMembers = options.fetchAllMembers;
+    this.options.fetchAllMembers = options.fetchAllMembers;
 
     require("../loaders/loader")(this);
   }
 
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, Command, args) {
+  async runCmd(msg, cmd, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -44,7 +45,7 @@ module.exports = class Miyako extends Client {
      * since the command could be sent in DMs rather than a guild text channel.
      */
 
-    const cmd = new Command(this);
+    // const cmd = new Command(this);
     // Declaring a reference for this because cmdRun() cannot access this client class.
     const _this = this; // eslint-disable-line
 

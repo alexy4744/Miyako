@@ -2,6 +2,7 @@ const Command = require("./Command");
 const snekfetch = require("snekfetch");
 
 module.exports = class Music extends Command {
+  // Methods that might be used in more than one music commmand.
   async getSong(query) {
     const res = await snekfetch.get(`http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`)
       .query({ identifier: `ytsearch:${query}` })
@@ -17,6 +18,25 @@ module.exports = class Music extends Command {
     return Promise.resolve(res.body.tracks);
   }
 
+  stop(guild) {
+    this.send({
+      "op": "stop",
+      "guildId": guild.id
+    });
+
+    guild.paused = false;
+    return guild.playing = false;
+  }
+
+  destroy(guild) {
+    this.send({
+      "op": "destroy",
+      "guildId": guild.id
+    });
+
+    return delete guild.player;
+  }
+
   leave(msg) {
     this.send({
       "op": 4,
@@ -29,10 +49,7 @@ module.exports = class Music extends Command {
       }
     });
 
-    return Object.assign(msg.guild.player, {
-      channelId: null,
-      queue: []
-    });
+    return this.destroy(msg.guild);
   }
 
   join(msg) {

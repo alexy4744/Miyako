@@ -5,7 +5,7 @@ module.exports = class Lavalink extends EventEmitter {
   constructor(client, options = {}) {
     super();
     this.client = client;
-    this.id = options.id || "415313696102023169";
+    this.id = options.id;
     this.shards = options.shard || 1;
     this.host = options.host || "localhost";
     this.port = options.port || 80;
@@ -23,7 +23,7 @@ module.exports = class Lavalink extends EventEmitter {
     this.ws.on("close", () => this.ws = null);
 
     this.client.on("raw", packet => {
-      if (packet.t === "VOICE_SERVER_UPDATE") this._sendVoiceUpdate(packet.d);
+      if (packet.t === "VOICE_SERVER_UPDATE") this._sendVoiceUpdate(packet.d); // Intercept these packets and send them to Lavalink instead.
     });
   }
 
@@ -34,9 +34,8 @@ module.exports = class Lavalink extends EventEmitter {
 
   _message(msg) {
     const data = JSON.parse(msg);
-
+    console.log(data)
     if (data.op === "stats") return this.stats = data;
-    if (data.reason === "LOAD_FAILED") return this._error("Failed to load this track!");
 
     if (!this.client.guilds.has(data.guildId)) return;
 
@@ -44,6 +43,10 @@ module.exports = class Lavalink extends EventEmitter {
 
     if (data.reason === "REPLACED") return;
     if (data.reason === "FINISHED") return this.emit("finished", guild);
+
+    // If anything bad happens to the current track, emitting the "finished" event will cause the bot to skip the song.
+    if (data.reason === "LOAD_FAILED") return this.emit("finished", guild);
+    if (data.type === "TrackStuckEvent" || data.type === "TrackExceptionEvent") return this.emit("finished", guild);
   }
 
   _error(err) {
@@ -51,8 +54,8 @@ module.exports = class Lavalink extends EventEmitter {
   }
 
   _sendVoiceUpdate(packet) {
+    if (!this.client.guilds.has(packet.guild_id)) return console.error("Couldn't find this guild while intercepting packets.");
     const guild = this.client.guilds.get(packet.guild_id);
-    if (!guild) this._error("Guild not found!");
     return this.send({
       "op": "voiceUpdate",
       "guildId": packet.guild_id,
