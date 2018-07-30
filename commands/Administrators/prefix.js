@@ -1,6 +1,6 @@
 const Command = require("../../modules/Command");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -8,7 +8,7 @@ module.exports = class Ping extends Command {
       botOwnerOnly: false,
       nsfw: false,
       cooldown: 5,
-      description: msg => `Re-assign the prefix of ${this.client.user.toString()}`,
+      description: () => `Re-assign the prefix of ${this.client.user.toString()}`,
       usage: () => [`v!`],
       aliases: [],
       userPermissions: ["administrator"],

@@ -4,7 +4,7 @@
 const Command = require("../../modules/Command");
 const moment = require("moment");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,

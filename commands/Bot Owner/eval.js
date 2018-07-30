@@ -1,9 +1,10 @@
 /* eslint no-eval: 0 */
+
 const Command = require("../../modules/Command");
 const snekfetch = require("snekfetch");
 const util = require("util");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,

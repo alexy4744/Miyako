@@ -12,10 +12,47 @@ module.exports = class Music extends Command {
       }));
 
     if (res.error) return Promise.reject(res.error);
-    if (res.body.loadType === "LOAD_FAILED") return Promise.reject(new Error("This track has failed to load!"));
     if (!res) return Promise.reject(new Error(`I couldn't GET from http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`));
 
+    for (const track of res.body.tracks) {
+      track.info.looped = false;
+      track.info.loadType = res.body.loadType;
+      track.info.playlistInfo = res.body.playlistInfo;
+    }
+
     return Promise.resolve(res.body.tracks);
+  }
+
+  play(guild, track) {
+    this.send({
+      "op": "play",
+      "guildId": guild.id,
+      "track": track
+    });
+
+    return guild.player.playing = true;
+  }
+
+  resume(guild) {
+    this.send({
+      "op": "pause",
+      "guildId": guild.id,
+      "pause": false
+    });
+
+    guild.player.paused = false;
+    return guild.player.playing = true;
+  }
+
+  pause(guild) {
+    this.send({
+      "op": "pause",
+      "guildId": guild.id,
+      "pause": true
+    });
+
+    guild.player.paused = true;
+    return guild.player.playing = false;
   }
 
   stop(guild) {
@@ -24,8 +61,8 @@ module.exports = class Music extends Command {
       "guildId": guild.id
     });
 
-    guild.paused = false;
-    return guild.playing = false;
+    guild.player.paused = false;
+    return guild.player.playing = false;
   }
 
   destroy(guild) {
@@ -37,19 +74,20 @@ module.exports = class Music extends Command {
     return delete guild.player;
   }
 
-  leave(msg) {
+  leave(guild) {
     this.send({
       "op": 4,
       "shard": this.client.player.shards,
       "d": {
-        "guild_id": msg.guild.id,
+        "guild_id": guild.id,
         "channel_id": null,
         "self_mute": false,
         "self_deaf": false
       }
     });
 
-    return this.destroy(msg.guild);
+    guild.player.channelId = null;
+    return guild.player.playing = false;
   }
 
   join(msg) {

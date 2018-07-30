@@ -9,7 +9,7 @@ module.exports = class extends Music {
       nsfw: false,
       checkVC: true,
       cooldown: 5,
-      description: () => `Leave the voice channel.`,
+      description: () => `Destroys the player and resets the queue for this guild, then leaves the voice channel.`,
       aliases: [],
       userPermissions: [],
       botPermissions: [],
@@ -18,12 +18,11 @@ module.exports = class extends Music {
   }
 
   run(msg) {
-    if (!msg.guild.player || (msg.guild.player && !msg.guild.player.channelId)) return msg.fail(`I am currently not connected to any voice channels!`);
-
-    if (msg.guild.player.queue.length > 0) this.pause(msg.guild);
+    if (!msg.guild.player) return msg.fail(`There is no player for this guild!`);
 
     this.leave(msg.guild);
+    this.destroy(msg.guild);
 
-    return msg.success(`I have successfully left #${msg.member.voiceChannel.name}!`);
+    return this.embed(msg, `💣${msg.emojis.bar}Poof, the player is now gone!`);
   }
 };

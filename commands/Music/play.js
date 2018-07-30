@@ -1,9 +1,6 @@
-/* eslint no-use-before-define: 0 */
-/* eslint no-confusing-arrow: 0 */
-
 const Music = require("../../modules/Music");
 
-module.exports = class Join extends Music {
+module.exports = class extends Music {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -41,17 +38,11 @@ module.exports = class Join extends Music {
 
     if (track.error) return msg.error(track.error, `play this track!`);
     if (track.length < 1) return msg.fail(`No search results have returned!`);
+    if (track[0].info.loadType === "LOAD_FAILED") return msg.fail(`"${track[0].info.title}" has failed to load!`);
 
     msg.guild.player.queue.push(track[0]);
 
-    if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) {
-      msg.guild.player.playing = true;
-      this.send({
-        "op": "play",
-        "guildId": msg.guild.id,
-        "track": track[0].track
-      });
-    }
+    if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.play(msg.guild, track[0].track);
 
     return msg.channel.send({
       embed: {

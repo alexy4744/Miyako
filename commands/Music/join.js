@@ -1,6 +1,6 @@
 const Music = require("../../modules/Music");
 
-module.exports = class Join extends Music {
+module.exports = class extends Music {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -34,8 +34,11 @@ module.exports = class Join extends Music {
         paused: false,
         volume: 75
       };
+      return msg.success(`I have successfully joined #${voiceChannel.name}!`);
+    } else if (msg.guild.player.queue.length > 0) { // If the bot is commanded to leave the voice channel while its playing previously, unpause the track and start playing wherever it left off as.
+      msg.guild.player.channelId = msg.member.voiceChannel.id;
+      this.resume(msg.guild);
+      return msg.success(`I have successfully joined #${voiceChannel.name}`, `Continuing the playback of **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**`);
     }
-
-    return msg.success(`I have successfully joined #${voiceChannel.name}!`);
   }
 };

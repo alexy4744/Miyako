@@ -3,7 +3,7 @@ const os = require("os");
 const moment = require("moment");
 require("moment-duration-format")(moment);
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,

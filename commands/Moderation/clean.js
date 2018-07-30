@@ -1,6 +1,6 @@
 const Command = require("../../modules/Command");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -16,7 +16,7 @@ module.exports = class Ping extends Command {
     });
   }
 
-  run(msg, args) {
+  run(msg) {
     if (!msg.guild.myMessages || msg.guild.myMessages.length < 1) return msg.fail(`There are no messages to delete!`);
 
     const myMessages = msg.guild.myMessages.get(msg.channel.id);

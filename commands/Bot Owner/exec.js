@@ -2,7 +2,7 @@ const { exec } = require("child_process");
 const { post } = require("snekfetch");
 const Command = require("../../modules/Command");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,

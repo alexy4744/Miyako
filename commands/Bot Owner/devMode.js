@@ -1,6 +1,6 @@
 const Command = require("../../modules/Command");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -16,7 +16,7 @@ module.exports = class Ping extends Command {
     });
   }
 
-  async run(msg, args) {
+  async run(msg) {
     const data = await this.client.db.get().catch(e => ({
       "error": e
     }));

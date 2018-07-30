@@ -2,8 +2,8 @@ const chalk = require("chalk");
 const figlet = require("figlet");
 
 module.exports = client => {
-  client.player.once("finished", guild => {
-    guild.player.queue.shift();
+  client.player.on("finished", guild => {
+    if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
 
     if (guild.player.queue.length > 0) {
       client.player.send({

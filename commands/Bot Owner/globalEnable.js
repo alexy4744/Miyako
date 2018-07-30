@@ -1,6 +1,6 @@
 const Command = require("../../modules/Command");
 
-module.exports = class Ping extends Command {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
