@@ -2,10 +2,10 @@ const EventEmitter = require("events");
 const WebSocket = require("ws");
 
 module.exports = class Lavalink extends EventEmitter {
-  constructor(client, options = {}) {
+  constructor(client, botId, options = {}) {
     super();
     this.client = client;
-    this.id = options.id;
+    this.id = botId;
     this.shards = options.shard || 1;
     this.host = options.host || "localhost";
     this.port = options.port || 80;
@@ -34,7 +34,7 @@ module.exports = class Lavalink extends EventEmitter {
 
   _message(msg) {
     const data = JSON.parse(msg);
-    console.log(data)
+
     if (data.op === "stats") return this.stats = data;
 
     if (!this.client.guilds.has(data.guildId)) return;

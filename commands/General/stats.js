@@ -20,7 +20,7 @@ module.exports = class extends Command {
   }
 
   async run(msg) {
-    msg.channel.send({
+    return msg.channel.send({
       embed: {
         fields: [
           {
@@ -34,7 +34,7 @@ module.exports = class extends Command {
 **Guilds**: \`${this.client.guilds.size.toLocaleString()}\`\n
 **Channels**: \`${this.client.channels.size.toLocaleString()}\`\n
 **Emojis**: \`${this.client.emojis.size.toLocaleString()}\`\n
-**Commands**: \`${this.client.commands.size.toLocaleString()}\`\n
+**Commands**: \`${Object.keys(this.client.commands).length.toLocaleString()}\`\n
 **Commands Ran**: \`${this.client.cache && this.client.cache.commandsRan ? this.client.cache.commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
           },
           {

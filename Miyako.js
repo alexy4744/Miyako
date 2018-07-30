@@ -9,10 +9,10 @@ const client = new Miyako({
   fetchAllMembers: true
 });
 
-client.once("ready", () => client.events.get("ready")(client));
-client.on("error", error => client.events.get("error")(error));
-client.on("guildCreate", guild => client.events.get("guildCreate")(guild));
-client.on("message", msg => client.events.get("message")(client, msg));
+client.once("ready", () => client.events.ready(client));
+client.on("error", error => client.events.error(error));
+client.on("guildCreate", guild => client.events.guildCreate(guild));
+client.on("message", msg => client.events.message(client, msg));
 
 client.login(token).catch(error => {
   throw new Error(error.stack);

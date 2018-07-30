@@ -1,8 +1,7 @@
 /* eslint no-undefined: 0 */
-/* eslint guard-for-in: 0 */
 /* eslint no-use-before-define: 0 */
 
-const { Client, Collection } = require("discord.js");
+const { Client } = require("discord.js");
 const RethinkDB = require("../database/methods");
 const Lavalink = require("../music/Lavalink");
 require("../structures/Structures")();
@@ -10,19 +9,17 @@ require("../structures/Structures")();
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    this.events = new Collection();
-    this.inhibitors = new Collection();
-    this.finalizers = new Collection();
-    this.commands = new Collection();
-    this.aliases = new Collection();
-    this.tasks = new Collection();
+    this.events = {};
+    this.inhibitors = {};
+    this.finalizers = {};
+    this.commands = {};
+    this.aliases = {};
+    this.tasks = {};
+    this.utils = {};
     this.categories = new Set();
     this.userCooldowns = new Set();
-    this.player = new Lavalink(this, {
-      "id": "415313696102023169"
-    });
+    this.player = new Lavalink(this, options.id);
     this.db = new RethinkDB("clientData", options.id);
-    this.utils = {};
     this.owner = options.owner;
     this.prefix = options.prefix;
     this.options.disabledEvents = options.disabledEvents;
@@ -80,7 +77,7 @@ module.exports = class Miyako extends Client {
       if (guildCache.error) return msg.error(guildCache.error, `execute this command!`);
     }
 
-    const inhibitors = Array.from(this.inhibitors.keys());
+    const inhibitors = Object.keys(this.inhibitors);
 
     if (inhibitors.length < 1) return cmdRun(); // If there's no inhibitors, just run the command.
 
@@ -89,7 +86,7 @@ module.exports = class Miyako extends Client {
     for (const inhibitor of inhibitors) { // Loop through all loaded inhibitors.
       try {
         if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
-        count += this.inhibitors.get(inhibitor)(this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
+        count += this.inhibitors[inhibitor](this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
         break;
       }
@@ -101,11 +98,11 @@ module.exports = class Miyako extends Client {
     function cmdRun() {
       cmd.run(msg, args);
 
-      const finalizers = Array.from(_this.finalizers.keys());
+      const finalizers = Object.keys(_this.finalizers);
 
       if (finalizers.length < 1) return null;
 
-      for (const finalizer of finalizers) _this.finalizers.get(finalizer)(_this);
+      for (const finalizer of finalizers) _this.finalizers[finalizer](_this);
 
       return null;
     }
