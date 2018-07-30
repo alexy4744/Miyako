@@ -18,11 +18,9 @@ module.exports = class extends Command {
   }
 
   async run(msg, args) {
-    let cmd = args[0];
+    if (!this.client.commands[args[0]] && !this.client.aliases[args[0]]) return msg.fail(`"${args[0]}" is not a valid command!`);
 
-    if (!this.client.commands.has(cmd) && !this.client.aliases.has(cmd)) return msg.fail(`"${cmd}" is not a valid command!`);
-
-    cmd = this.client.commands.get(cmd) || this.client.aliases.get(cmd);
+    const cmd = this.client.commands[args[0]] || this.client.commands[this.client.aliases[args[0]]];
 
     const data = await this.client.db.get().catch(e => ({
       "error": e

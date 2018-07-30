@@ -6,8 +6,10 @@ module.exports = (client, fs) => {
       fs.readdir(`./commands/${folder}`).then(commands => commands.forEach(c => {
         if (c.split(".").pop() === "js") {
           const cmd = new (require(`../commands/${folder}/${c}`))(client);
-          client.commands[c.slice(0, -3)] = cmd;
-          for (const alias of cmd.options.aliases) client.aliases[alias] = c.slice(0, -3);
+          cmd.options.name = c.slice(0, -3).toLowerCase();
+          cmd.options.category = folder;
+          client.commands[c.slice(0, -3).toLowerCase()] = cmd;
+          for (const alias of cmd.options.aliases) client.aliases[alias] = c.slice(0, -3).toLowerCase();
         }
       })).catch(error => console.error(error));
     });

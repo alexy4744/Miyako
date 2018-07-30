@@ -20,7 +20,7 @@ module.exports = class extends Command {
   }
 
   run(msg, args) {
-    exec(args.join(" "), (err, stdout, stderr) => {
+    return exec(args.join(" "), (err, stdout, stderr) => {
       if (err) return msg.error(err, "execute this shell command!");
       const output = `**Input**\n\`\`\`dos\n${args.join(" ")}\n\`\`\`\n**Output**\n\`\`\`dos\n${stdout}\n\`\`\`\n**Error**\n\`\`\`dos\n${stderr}\n\`\`\``;
       if (output.length > 2000) {

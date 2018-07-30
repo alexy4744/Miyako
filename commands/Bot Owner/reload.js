@@ -20,30 +20,30 @@ module.exports = class extends Command {
   run(msg, args) {
     const thingToReload = args[0];
 
-    if (this.client.commands.has(thingToReload) || this.client.aliases.has(thingToReload)) {
+    if (this.client.commands[thingToReload] || this.client.aliases[thingToReload]) {
       try {
-        let cmd = this.client.commands.get(thingToReload) || this.client.aliases.get(thingToReload);
+        let cmd = this.client.commands[thingToReload] || this.client.commands[this.client.aliases[thingToReload]];
         delete require.cache[require.resolve(`../${cmd.options.category}/${cmd.options.name}`)];
-        this.client.commands.delete(cmd.options.name);
-        for (const alias of cmd.options.aliases) this.client.aliases.delete(alias);
+        delete this.client.commands[cmd.options.name];
+        for (const alias of cmd.options.aliases) delete this.client.aliases[alias];
 
         const category = cmd.options.category;
-        cmd = require(`../${cmd.options.category}/${cmd.options.name}`);
+        cmd = new (require(`../${cmd.options.category}/${cmd.options.name}`))(this.client);
 
         cmd.options.name = thingToReload;
         cmd.options.category = category;
 
-        this.client.commands.set(cmd.options.name, cmd);
-        for (const alias of cmd.options.aliases) this.client.aliases.set(alias, cmd);
+        this.client.commands[cmd.options.name] = cmd;
+        for (const alias of cmd.options.aliases) this.client.aliases[alias] = cmd.options.name;
       } catch (error) {
         return msg.error(error, `reload this command!`);
       }
-    } else if (this.client.inhibitors.has(thingToReload)) {
+    } else if (this.client.inhibitors[thingToReload]) {
       try {
         delete require.cache[require.resolve(`../../inhibitors/${thingToReload}`)];
-        this.client.inhibitors.delete(thingToReload);
+        delete this.client.inhibitors[thingToReload];
 
-        this.client.inhibitors.set(thingToReload, require(`../../inhibitors/${thingToReload}`));
+        this.client.inhibitors[thingToReload] = require(`../../inhibitors/${thingToReload}`);
       } catch (error) {
         return msg.error(error, `reload this inhibitor!`);
       }

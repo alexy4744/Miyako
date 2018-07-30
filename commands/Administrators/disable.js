@@ -18,9 +18,9 @@ module.exports = class extends Command {
   }
 
   async run(msg, args) {
-    if (!this.client.commands.has(args[0]) && !this.client.aliases.has(args[0])) return msg.fail(`Please enter a valid command to be disabled!`);
+    if (!this.client.commands[args[0]] && !this.client.aliases[args[0]]) return msg.fail(`Please enter a valid command to be disabled!`);
 
-    const cmd = this.client.commands.get(args[0]) || this.client.aliases.get(args[0]);
+    const cmd = this.client.commands[args[0]] || this.client.commands[this.client.aliases[args[0]]];
 
     if (cmd.options.guarded) return msg.fail(`${msg.author.username}, this command is guarded and cannot be disabled!`);
 

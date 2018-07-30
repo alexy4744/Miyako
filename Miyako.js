@@ -6,7 +6,7 @@ const client = new Miyako({
   id: "415313696102023169",
   disabledEvents: ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
   disableEveryone: true,
-  fetchAllMembers: true
+  fetchAllMembers: false
 });
 
 client.once("ready", () => client.events.ready(client));

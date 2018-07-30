@@ -20,7 +20,7 @@ module.exports = class extends Command {
 
   run(msg, args) {
     if (args[0]) {
-      const cmd = this.client.commands.get(args[0]).options || this.client.aliases.get(args[0]).options;
+      const cmd = this.client.commands[args[0]] ? this.client.commands[args[0]].options : this.client.commands[this.client.aliases[args[0]]].options;
       msg.channel.send({
         embed: {
           title: args[0].charAt(0).toUpperCase() + args[0].slice(1),
@@ -46,26 +46,26 @@ module.exports = class extends Command {
       const help = {};
       const sendHelp = [];
 
-      for (const cmd of this.client.commands) {
-        const options = cmd[1].options;
+      for (let cmd in this.client.commands) {
+        cmd = this.client.commands[cmd].options;
         let skipCMD = false;
 
-        if (msg.channel.type === "text" && (options.runIn.length < 1 || options.runIn.includes("text"))) {
-          if (options.userPermissions.length > 0) {
-            for (const permission of options.userPermissions) if (!msg.member.hasPermission(permission)) skipCMD = true;
+        if (msg.channel.type === "text" && (cmd.runIn.length < 1 || cmd.runIn.includes("text"))) {
+          if (cmd.userPermissions.length > 0) {
+            for (const permission of cmd.userPermissions) if (!msg.member.hasPermission(permission)) skipCMD = true;
           }
 
           if (skipCMD) continue;
-          if (!msg.channel.nsfw && options.nsfw) continue;
-          if (msg.author.id !== this.client.owner && options.botOwnerOnly) continue;
+          if (!msg.channel.nsfw && cmd.nsfw) continue;
+          if (msg.author.id !== this.client.owner && cmd.botOwnerOnly) continue;
 
-          if (!help[cmd[1].options.category]) help[cmd[1].options.category] = {};
-          help[cmd[1].options.category][cmd[0]] = cmd[1].options.description(msg);
-        } else if (msg.channel.type === "dm" && (options.runIn.length < 1 || options.runIn[0] === "dm")) { // The only way for a command to be DM only is if the first element of the array is DM
-          if (options.nsfw || (msg.author.id !== this.client.owner && options.botOwnerOnly)) continue;
+          if (!help[cmd.category]) help[cmd.category] = {};
+          help[cmd.category][cmd.name] = cmd.description(msg);
+        } else if (msg.channel.type === "dm" && (cmd.runIn.length < 1 || cmd.runIn[0] === "dm")) { // The only way for a command to be DM only is if the first element of the array is DM
+          if (cmd.nsfw || (msg.author.id !== this.client.owner && cmd.botOwnerOnly)) continue;
 
-          if (!help[cmd[1].options.category]) help[cmd[1].options.category] = {};
-          help[cmd[1].options.category][cmd[0]] = cmd[1].options.description;
+          if (!help[cmd.category]) help[cmd.category] = {};
+          help[cmd.category][cmd.name] = cmd.description(msg);
         }
       }
 
@@ -74,9 +74,11 @@ module.exports = class extends Command {
         for (const cmd in help[category]) sendHelp.push(`\`${cmd}\` **-** ${help[category][cmd]}\n`);
       }
 
-      msg.author.send(sendHelp).then(() => {
-        if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => msg.channel.send(`Help is on the way, ${msg.author.toString()}...`));
-        else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
+      return msg.author.send(sendHelp).then(() => {
+        if (msg.channel.type === "text") {
+          if (msg.guild && msg.guild.me.hasPermission("ADD_REACTIONS")) msg.react("☑").catch(() => msg.channel.send(`Help is on the way, ${msg.author.toString()}...`));
+          else msg.channel.send(`Help is on the way, ${msg.author.toString()}...`);
+        }
       }).catch(() => {
         msg.channel.send(`${msg.author.toString()}, I could not DM you. Please check that your DMs are not disabled!`);
       });
