@@ -68,7 +68,7 @@ module.exports = class extends Command {
       // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
       if (guildMember.bannable) {
         if (days) { // Only save it to the database if this is a timed ban.
-          const clientData = await this.client.db.get().catch(e => ({
+          const clientData = await msg.client.db.get().catch(e => ({
             "error": e
           }));
 
@@ -87,10 +87,10 @@ module.exports = class extends Command {
             });
 
             try {
-              await this.client.db.update({
+              await msg.client.db.update({
                 "bannedMembers": clientData.bannedMembers
               });
-              await this.client.updateCache("bannedMembers", this.client.bannedMembers);
+              await msg.client.updateCache("bannedMembers", clientData.bannedMembers);
             } catch (error) {
               return msg.error(error, `ban ${guildMember.user.tag}!`);
             }
@@ -98,22 +98,22 @@ module.exports = class extends Command {
         }
 
         return guildMember.ban({
-          "reason": reason.length < 1 ? null : reason
-        }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason.length > 0 ? reason : `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
+          "reason": reason
+        }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason ? reason : `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
           .catch(e => {
             // Only revert database if it is a timed ban.
             // Ignoring errors because I can check if this member is actually banned later in my loop
             if (days) {
-              this.client.db.get().then(async clientData => {
+              msg.client.db.get().then(async clientData => {
                 const index = clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id);
 
                 if (index > -1) {
                   try {
                     clientData.bannedMembers.splice(index, 1);
-                    await this.client.db.update({
+                    await msg.client.db.update({
                       "bannedMembers": clientData.bannedMembers
                     });
-                    await this.client.updateCache("bannedMembers", clientData.bannedMembers);
+                    await msg.client.updateCache("bannedMembers", clientData.bannedMembers);
                   } catch (error) {
                     // noop
                   }

@@ -58,7 +58,7 @@ module.exports = class extends Command {
         return msg.error(error, `unmute ${member.user.tag}!`);
       }
     } else {
-      msg.fail("I can't unmute a member with higher privilege/roles than me!");
+      return msg.fail("I can't unmute a member with higher privilege/roles than me!");
     }
   }
 };

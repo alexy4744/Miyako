@@ -75,7 +75,7 @@ module.exports = class extends Command {
       // Unban first because i can always check if this member still exists because i can skip in loop later.
       return msg.guild.members.unban(member.user).then(async () => {
         // Don't really care if it anything errors in here, I can always remove it later while checking for timed bans.
-        const clientData = await this.client.db.get().catch(() => ({
+        const clientData = await msg.client.db.get().catch(() => ({
           "error": "(ノಠ益ಠ)ノ彡┻━┻"
         }));
 
@@ -85,10 +85,10 @@ module.exports = class extends Command {
           if (index > -1) {
             try {
               clientData.bannedMembers.splice(index, 1);
-              await this.client.db.update({
+              await msg.client.db.update({
                 "bannedMembers": clientData.bannedMembers
               });
-              await this.client.updateCache("bannedMembers", clientData.bannedMembers);
+              await msg.client.updateCache("bannedMembers", clientData.bannedMembers);
             } catch (error) {
               // noop
             }
