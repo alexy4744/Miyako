@@ -28,6 +28,7 @@ module.exports = class Lavalink extends EventEmitter {
   }
 
   send(obj) {
+    if (!this.ws) return this._error(new Error(`No Lavalink player found!`));
     if (!isNaN(obj.op)) this.client.ws.send(obj); // If it is a number, then send it to client ws.
     else this.ws.send(JSON.stringify(obj)); // Send it to Lavalink.
   }

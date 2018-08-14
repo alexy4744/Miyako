@@ -18,7 +18,6 @@
     "cheerio": "^1.0.0-rc.2",
     "discord.js": "github:hydrabolt/discord.js",
     "erlpack": "github:discordapp/erlpack",
-    "figlet": "^1.2.0",
     "fs-nextra": "^0.3.5",
     "html-metadata": "^1.7.0",
     "js-beautify": "^1.7.5",

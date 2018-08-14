@@ -21,8 +21,12 @@ module.exports = class extends Music {
     if (!msg.guild.player) return msg.fail(`There is no player for this guild!`);
 
     this.leave(msg.guild);
-    this.destroy(msg.guild);
 
-    return this.embed(msg, `💣${msg.emojis.bar}Poof, the player is now gone!`);
+    return msg.channel.send({
+      embed: {
+        title: `💣${msg.emojis.bar}Poof, the player is now destroyed!`,
+        color: msg.colors.pending
+      }
+    });
   }
 };

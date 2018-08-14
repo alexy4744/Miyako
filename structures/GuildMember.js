@@ -18,16 +18,14 @@ Structures.extend("GuildMember", GuildMember => {
      */
     updateCache(key, value) {
       return new Promise((resolve, reject) => {
-        this.db.get().then(data => {
-          resolve(this.cache = data);
-        }).catch(e => {
+        this.db.get().then(data => resolve(this.cache = data)).catch(e => {
           // If what ever reason it fails to get from database, try to manually update the key with the new value for the cache.
           if (key && value) {
             if (!this.cache) this.cache = {};
             return resolve(this.cache[key] = value);
           } else { // eslint-disable-line
             if (this.cache === undefined) reject(e); // eslint-disable-line
-            else this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
+            else return this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
           }
         });
       });

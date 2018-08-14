@@ -1,4 +1,4 @@
-/* eslint curly: 0 */
+  /* eslint curly: 0 */
 
 const Database = require("./rethinkdb");
 

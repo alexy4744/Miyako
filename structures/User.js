@@ -13,17 +13,10 @@ Structures.extend("User", User => {
     getAvatar(resolution) {
       const quality = !isNaN(resolution) ? parseInt(resolution) : 2048;
 
-      if (this.displayAvatarURL({ size: 16 }).match(/\.gif/gi)) {
-        return this.displayAvatarURL({
-          format: "gif",
-          size: quality
-        });
-      } else { // eslint-disable-line
-        return this.displayAvatarURL({
-          format: "png",
-          size: quality
-        });
-      }
+      return this.displayAvatarURL({
+        format: this.displayAvatarURL({ size: 16 }).match(/\.gif/gi) ? "gif" : "png",
+        size: quality
+      });
     }
 
     /**
@@ -34,16 +27,14 @@ Structures.extend("User", User => {
      */
     updateCache(key, value) {
       return new Promise((resolve, reject) => {
-        this.db.get().then(data => {
-          resolve(this.cache = data);
-        }).catch(e => {
+        this.db.get().then(data => resolve(this.cache = data)).catch(e => {
           // If what ever reason it fails to get from database, try to manually update the key with the new value for the cache.
           if (key && value) {
             if (!this.cache) this.cache = {};
             return resolve(this.cache[key] = value);
           } else { // eslint-disable-line
             if (this.cache === undefined) reject(e); // eslint-disable-line
-            else this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
+            else return this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
           }
         });
       });

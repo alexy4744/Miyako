@@ -1,5 +1,6 @@
 module.exports = (client, msg, cmd) => {
   const perms = cmd.options.userPermissions;
+  if (msg.author.id === client.owner) return 1;
 
   if (msg.channel.type !== "text" || perms.length < 1) return 1;
 
