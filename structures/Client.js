@@ -29,8 +29,11 @@ module.exports = class Miyako extends Client {
     this.options.disableEveryone = options.disableEveryone;
     this.options.fetchAllMembers = options.fetchAllMembers;
 
-    this.miyakoWSS.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    this.wss.on("error", this._wssOnError.bind(this));
+    this.miyakoWSS.on("error", this._wssOnError.bind(this));
     this.player.on("error", err => console.error(err));
+
+    this.miyakoWSS.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
     this.player.on("finished", guild => {
       if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
       if (guild.player.queue.length > 0) {
@@ -131,5 +134,11 @@ module.exports = class Miyako extends Client {
     } catch (error) {
       return console.error(error);
     }
+  }
+
+  _wssOnError() {
+    this.wss = null;
+    this.miyakoWSS = null;
+    return null;
   }
 };
