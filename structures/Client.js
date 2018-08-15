@@ -10,30 +10,36 @@ require("../structures/Structures")();
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    this.events = {};
-    this.inhibitors = {};
-    this.finalizers = {};
-    this.commands = {};
-    this.aliases = {};
-    this.tasks = {};
-    this.utils = {};
-    this.categories = new Set();
-    this.userCooldowns = new Set();
-    this.player = new Lavalink(this, options.id);
-    this.db = new RethinkDB("clientData", options.id);
-    this.wss = new WebSocket(`ws://localhost:4000`);
-    this.miyakoWSS = new WebSocket(`ws://localhost:5000`);
-    this.owner = options.owner;
-    this.prefix = options.prefix;
-    this.options.disabledEvents = options.disabledEvents;
-    this.options.disableEveryone = options.disableEveryone;
-    this.options.fetchAllMembers = options.fetchAllMembers;
+    for (const option in options.clientOptions) Object.assign(this.options, { [option]: options.clientOptions[option] }); // eslint-disable-line
+
+    Object.assign(this, {
+      "events": {},
+      "inhibitors": {},
+      "finalizers": {},
+      "commands": {},
+      "aliases": {},
+      "tasks": {},
+      "utils": {}
+    });
+
+    Object.assign(this, {
+      "categories": new Set(),
+      "userCooldowns": new Set(),
+      "player": new Lavalink(this, options.id),
+      "db": new RethinkDB("clientData", options.id),
+      "wss": new WebSocket(`ws://localhost:4000`)
+    });
+
+    Object.assign(this, {
+      "owner": options.owner,
+      "prefix": options.prefix
+    });
 
     this.wss.on("error", this._wssOnError.bind(this));
-    this.miyakoWSS.on("error", this._wssOnError.bind(this));
+
     this.player.on("error", err => console.error(err));
 
-    this.miyakoWSS.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
     this.player.on("finished", guild => {
       if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
       if (guild.player.queue.length > 0) {
@@ -125,8 +131,10 @@ module.exports = class Miyako extends Client {
 
   async _handleRequests(data) {
     // Since the database is all updated in the dashboard's backend, all it has to do here is updating the cache for the bot.
+    const request = JSON.parse(data);
+    if (request.recipient === "dashboard") return;
+
     try {
-      const request = JSON.parse(data);
       if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);
       if (request.data.table === "guildData") await this.guilds.get(request.data.id).updateCache(request.data.key, request.data.value);
       if (request.data.table === "memberData") await this.guilds.get(request.data.guildId).members.fetch(request.data.memberId).updateCache(request.data.key, request.data.value);
@@ -136,9 +144,8 @@ module.exports = class Miyako extends Client {
     }
   }
 
-  _wssOnError() {
+  _wssOnError(error) {
     this.wss = null;
-    this.miyakoWSS = null;
-    return null;
+    return console.error(error);
   }
 };

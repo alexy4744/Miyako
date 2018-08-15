@@ -1,12 +1,14 @@
 const { token, owner, prefix } = require("./config.json");
 const Miyako = require("./structures/Client");
 const client = new Miyako({
-  owner: owner,
-  prefix: prefix,
-  id: "415313696102023169",
-  disabledEvents: ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
-  disableEveryone: true,
-  fetchAllMembers: false
+  "owner": owner,
+  "prefix": prefix,
+  "id": "415313696102023169",
+  "clientOptions": {
+    "disabledEvents": ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
+    "disableEveryone": true,
+    "fetchAllMembers": false
+  }
 });
 
 client.once("ready", () => client.events.ready(client));
