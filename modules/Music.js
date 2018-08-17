@@ -16,11 +16,21 @@ module.exports = class Music extends Command {
 
     for (const track of res.body.tracks) {
       track.info.looped = false;
+      track.info.thumbnail = `http://i3.ytimg.com/vi/${track.info.identifier}/maxresdefault.jpg`
       track.info.loadType = res.body.loadType;
       track.info.playlistInfo = res.body.playlistInfo;
     }
 
     return Promise.resolve(res.body.tracks);
+  }
+
+  async updateDatabase(guild, key, value) {
+    try {
+      await guild.db.update({ [key]: value });
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   play(guild, track) {
@@ -96,7 +106,7 @@ module.exports = class Music extends Command {
       "shard": this.client.player.shards,
       "d": {
         "guild_id": msg.guild.id,
-        "channel_id": msg.member.voiceChannel.id,
+        "channel_id": msg.member.voice.channel.id,
         "self_mute": false,
         "self_deaf": false
       }

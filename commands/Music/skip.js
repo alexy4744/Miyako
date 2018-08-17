@@ -1,4 +1,8 @@
 const Music = require("../../modules/Music");
+const util = require("util");
+const zlib = require("zlib");
+
+const deflate = util.promisify(zlib.deflate);
 
 module.exports = class extends Music {
   constructor(...args) {
@@ -17,7 +21,7 @@ module.exports = class extends Music {
     });
   }
 
-  run(msg) {
+  async run(msg) {
     if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing to skip!`);
 
     const songToSkip = msg.guild.player.queue[0];
@@ -26,13 +30,20 @@ module.exports = class extends Music {
 
     if (msg.guild.player.queue.length > 0) {
       this.play(msg.guild, msg.guild.player.queue[0].track);
-      msg.channel.send({
-        embed: {
-          title: `"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
-          description: `Now Playing: **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**`,
-          color: msg.colors.default
-        }
-      });
+
+      try {
+        const queue = await deflate(JSON.stringify(msg.guild.player.queue));
+        await this.updateDatabase(msg.guild, "queue", queue); // save the compressed queue
+        return msg.channel.send({
+          embed: {
+            title: `"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
+            description: `Now Playing: **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**`,
+            color: msg.colors.default
+          }
+        });
+      } catch (error) {
+        return console.error(error);
+      }
     } else {
       return msg.fail(`There are no songs in the queue to skip!`);
     }

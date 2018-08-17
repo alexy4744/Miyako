@@ -28,9 +28,10 @@ module.exports = class Lavalink extends EventEmitter {
   }
 
   send(obj) {
+    console.log(JSON.stringify(obj))
     if (!this.ws) return this._error(new Error(`No Lavalink player found!`));
     if (!isNaN(obj.op)) this.client.ws.send(obj); // If it is a number, then send it to client ws.
-    else this.ws.send(JSON.stringify(obj)); // Send it to Lavalink.
+    else this.ws.send(JSON.stringify(obj), err => console.error(err)); // Send it to Lavalink.
   }
 
   _message(msg) {
@@ -57,10 +58,11 @@ module.exports = class Lavalink extends EventEmitter {
   _sendVoiceUpdate(packet) {
     if (!this.client.guilds.has(packet.guild_id)) return console.error("Couldn't find this guild while intercepting packets.");
     const guild = this.client.guilds.get(packet.guild_id);
+    // console.log(guild.me.voice.sessionID)
     return this.send({
       "op": "voiceUpdate",
       "guildId": packet.guild_id,
-      "sessionId": guild.me.voiceSessionID,
+      "sessionId": guild.me.voice.sessionID,
       "event": packet
     });
   }

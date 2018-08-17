@@ -25,9 +25,11 @@ module.exports = class Miyako extends Client {
     Object.assign(this, {
       "categories": new Set(),
       "userCooldowns": new Set(),
-      "player": new Lavalink(this, options.id),
+      "player": new Lavalink(this, options.id, {
+        port: 7070
+      }),
       "db": new RethinkDB("clientData", options.id),
-      "wss": new WebSocket(`ws://localhost:4000`)
+      "wss": new WebSocket(options.wsAddress)
     });
 
     Object.assign(this, {
@@ -92,6 +94,7 @@ module.exports = class Miyako extends Client {
         if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
         count += this.inhibitors[inhibitor](this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
+        console.error(error)
         break;
       }
     }
@@ -132,7 +135,7 @@ module.exports = class Miyako extends Client {
   async _handleRequests(data) {
     // Since the database is all updated in the dashboard's backend, all it has to do here is updating the cache for the bot.
     const request = JSON.parse(data);
-    if (request.recipient === "dashboard") return;
+    if (request.recipient === "dashboard") return; // If the message was meant for the dashboard not the bot.
 
     try {
       if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);

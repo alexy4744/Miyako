@@ -24,6 +24,6 @@ module.exports = class extends Music {
 
     this.leave(msg.guild);
 
-    return msg.success(`I have successfully left #${msg.member.voiceChannel.name}!`);
+    return msg.success(`I have successfully left #${msg.member.voice.channel.name}!`);
   }
 };

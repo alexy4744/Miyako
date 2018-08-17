@@ -4,6 +4,7 @@ const client = new Miyako({
   "owner": owner,
   "prefix": prefix,
   "id": "415313696102023169",
+  "wsAddress": "http://18.216.194.144:4000",
   "clientOptions": {
     "disabledEvents": ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
     "disableEveryone": true,
@@ -17,11 +18,11 @@ client.on("guildCreate", guild => client.events.guildCreate(guild));
 client.on("message", msg => client.events.message(client, msg));
 
 client.login(token).catch(error => {
-  throw new Error(error.stack);
+  throw error;
 });
 
 process.on("uncaughtException", error => {
-  throw new Error(error.stack);
+  console.error(error);
 });
 
 process.on("unhandledRejection", (reason, p) => {

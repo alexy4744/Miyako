@@ -17,16 +17,22 @@ module.exports = class extends Music {
     });
   }
 
-  run(msg) {
+  async run(msg) {
     if (!msg.guild.player) return msg.fail(`There is no player for this guild!`);
 
     this.leave(msg.guild);
 
-    return msg.channel.send({
+    msg.channel.send({
       embed: {
         title: `💣${msg.emojis.bar}Poof, the player is now destroyed!`,
         color: msg.colors.pending
       }
     });
+
+    try {
+      await this.updateDatabase(msg.guild, "queue", null);
+    } catch (error) {
+      return console.error(error);
+    }
   }
 };

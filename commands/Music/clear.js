@@ -17,17 +17,23 @@ module.exports = class extends Music {
     });
   }
 
-  run(msg) {
-    if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing in the queue to clear!`);
+  async run(msg) {
+    if (!(msg.guild.player instanceof Object) || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing in the queue to clear!`);
 
     this.stop(msg.guild);
     msg.guild.player.queue = [];
 
-    return msg.channel.send({
+    msg.channel.send({
       embed: {
         title: `⚡${msg.emojis.bar}The queue has been cleared!`,
         color: msg.colors.pending
       }
     });
+
+    try {
+      await this.updateDatabase(msg.guild, "queue", null);
+    } catch (error) {
+      return console.error(error);
+    }
   }
 };

@@ -1,4 +1,8 @@
 const Music = require("../../modules/Music");
+const util = require("util");
+const zlib = require("zlib");
+
+const deflate = util.promisify(zlib.deflate);
 
 module.exports = class extends Music {
   constructor(...args) {
@@ -25,7 +29,8 @@ module.exports = class extends Music {
       this.join(msg);
       msg.guild.player = {
         queue: [],
-        channelId: msg.member.voiceChannel.id,
+        channelId: msg.member.voice.channel.id,
+        sessionId: msg.guild.me.voice.sessionId,
         playing: false,
         paused: false,
         volume: 75
@@ -44,12 +49,18 @@ module.exports = class extends Music {
 
     if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.play(msg.guild, track[0].track);
 
-    return msg.channel.send({
-      embed: {
-        title: `${msg.emojis.default}Track has been added to the queue!`,
-        description: `[${track[0].info.title}](${track[0].info.uri})`,
-        color: msg.colors.default
-      }
-    });
+    try {
+      const queue = await deflate(JSON.stringify(msg.guild.player.queue));
+      await this.updateDatabase(msg.guild, "queue", queue); // save the compressed queue
+      return msg.channel.send({
+        embed: {
+          title: `${msg.emojis.default}Track has been added to the queue!`,
+          description: `[${track[0].info.title}](${track[0].info.uri})`,
+          color: msg.colors.default
+        }
+      });
+    } catch (error) {
+      return console.error(error);
+    }
   }
 };

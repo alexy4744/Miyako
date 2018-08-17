@@ -5,7 +5,7 @@ lavalink:
   server:
     password: "youshallnotpass"
     ws:
-      port: 80
+      port: 7070
       host: 0.0.0.0
     sources:
       youtube: true
