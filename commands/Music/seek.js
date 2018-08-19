@@ -23,14 +23,14 @@ module.exports = class extends Command {
 
     let time = args[0];
 
-    if (this.client.utils.stringToMillis.isValid(args[0])) time = this.client.utils.stringToMillis.convert(args[0]);
+    if (this.client.utils.stringToMillis.isValid(args[0])) time = this.client.utils.stringToMillis.convert(args[0]).ms;
     else if (isNaN(time)) return msg.fail(`Please enter the a valid time format or milliseconds in order to seek!`);
 
     if (time > msg.guild.player.queue[0].info.length) {
       this.client.player.skip(msg.guild);
       return msg.channel.send({
         embed: {
-          title: `I have skipped the current song!`,
+          title: `⏭${msg.emoji.bar}I have skipped the current song!`,
           color: msg.colors.default
         }
       });
@@ -40,7 +40,7 @@ module.exports = class extends Command {
 
     return msg.channel.send({
       embed: {
-        title: `I have seeked "${msg.guild.player.queue[0].info.title}" to ${time}`,
+        title: `⏩${msg.emoji.bar}I have seeked "${msg.guild.player.queue[0].info.title}" to ${time}`,
         color: msg.colors.default
       }
     });

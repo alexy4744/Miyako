@@ -46,7 +46,7 @@ module.exports = class extends Command {
 
     return msg.channel.send({
       embed: {
-        title: `${msg.emojis.default}Track has been added to the queue!`,
+        title: `▶${msg.emojis.bar}Track has been added to the queue!`,
         description: `[${track[0].info.title}](${track[0].info.uri})`,
         color: msg.colors.default
       }

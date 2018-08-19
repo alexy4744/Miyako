@@ -17,7 +17,7 @@ module.exports = class extends Command {
     });
   }
 
-  run(msg) {
+  async run(msg) {
     if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing to skip!`);
 
     const songToSkip = msg.guild.player.queue[0];
@@ -29,11 +29,16 @@ module.exports = class extends Command {
       this.client.player.leave(msg.guild);
       this.client.player.join(msg);
       msg.guild.player.queue = [];
+      try {
+        await this.client.player.updateDatabase(msg.guild, "queue", null);
+      } catch (error) {
+        return console.error(error);
+      }
     }
 
     return msg.channel.send({
       embed: {
-        title: `"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
+        title: `⏭${msg.emoji.bar}"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
         description: msg.guild.player.queue.length > 0 ? `Now Playing: **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**` : null,
         color: msg.colors.default
       }
