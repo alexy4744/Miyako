@@ -4,7 +4,7 @@
 const { Client } = require("discord.js");
 const WebSocket = require("ws");
 const RethinkDB = require("../database/methods");
-const Lavalink = require("../music/Lavalink");
+const Lavalink = require("../music/methods");
 require("../structures/Structures")();
 
 module.exports = class Miyako extends Client {
@@ -29,7 +29,7 @@ module.exports = class Miyako extends Client {
         port: 7070
       }),
       "db": new RethinkDB("clientData", options.id),
-      "wss": new WebSocket(options.wsAddress)
+      "dashboard": new WebSocket(options.wsAddress)
     });
 
     Object.assign(this, {
@@ -37,11 +37,10 @@ module.exports = class Miyako extends Client {
       "prefix": options.prefix
     });
 
-    this.wss.on("error", this._wssOnError.bind(this));
-
+    this.dashboard.on("error", this._dashboardOnError.bind(this));
     this.player.on("error", err => console.error(err));
 
-    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    this.dashboard.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
     this.player.on("finished", guild => {
       if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
       if (guild.player.queue.length > 0) {
@@ -50,8 +49,24 @@ module.exports = class Miyako extends Client {
           "guildId": guild.id,
           "track": guild.player.queue[0].track
         });
+        update();
       } else {
-        return guild.player.playing = false;
+        guild.player.playing = false;
+        this.dashboard.send(JSON.stringify({
+          "op": "finished",
+          "guildId": guild.id
+        }));
+        return update();
+      }
+
+      async function update() {
+        try {
+          return await guild.db.update({
+            "track": guild.player.queue.length > 0 ? guild.player.queue[0] : null
+          });
+        } catch (error) {
+          return console.error(error);
+        }
       }
     });
 
@@ -94,7 +109,6 @@ module.exports = class Miyako extends Client {
         if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
         count += this.inhibitors[inhibitor](this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
-        console.error(error)
         break;
       }
     }
@@ -135,20 +149,34 @@ module.exports = class Miyako extends Client {
   async _handleRequests(data) {
     // Since the database is all updated in the dashboard's backend, all it has to do here is updating the cache for the bot.
     const request = JSON.parse(data);
-    if (request.recipient === "dashboard") return; // If the message was meant for the dashboard not the bot.
+    if (!request.recipient || request.recipient === "dashboard") return; // If the message was meant for the dashboard not the bot.
 
-    try {
-      if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);
-      if (request.data.table === "guildData") await this.guilds.get(request.data.id).updateCache(request.data.key, request.data.value);
-      if (request.data.table === "memberData") await this.guilds.get(request.data.guildId).members.fetch(request.data.memberId).updateCache(request.data.key, request.data.value);
-      if (request.data.table === "userData") await this.users.fetch(request.data.id).updateCache(request.data.key, request.data.value);
-    } catch (error) {
-      return console.error(error);
+    if (request.op) {
+      const guild = this.guilds.get(request.guildId);
+
+      try {
+        if (request.op === "pause") this.player.pause(guild, "lavalink");
+        else if (request.op === "resume") this.player.resume(guild, "lavalink");
+        else if (request.op === "skip") this.player.skip(guild, "lavalink");
+        else if (request.op === "leave") this.player.leave(guild, "lavalink");
+        else return;
+      } catch (error) {
+        return console.error(error);
+      }
+    } else {
+      try {
+        if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);
+        if (request.data.table === "guildData") await this.guilds.get(request.data.id).updateCache(request.data.key, request.data.value);
+        if (request.data.table === "memberData") await this.guilds.get(request.data.guildId).members.fetch(request.data.memberId).updateCache(request.data.key, request.data.value);
+        if (request.data.table === "userData") await this.users.fetch(request.data.id).updateCache(request.data.key, request.data.value);
+      } catch (error) {
+        return console.error(error);
+      }
     }
   }
 
-  _wssOnError(error) {
-    this.wss = null;
+  _dashboardOnError(error) {
+    this.dashboard = null;
     return console.error(error);
   }
 };

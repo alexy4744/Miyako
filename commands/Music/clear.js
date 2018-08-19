@@ -1,6 +1,6 @@
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -20,7 +20,7 @@ module.exports = class extends Music {
   async run(msg) {
     if (!(msg.guild.player instanceof Object) || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing in the queue to clear!`);
 
-    this.stop(msg.guild);
+    this.client.player.stop(msg.guild);
     msg.guild.player.queue = [];
 
     msg.channel.send({
@@ -31,7 +31,7 @@ module.exports = class extends Music {
     });
 
     try {
-      await this.updateDatabase(msg.guild, "queue", null);
+      await this.client.player.updateDatabase(msg.guild, "queue", null);
     } catch (error) {
       return console.error(error);
     }

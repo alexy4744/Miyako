@@ -11,6 +11,7 @@ module.exports = class Lavalink extends EventEmitter {
     this.port = options.port || 80;
     this.APIport = options.APIport || 2333;
 
+    this.dashboard = new WebSocket(`ws://localhost:4000`);
     this.ws = new WebSocket(`ws://${this.host}:${this.port}`, {
       headers: {
         "User-Id": this.id,
@@ -27,11 +28,23 @@ module.exports = class Lavalink extends EventEmitter {
     });
   }
 
-  send(obj) {
-    console.log(JSON.stringify(obj))
+  send(obj, target) {
     if (!this.ws) return this._error(new Error(`No Lavalink player found!`));
-    if (!isNaN(obj.op)) this.client.ws.send(obj); // If it is a number, then send it to client ws.
-    else this.ws.send(JSON.stringify(obj), err => console.error(err)); // Send it to Lavalink.
+    if (!isNaN(obj.op)) {
+      this.client.ws.send(obj); // If it is a number, then send it to client ws.
+    } else {
+      this.ws.send(JSON.stringify(obj), err => { // Send it to Lavalink.
+        if (err) return console.error(err);
+      });
+    }
+
+    if (target && target === "lavalink") return; // eslint-disable-line
+    else { // eslint-disable-line
+      if (obj.guildId || obj.guild_id) obj.queue = this.client.guilds.get(obj.guildId || obj.guild_id).player.queue;
+      return this.dashboard.send(JSON.stringify(obj), err => {
+        if (err) return console.error(err); // Send it over to the web dashboard also.
+      });
+    }
   }
 
   _message(msg) {
@@ -58,7 +71,7 @@ module.exports = class Lavalink extends EventEmitter {
   _sendVoiceUpdate(packet) {
     if (!this.client.guilds.has(packet.guild_id)) return console.error("Couldn't find this guild while intercepting packets.");
     const guild = this.client.guilds.get(packet.guild_id);
-    // console.log(guild.me.voice.sessionID)
+
     return this.send({
       "op": "voiceUpdate",
       "guildId": packet.guild_id,

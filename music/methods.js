@@ -1,8 +1,9 @@
-const Command = require("./Command");
+const Lavalink = require("../music/Lavalink");
 const snekfetch = require("snekfetch");
 
-module.exports = class Music extends Command {
-  // Methods that might be used in more than one music commmand.
+module.exports = class extends Lavalink {
+  constructor(...args) { super(...args); } // eslint-disable-line
+
   async getSong(query) {
     const res = await snekfetch.get(`http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`)
       .query({ identifier: `ytsearch:${query}` })
@@ -16,7 +17,7 @@ module.exports = class Music extends Command {
 
     for (const track of res.body.tracks) {
       track.info.looped = false;
-      track.info.thumbnail = `http://i3.ytimg.com/vi/${track.info.identifier}/maxresdefault.jpg`
+      track.info.thumbnail = `http://i3.ytimg.com/vi/${track.info.identifier}/maxresdefault.jpg`;
       track.info.loadType = res.body.loadType;
       track.info.playlistInfo = res.body.playlistInfo;
     }
@@ -33,58 +34,80 @@ module.exports = class Music extends Command {
     }
   }
 
-  play(guild, track) {
+  async play(guild, track, target) {
     this.send({
       "op": "play",
       "guildId": guild.id,
       "track": track
-    });
+    }, target);
 
-    return guild.player.playing = true;
+    guild.player.playing = true;
+
+    try {
+      return await this.updateDatabase(guild, "track", guild.player.queue[0]); // save the current track to the database.
+    } catch (error) {
+      return console.error(error);
+    }
   }
 
-  resume(guild) {
+  seek(guild) {
+    
+  }
+
+  skip(guild, target) {
+    if (guild.player.queue.length > 0) {
+      guild.player.queue.shift();
+      this.play(guild, guild.player.queue[0].track, target);
+    }
+  }
+
+  resume(guild, target) {
     this.send({
       "op": "pause",
       "guildId": guild.id,
       "pause": false
-    });
+    }, target);
 
     guild.player.paused = false;
     return guild.player.playing = true;
   }
 
-  pause(guild) {
+  pause(guild, target) {
     this.send({
       "op": "pause",
       "guildId": guild.id,
       "pause": true
-    });
+    }, target);
 
     guild.player.paused = true;
     return guild.player.playing = false;
   }
 
-  stop(guild) {
+  stop(guild, target) {
     this.send({
       "op": "stop",
       "guildId": guild.id
-    });
+    }, target);
 
     guild.player.paused = false;
     return guild.player.playing = false;
   }
 
-  destroy(guild) {
+  async destroy(guild, target) {
     this.send({
       "op": "destroy",
       "guildId": guild.id
-    });
+    }, target);
 
-    return delete guild.player;
+    try {
+      await this.updateDatabase(guild, "track", null); // save the current track to the database.
+      return delete guild.player;
+    } catch (error) {
+      return console.error(error);
+    }
   }
 
-  leave(guild) {
+  leave(guild, target) {
     this.send({
       "op": 4,
       "shard": this.client.player.shards,
@@ -94,13 +117,13 @@ module.exports = class Music extends Command {
         "self_mute": false,
         "self_deaf": false
       }
-    });
+    }, target);
 
     guild.player.channelId = null;
     return guild.player.playing = false;
   }
 
-  join(msg) {
+  join(msg, target) {
     return this.send({
       "op": 4,
       "shard": this.client.player.shards,
@@ -110,10 +133,6 @@ module.exports = class Music extends Command {
         "self_mute": false,
         "self_deaf": false
       }
-    });
-  }
-
-  send(obj) {
-    return this.client.player.send(obj);
+    }, target);
   }
 };

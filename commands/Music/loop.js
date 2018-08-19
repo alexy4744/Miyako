@@ -1,6 +1,6 @@
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,

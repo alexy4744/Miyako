@@ -1,6 +1,6 @@
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -25,7 +25,7 @@ module.exports = class extends Music {
     if (voiceChannel.full) return msg.fail(`#${voiceChannel.name} is currently full!`);
     if (!voiceChannel.joinable) return msg.fail(`I do not have the permissions to join #${voiceChannel.name}!`);
 
-    this.join(msg);
+    this.client.player.join(msg);
 
     if (!msg.guild.player) {
       msg.guild.player = {
@@ -39,7 +39,7 @@ module.exports = class extends Music {
       return msg.success(`I have successfully joined #${voiceChannel.name}!`);
     } else if (msg.guild.player.queue.length > 0) { // If the bot is commanded to leave the voice channel while its playing previously, unpause the track and start playing wherever it left off as.
       msg.guild.player.channelId = voiceChannel.id;
-      this.resume(msg.guild);
+      this.client.player.resume(msg.guild);
       return msg.success(`I have successfully joined #${voiceChannel.name}`, `Continuing the playback of **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**`);
     }
   }

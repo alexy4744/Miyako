@@ -1,6 +1,6 @@
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -20,9 +20,9 @@ module.exports = class extends Music {
   run(msg) {
     if (!msg.guild.player || (msg.guild.player && !msg.guild.player.channelId)) return msg.fail(`I am currently not connected to any voice channels!`);
 
-    if (msg.guild.player.queue.length > 0) this.pause(msg.guild);
+    if (msg.guild.player.queue.length > 0) this.client.player.pause(msg.guild);
 
-    this.leave(msg.guild);
+    this.client.player.leave(msg.guild);
 
     return msg.success(`I have successfully left #${msg.member.voice.channel.name}!`);
   }

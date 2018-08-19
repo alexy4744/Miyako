@@ -1,9 +1,9 @@
 /* eslint no-use-before-define: 0 */
 /* eslint no-confusing-arrow: 0 */
 
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -24,7 +24,7 @@ module.exports = class extends Music {
     if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing to resume!`);
     if (msg.guild.player.playing && !msg.guild.player.paused) return msg.fail(`The player is already playing!`);
 
-    this.resume(msg.guild);
+    this.client.player.resume(msg.guild);
 
     return msg.channel.send({
       embed: {

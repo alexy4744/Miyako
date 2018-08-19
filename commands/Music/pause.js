@@ -1,6 +1,6 @@
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -21,7 +21,7 @@ module.exports = class extends Music {
     if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing to pause!`);
     if (!msg.guild.player.playing && msg.guild.player.paused) return msg.fail(`The player is already paused!`);
 
-    this.pause(msg.guild);
+    this.client.player.pause(msg.guild);
 
     return msg.channel.send({
       embed: {

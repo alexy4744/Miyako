@@ -1,6 +1,6 @@
-const Music = require("../../modules/Music");
+const Command = require("../../modules/Command");
 
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -17,22 +17,17 @@ module.exports = class extends Music {
     });
   }
 
-  async run(msg) {
+  run(msg) {
     if (!msg.guild.player) return msg.fail(`There is no player for this guild!`);
 
-    this.leave(msg.guild);
+    this.client.player.leave(msg.guild);
+    this.client.player.destroy(msg.guild);
 
-    msg.channel.send({
+    return msg.channel.send({
       embed: {
         title: `💣${msg.emojis.bar}Poof, the player is now destroyed!`,
         color: msg.colors.pending
       }
     });
-
-    try {
-      await this.updateDatabase(msg.guild, "queue", null);
-    } catch (error) {
-      return console.error(error);
-    }
   }
 };

@@ -1,10 +1,6 @@
-const Music = require("../../modules/Music");
-const util = require("util");
-const zlib = require("zlib");
+const Command = require("../../modules/Command");
 
-const deflate = util.promisify(zlib.deflate);
-
-module.exports = class extends Music {
+module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
@@ -26,18 +22,17 @@ module.exports = class extends Music {
     if (args.length < 1) return msg.fail(`You must enter a link or a search query for me to play!`);
 
     if (!msg.guild.player || !msg.guild.player.channelId) {
-      this.join(msg);
+      this.client.player.join(msg);
       msg.guild.player = {
         queue: [],
         channelId: msg.member.voice.channel.id,
-        sessionId: msg.guild.me.voice.sessionId,
         playing: false,
         paused: false,
         volume: 75
       };
     }
 
-    const track = await this.getSong(args.join(" ")).catch(error => ({
+    const track = await this.client.player.getSong(args.join(" ")).catch(error => ({
       "error": error
     }));
 
@@ -47,20 +42,14 @@ module.exports = class extends Music {
 
     msg.guild.player.queue.push(track[0]);
 
-    if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.play(msg.guild, track[0].track);
+    if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.client.player.play(msg.guild, track[0].track);
 
-    try {
-      const queue = await deflate(JSON.stringify(msg.guild.player.queue));
-      await this.updateDatabase(msg.guild, "queue", queue); // save the compressed queue
-      return msg.channel.send({
-        embed: {
-          title: `${msg.emojis.default}Track has been added to the queue!`,
-          description: `[${track[0].info.title}](${track[0].info.uri})`,
-          color: msg.colors.default
-        }
-      });
-    } catch (error) {
-      return console.error(error);
-    }
+    return msg.channel.send({
+      embed: {
+        title: `${msg.emojis.default}Track has been added to the queue!`,
+        description: `[${track[0].info.title}](${track[0].info.uri})`,
+        color: msg.colors.default
+      }
+    });
   }
 };
