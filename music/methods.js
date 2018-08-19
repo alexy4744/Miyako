@@ -50,15 +50,17 @@ module.exports = class extends Lavalink {
     }
   }
 
-  seek(guild) {
-    
+  seek(guild, pos, target) {
+    this.send({
+      "op": "seek",
+      "guildId": guild.id,
+      "position": pos
+    }, target);
   }
 
   skip(guild, target) {
-    if (guild.player.queue.length > 0) {
-      guild.player.queue.shift();
-      this.play(guild, guild.player.queue[0].track, target);
-    }
+    if (guild.player.queue.length >= 1) guild.player.queue.shift();
+    if (guild.player.queue.length >= 1) this.play(guild, guild.player.queue[0].track, target);
   }
 
   resume(guild, target) {
@@ -81,6 +83,16 @@ module.exports = class extends Lavalink {
 
     guild.player.paused = true;
     return guild.player.playing = false;
+  }
+
+  volume(guild, vol, target) {
+    this.send({
+      "op": "volume",
+      "guildId": guild.id,
+      "volume": vol
+    }, target);
+
+    return guild.player.volume = parseInt(vol);
   }
 
   stop(guild, target) {

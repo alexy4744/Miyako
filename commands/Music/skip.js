@@ -22,20 +22,21 @@ module.exports = class extends Command {
 
     const songToSkip = msg.guild.player.queue[0];
 
-    msg.guild.player.queue.shift();
-
-    if (msg.guild.player.queue.length > 0) {
-      this.client.player.play(msg.guild, msg.guild.player.queue[0].track);
-
-      msg.channel.send({
-        embed: {
-          title: `"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
-          description: `Now Playing: **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**`,
-          color: msg.colors.default
-        }
-      });
+    if (msg.guild.player.queue.length > 1) {
+      this.client.player.skip(msg.guild);
     } else {
-      return msg.fail(`There are no songs in the queue to skip!`);
+      this.client.player.stop(msg.guild);
+      this.client.player.leave(msg.guild);
+      this.client.player.join(msg);
+      msg.guild.player.queue = [];
     }
+
+    return msg.channel.send({
+      embed: {
+        title: `"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
+        description: msg.guild.player.queue.length > 0 ? `Now Playing: **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**` : null,
+        color: msg.colors.default
+      }
+    });
   }
 };
