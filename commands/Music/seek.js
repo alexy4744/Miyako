@@ -40,7 +40,7 @@ module.exports = class extends Command {
 
     return msg.channel.send({
       embed: {
-        title: `⏩${msg.emoji.bar}I have seeked "${msg.guild.player.queue[0].info.title}" to ${time}`,
+        title: `⏩${msg.emojis.bar}I have seeked "${msg.guild.player.queue[0].info.title}" to ${args[0]}`,
         color: msg.colors.default
       }
     });

@@ -42,6 +42,7 @@ module.exports = class Miyako extends Client {
 
     this.dashboard.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
     this.player.on("finished", guild => {
+      guild.player.musicPause = new Date();
       if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
       if (guild.player.queue.length > 0) {
         this.player.send({
@@ -159,6 +160,8 @@ module.exports = class Miyako extends Client {
         else if (request.op === "resume") this.player.resume(guild, "lavalink");
         else if (request.op === "skip") this.player.skip(guild, "lavalink");
         else if (request.op === "leave") this.player.leave(guild, "lavalink");
+        else if (request.op === "playback" && guild.player && guild.player.queue[0]) guild.player.queue[0].info.currentTime = request.time;
+        else if (request.op === "init") this._dashboardInit(guild);
         else return;
       } catch (error) {
         return console.error(error);
@@ -178,5 +181,13 @@ module.exports = class Miyako extends Client {
   _dashboardOnError(error) {
     this.dashboard = null;
     return console.error(error);
+  }
+
+  _dashboardInit(guild) {
+    this.dashboard.send(JSON.stringify({
+      "op": "initB",
+      "guildId": guild.id,
+      "time": guild.player ? guild.player.musicPlayTime() : false
+    }));
   }
 };
