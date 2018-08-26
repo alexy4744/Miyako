@@ -1,6 +1,6 @@
 # Bot files
 config.json
-process.env*
+process.env
 *.pem
 
 # Lavalink
@@ -72,7 +72,7 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env*
 
 # next.js build output
 .next
