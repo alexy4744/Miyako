@@ -144,12 +144,11 @@ module.exports = class Miyako extends Client {
   async _handleRequests(data) {
     // Since the database is all updated in the dashboard's backend, all it has to do here is updating the cache for the bot.
     const request = JSON.parse(data);
-    console.log(request)
+
     if (request.op) {
       const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
 
       try {
-        if (request.op === "ping") this.dashboard.send(JSON.stringify)
         if (request.op === "pause") this.player.pause(guild);
         else if (request.op === "seek" && request.pos) this.player.seek(guild, request.pos);
         else if (request.op === "resume") this.player.resume(guild);
