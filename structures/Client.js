@@ -25,9 +25,7 @@ module.exports = class Miyako extends Client {
     Object.assign(this, {
       "categories": new Set(),
       "userCooldowns": new Set(),
-      "player": new Lavalink(this, options.id, {
-        port: 7070
-      }),
+      "player": new Lavalink(this, options.id, { port: 7070 }),
       "db": new RethinkDB("clientData", options.id),
       "dashboard": new WebSocket(options.wsAddress)
     });
@@ -37,37 +35,33 @@ module.exports = class Miyako extends Client {
       "prefix": options.prefix
     });
 
+    this.dashboard.on("open", this._dashboardOnOpen.bind(this));
     this.dashboard.on("error", this._dashboardOnError.bind(this));
+    this.dashboard.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+
     this.player.on("error", err => console.error(err));
 
-    this.dashboard.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
     this.player.on("finished", guild => {
-      guild.player.musicPause = new Date();
       if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
+
       if (guild.player.queue.length > 0) {
+        guild.player.musicStart = new Date();
+        guild.player.musicPauseAll = null;
+        guild.player.musicPause = null;
+
         this.player.send({
           "op": "play",
           "guildId": guild.id,
           "track": guild.player.queue[0].track
         });
-        update();
       } else {
+        guild.player.musicPause = new Date();
         guild.player.playing = false;
-        this.dashboard.send(JSON.stringify({
+
+        this.player.send({
           "op": "finished",
           "guildId": guild.id
-        }));
-        return update();
-      }
-
-      async function update() {
-        try {
-          return await guild.db.update({
-            "track": guild.player.queue.length > 0 ? guild.player.queue[0] : null
-          });
-        } catch (error) {
-          return console.error(error);
-        }
+        });
       }
     });
 
@@ -150,18 +144,18 @@ module.exports = class Miyako extends Client {
   async _handleRequests(data) {
     // Since the database is all updated in the dashboard's backend, all it has to do here is updating the cache for the bot.
     const request = JSON.parse(data);
-    if (!request.recipient || request.recipient === "dashboard") return; // If the message was meant for the dashboard not the bot.
-
+    console.log(request)
     if (request.op) {
-      const guild = this.guilds.get(request.guildId);
+      const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
 
       try {
-        if (request.op === "pause") this.player.pause(guild, "lavalink");
-        else if (request.op === "resume") this.player.resume(guild, "lavalink");
-        else if (request.op === "skip") this.player.skip(guild, "lavalink");
-        else if (request.op === "leave") this.player.leave(guild, "lavalink");
-        else if (request.op === "playback" && guild.player && guild.player.queue[0]) guild.player.queue[0].info.currentTime = request.time;
-        else if (request.op === "init") this._dashboardInit(guild);
+        if (request.op === "ping") this.dashboard.send(JSON.stringify)
+        if (request.op === "pause") this.player.pause(guild);
+        else if (request.op === "seek" && request.pos) this.player.seek(guild, request.pos);
+        else if (request.op === "resume") this.player.resume(guild);
+        else if (request.op === "skip") this.player.skip(guild);
+        else if (request.op === "leave") this.player.leave(guild);
+        else if (request.op === "init") this._dashboardInit(guild, request);
         else return;
       } catch (error) {
         return console.error(error);
@@ -178,15 +172,25 @@ module.exports = class Miyako extends Client {
     }
   }
 
+  _dashboardOnOpen() {
+    this.dashboard.send(JSON.stringify({
+      "op": "identify",
+      "identifier": process.env.BOT_IDENTIFIER
+    }));
+  }
+
   _dashboardOnError(error) {
     this.dashboard = null;
     return console.error(error);
   }
 
-  _dashboardInit(guild) {
+  _dashboardInit(guild, request) {
     this.dashboard.send(JSON.stringify({
+      ...request, // Merge the request object with this object.
+      "recipient": "dashboard",
       "op": "initB",
-      "guildId": guild.id,
+      "queue": guild.player ? guild.player.queue ? guild.player.queue : false : false,
+      "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
       "time": guild.player ? guild.player.musicPlayTime() : false
     }));
   }

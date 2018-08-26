@@ -1,8 +1,9 @@
-const { token, owner, prefix } = require("./config.json");
+require("dotenv").config({ "path": `${__dirname}\\process.env` });
+
 const Miyako = require("./structures/Client");
 const client = new Miyako({
-  "owner": owner,
-  "prefix": prefix,
+  "owner": process.env.OWNER,
+  "prefix": process.env.PREFIX,
   "id": "415313696102023169",
   "wsAddress": "ws://localhost:4000",
   "clientOptions": {
@@ -17,7 +18,7 @@ client.on("error", error => client.events.error(error));
 client.on("guildCreate", guild => client.events.guildCreate(guild));
 client.on("message", msg => client.events.message(client, msg));
 
-client.login(token).catch(error => {
+client.login(process.env.TOKEN).catch(error => {
   throw error;
 });
 

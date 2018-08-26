@@ -1,4 +1,3 @@
-const config = require("../config.json");
 const Lavalink = require("../music/Lavalink");
 const snekfetch = require("snekfetch");
 
@@ -27,7 +26,7 @@ module.exports = class extends Lavalink {
 
   // Always get the highest quality thumbnail if possible
   async getThumbnail(videoId) {
-    const res = await snekfetch.get(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet&key=${config.yt}`).catch(e => ({
+    const res = await snekfetch.get(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet&key=${process.env.YT}`).catch(e => ({
       "error": e
     }));
 
@@ -37,17 +36,7 @@ module.exports = class extends Lavalink {
     else return `http://i3.ytimg.com/vi/${videoId}/hqdefault.jpg`; // eslint-disable-line
   }
 
-  async updateDatabase(guild, key, value) {
-    try {
-      await guild.db.update({ [key]: value });
-      return Promise.resolve();
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-
-  async play(guild, track, target) {
-    guild.player.queue[0].info.thumbnail = await this.getThumbnail(guild.player.queue[0].info.identifier);
+  play(guild, track, target) {
     guild.player.playing = true;
     guild.player.musicStart = new Date(); // when the song start I get the date when it starts
     guild.player.musicPauseAll = null; // this is only to make sure everything is back to default
@@ -86,25 +75,27 @@ module.exports = class extends Lavalink {
       }
     };
 
+    guild.player.seekTime = time => {
+      guild.player.musicStart = new Date((new Date()).getTime() - Number(time));
+      if (guild.player.musicPause) guild.player.musicPause = new Date();
+      guild.player.musicPauseAll = null;
+    };
+
     setInterval(() => { // this onlly for testing
       console.log(guild.player.musicPlayTime());
     }, 10000);
 
-    this.send({
+    return this.send({
       "op": "play",
       "guildId": guild.id,
       "track": track
     }, target);
-
-    try {
-      return await this.updateDatabase(guild, "track", guild.player.queue[0]); // save the current track to the database.
-    } catch (error) {
-      return console.error(error);
-    }
   }
 
   seek(guild, pos, target) {
-    this.send({
+    guild.player.seekTime(pos);
+
+    return this.send({
       "op": "seek",
       "guildId": guild.id,
       "position": pos
@@ -112,9 +103,9 @@ module.exports = class extends Lavalink {
   }
 
   skip(guild, target) {
-    if (guild.player.queue.length >= 1) {
+    if (guild.player.queue.length >= 2) {
       guild.player.queue.shift();
-      this.play(guild, guild.player.queue[0].track, target);
+      return this.play(guild, guild.player.queue[0].track, target);
     }
   }
 
@@ -169,18 +160,15 @@ module.exports = class extends Lavalink {
     return guild.player.playing = false;
   }
 
-  async destroy(guild, target) {
-    this.send({
+  destroy(guild, target) {
+    this.emit("finished", guild);
+
+    guild.player.queue = [];
+
+    return this.send({
       "op": "destroy",
       "guildId": guild.id
     }, target);
-
-    try {
-      await this.updateDatabase(guild, "track", null); // save the current track to the database.
-      return delete guild.player;
-    } catch (error) {
-      return console.error(error);
-    }
   }
 
   leave(guild, target) {

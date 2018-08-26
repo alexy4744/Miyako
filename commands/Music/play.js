@@ -40,6 +40,8 @@ module.exports = class extends Command {
     if (track.length < 1) return msg.fail(`No search results have returned!`);
     if (track[0].info.loadType === "LOAD_FAILED") return msg.fail(`"${track[0].info.title}" has failed to load!`);
 
+    track[0].info.thumbnail = await this.client.player.getThumbnail(track[0].info.identifier);
+
     msg.guild.player.queue.push(track[0]);
 
     if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.client.player.play(msg.guild, track[0].track);

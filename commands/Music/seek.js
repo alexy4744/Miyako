@@ -30,7 +30,7 @@ module.exports = class extends Command {
       this.client.player.skip(msg.guild);
       return msg.channel.send({
         embed: {
-          title: `⏭${msg.emoji.bar}I have skipped the current song!`,
+          title: `⏭${msg.emojis.bar}I have skipped the current song!`,
           color: msg.colors.default
         }
       });
