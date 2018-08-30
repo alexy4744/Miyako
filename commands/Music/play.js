@@ -44,6 +44,11 @@ module.exports = class extends Command {
 
     msg.guild.player.queue.push(track[0]);
 
+    this.client.player.send({
+      "op": "new song",
+      "guildId": msg.guild.id
+    });
+
     if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.client.player.play(msg.guild, track[0].track);
 
     return msg.channel.send({

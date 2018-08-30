@@ -38,7 +38,7 @@ module.exports = class extends Command {
 
     return msg.channel.send({
       embed: {
-        title: `⏭${msg.emoji.bar}"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
+        title: `⏭${msg.emojis.bar}"${songToSkip.info.title}" has been skipped by ${msg.author.tag}!`,
         description: msg.guild.player.queue.length > 0 ? `Now Playing: **[${msg.guild.player.queue[0].info.title}](${msg.guild.player.queue[0].info.uri})**` : null,
         color: msg.colors.default
       }

@@ -81,10 +81,6 @@ module.exports = class extends Lavalink {
       guild.player.musicPauseAll = null;
     };
 
-    setInterval(() => { // this onlly for testing
-      console.log(guild.player.musicPlayTime());
-    }, 10000);
-
     return this.send({
       "op": "play",
       "guildId": guild.id,
@@ -128,16 +124,16 @@ module.exports = class extends Lavalink {
   }
 
   pause(guild, target) {
-    this.send({
+    // When pause is used I get the date of when the user paused the music
+    guild.player.musicPause = new Date();
+    guild.player.paused = true;
+    guild.player.playing = false;
+
+    return this.send({
       "op": "pause",
       "guildId": guild.id,
       "pause": true
     }, target);
-
-    // When pause is used I get the date of when the user paused the music
-    guild.player.musicPause = new Date();
-    guild.player.paused = true;
-    return guild.player.playing = false;
   }
 
   volume(guild, vol, target) {

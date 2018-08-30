@@ -42,6 +42,7 @@ module.exports = class extends Command {
     }
 
     track.looped = true;
+
     return msg.channel.send({
       embed: {
         title: `🔁${msg.emojis.bar}"${track.title}" is now looped!`,

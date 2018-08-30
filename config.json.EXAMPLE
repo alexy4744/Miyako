@@ -1,7 +1,0 @@
-{
-  "token": "BOT TOKEN HERE",
-  "owner": "OWNER ID",
-  "prefix": "v$",
-  "yt": "YOUTUBE API KEY",
-  "twitch": "TWITCH API KEY"
-}

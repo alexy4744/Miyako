@@ -25,7 +25,7 @@ module.exports = class Miyako extends Client {
     Object.assign(this, {
       "categories": new Set(),
       "userCooldowns": new Set(),
-      "player": new Lavalink(this, options.id, { port: 7070 }),
+      "player": new Lavalink(this, options.id, { port: 6666 }),
       "db": new RethinkDB("clientData", options.id),
       "dashboard": new WebSocket(options.wsAddress)
     });
@@ -42,26 +42,28 @@ module.exports = class Miyako extends Client {
     this.player.on("error", err => console.error(err));
 
     this.player.on("finished", guild => {
-      if (!guild.player.queue[0].info.looped) guild.player.queue.shift();
+      if (guild.player && guild.player.queue[0] && !guild.player.queue[0].info.looped) guild.player.queue.shift();
 
-      if (guild.player.queue.length > 0) {
-        guild.player.musicStart = new Date();
-        guild.player.musicPauseAll = null;
-        guild.player.musicPause = null;
+      if (guild.player) {
+        if (guild.player.queue.length > 0) {
+          guild.player.musicStart = new Date();
+          guild.player.musicPauseAll = null;
+          guild.player.musicPause = null;
 
-        this.player.send({
-          "op": "play",
-          "guildId": guild.id,
-          "track": guild.player.queue[0].track
-        });
-      } else {
-        guild.player.musicPause = new Date();
-        guild.player.playing = false;
+          this.player.send({
+            "op": "play",
+            "guildId": guild.id,
+            "track": guild.player.queue[0].track
+          });
+        } else {
+          guild.player.musicPause = new Date();
+          guild.player.playing = false;
 
-        this.player.send({
-          "op": "finished",
-          "guildId": guild.id
-        });
+          this.dashboard.send(JSON.stringify({
+            "op": "finished",
+            "id": guild.id
+          }));
+        }
       }
     });
 
@@ -147,27 +149,27 @@ module.exports = class Miyako extends Client {
 
     if (request.op) {
       const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
+      if (!guild) return;
 
       try {
-        if (request.op === "pause") this.player.pause(guild);
-        else if (request.op === "seek" && request.pos) this.player.seek(guild, request.pos);
-        else if (request.op === "resume") this.player.resume(guild);
-        else if (request.op === "skip") this.player.skip(guild);
-        else if (request.op === "leave") this.player.leave(guild);
-        else if (request.op === "init") this._dashboardInit(guild, request);
-        else return;
+        if (request.op === "pause") return this.player.pause(guild);
+        else if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
+        else if (request.op === "resume") return this.player.resume(guild);
+        else if (request.op === "skip") return this.player.skip(guild);
+        else if (request.op === "leave") return this.player.leave(guild);
+        else if (request.op === "init") return this._dashboardInit(guild, request);
       } catch (error) {
         return console.error(error);
       }
     } else {
-      try {
-        if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);
-        if (request.data.table === "guildData") await this.guilds.get(request.data.id).updateCache(request.data.key, request.data.value);
-        if (request.data.table === "memberData") await this.guilds.get(request.data.guildId).members.fetch(request.data.memberId).updateCache(request.data.key, request.data.value);
-        if (request.data.table === "userData") await this.users.fetch(request.data.id).updateCache(request.data.key, request.data.value);
-      } catch (error) {
-        return console.error(error);
-      }
+      // try {
+      //   if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);
+      //   if (request.data.table === "guildData") await this.guilds.get(request.data.id).updateCache(request.data.key, request.data.value);
+      //   if (request.data.table === "memberData") await this.guilds.get(request.data.guildId).members.fetch(request.data.memberId).updateCache(request.data.key, request.data.value);
+      //   if (request.data.table === "userData") await this.users.fetch(request.data.id).updateCache(request.data.key, request.data.value);
+      // } catch (error) {
+      //   return console.error(error);
+      // }
     }
   }
 
@@ -186,9 +188,8 @@ module.exports = class Miyako extends Client {
   _dashboardInit(guild, request) {
     this.dashboard.send(JSON.stringify({
       ...request, // Merge the request object with this object.
-      "recipient": "dashboard",
       "op": "initB",
-      "queue": guild.player ? guild.player.queue ? guild.player.queue : false : false,
+      "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],
       "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
       "time": guild.player ? guild.player.musicPlayTime() : false
     }));

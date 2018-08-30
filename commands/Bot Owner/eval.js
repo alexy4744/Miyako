@@ -39,15 +39,18 @@ module.exports = class extends Command {
         });
       }
 
+      evaled = evaled.replace(this.client.token, "SIKE");
+      evaled = evaled.replace(process.env.BOT_IDENTIFIER, "SIKE");
+
       if (evaled.length < 2000) {
-        msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled.replace(this.client.token, "SIKE")}\n\`\`\`\n**Type**\n\`\`\`js\n${typeof type}\`\`\``);
+        msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled}\n\`\`\`\n**Type**\n\`\`\`js\n${typeof type}\`\`\``);
       } else {
-        snekfetch.post(`https://hastebin.com/documents`).send(evaled.replace(this.client.token, "SIKE")).then(url => { // eslint-disable-line
+        snekfetch.post(`https://hastebin.com/documents`).send(evaled).then(url => { // eslint-disable-line
           return msg.channel.send(`Results have been uploaded onto Hastebin as it exceeded 2000 characters!\n**https://hastebin.com/${url.body.key}**`, {
             files: [
               {
                 name: "output.txt",
-                attachment: Buffer.from(evaled.replace(this.client.token, "SIKE"))
+                attachment: Buffer.from(evaled)
               }
             ]
           });

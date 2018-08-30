@@ -11,7 +11,6 @@ module.exports = class Lavalink extends EventEmitter {
     this.port = options.port || 80;
     this.APIport = options.APIport || 2333;
 
-    this.dashboard = new WebSocket(`ws://localhost:4000`);
     this.ws = new WebSocket(`ws://${this.host}:${this.port}`, {
       headers: {
         "User-Id": this.id,
@@ -40,11 +39,10 @@ module.exports = class Lavalink extends EventEmitter {
 
     if (target && target === "lavalink") return; // eslint-disable-line
     else { // eslint-disable-line
-      obj.id = obj.guildId || obj.guild_id;
-      obj.recipient = "dashboard";
-      obj.queue = this.client.guilds.has(obj.id) ? this.client.guilds.get(obj.id).player ? this.client.guilds.get(obj.id).player.queue : null : null;
+      if (!obj.id && (obj.guildId || obj.guild_id)) obj.id = obj.guildId || obj.guild_id;
+      obj.queue = this.client.guilds.has(obj.id) ? this.client.guilds.get(obj.id).player ? this.client.guilds.get(obj.id).player.queue : [] : [];
 
-      return this.dashboard.send(JSON.stringify(obj), err => {
+      return this.client.dashboard.send(JSON.stringify(obj), err => {
         if (err) return console.error(err); // Send it over to the web dashboard also.
       });
     }
