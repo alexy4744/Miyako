@@ -1,1 +1,1 @@
-module.exports = client => client.cache.get(client.user.id).commandsPerSecond++;
+module.exports = client => client.commandsPerSecond++;

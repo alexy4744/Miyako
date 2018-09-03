@@ -19,10 +19,6 @@ module.exports = async client => {
   } catch (error) {
     throw error;
   } finally {
-    client.cache.set(process.env.BOTID, {
-      "messagesPerSecond": 0,
-      "commandsPerSecond": 0
-    });
     await client.updateCache();
   }
 };

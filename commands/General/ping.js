@@ -19,7 +19,6 @@ module.exports = class extends Command {
 
   async run(msg) {
     const init = Date.now(); // Get the ms before editing the message.
-    console.log("yo1")
     const datebasePing = await this.client.db.ping().catch(() => "Failed");
     const message = await msg.channel.send({
       embed: {

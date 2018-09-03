@@ -1,8 +1,8 @@
 /* eslint no-undefined: 0 */
 /* eslint no-use-before-define: 0 */
 
-const chalk = require("chalk");
 const { Client } = require("discord.js");
+const chalk = require("chalk");
 const WebSocket = require("ws");
 const RethinkDB = require("../database/methods");
 const Lavalink = require("../music/methods");
@@ -34,12 +34,14 @@ module.exports = class Miyako extends Client {
 
     Object.assign(this, {
       "owner": options.owner,
-      "prefix": options.prefix
+      "prefix": options.prefix,
+      "messagesPerSecond": 0,
+      "commandsPerSecond": 0
     });
 
     this.setInterval(() => {
-      this.cache.get(process.env.BOTID).messagesPerSecond = 0;
-      this.cache.get(process.env.BOTID).commandsPerSecond = 0;
+      this.messagesPerSecond = 0;
+      this.commandsPerSecond = 0;
     }, 1100);
 
     this.db.on("updated", () => this.updateCache());
@@ -92,12 +94,9 @@ module.exports = class Miyako extends Client {
      * since the command could be sent in DMs rather than a guild text channel.
      */
 
-    // Declaring a reference for this because cmdRun() cannot access this client class.
-    const _this = this; // eslint-disable-line
-
     const inhibitors = Object.keys(this.inhibitors);
 
-    if (inhibitors.length < 1) return cmdRun(); // If there's no inhibitors, just run the command.
+    if (inhibitors.length < 1) return cmdRun(this); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 
@@ -111,12 +110,14 @@ module.exports = class Miyako extends Client {
     }
 
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
-    if (count >= inhibitors.length) return cmdRun();
+    if (count >= inhibitors.length) return cmdRun(this);
 
-    function cmdRun() {
+    function cmdRun(client) {
       cmd.run(msg, args);
-      const finalizers = Object.keys(_this.finalizers);
-      if (finalizers.length > 0) for (const finalizer of finalizers) _this.finalizers[finalizer](_this);
+      const finalizers = Object.keys(client.finalizers);
+      if (finalizers.length < 1) return null;
+      for (const finalizer of finalizers) client.finalizers[finalizer](client);
+      return null;
     }
   }
 
@@ -157,7 +158,6 @@ module.exports = class Miyako extends Client {
   _wssInit(guild, request) {
     this.wss.send(JSON.stringify({
       ...request, // Merge the request object with this object.
-      "op": "initB",
       "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],
       "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
       "time": guild.player ? guild.player.musicPlayTime() : false
