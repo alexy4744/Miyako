@@ -6,7 +6,7 @@ const { Client } = require("discord.js");
 const WebSocket = require("ws");
 const RethinkDB = require("../database/methods");
 const Lavalink = require("../music/methods");
-require("../structures/Structures")();
+require("./Structures")();
 
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
@@ -24,31 +24,29 @@ module.exports = class Miyako extends Client {
     });
 
     Object.assign(this, {
-      "_cache": new Map(),
+      "cache": new Map(),
       "categories": new Set(),
       "userCooldowns": new Set(),
-      "player": new Lavalink(this, options.id, { port: 6666 }),
-      "db": new RethinkDB("clientData", options.id),
-      "dashboard": new WebSocket(options.wsAddress)
+      "player": new Lavalink(this, { port: 6666 }),
+      "db": new RethinkDB("clientData", process.env.BOTID),
+      "wss": new WebSocket(process.env.WEBSOCKETSERVER)
     });
 
     Object.assign(this, {
       "owner": options.owner,
-      "prefix": options.prefix,
-      "messagesPerSecond": 0,
-      "commandsPerSecond": 0
+      "prefix": options.prefix
     });
 
     this.setInterval(() => {
-      this.messagesPerSecond = 0;
-      this.commandsPerSecond = 0;
+      this.cache.get(process.env.BOTID).messagesPerSecond = 0;
+      this.cache.get(process.env.BOTID).commandsPerSecond = 0;
     }, 1100);
 
     this.db.on("updated", () => this.updateCache());
 
-    this.dashboard.on("open", this._dashboardOnOpen.bind(this));
-    this.dashboard.on("error", this._dashboardOnError.bind(this));
-    this.dashboard.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    this.wss.on("open", this._wssOnOpen.bind(this));
+    this.wss.on("error", this._wssOnError.bind(this));
+    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
 
     this.player.on("error", err => console.error(err));
 
@@ -70,7 +68,7 @@ module.exports = class Miyako extends Client {
           guild.player.musicPause = new Date();
           guild.player.playing = false;
 
-          this.dashboard.send(JSON.stringify({
+          this.wss.send(JSON.stringify({
             "op": "finished",
             "id": guild.id
           }));
@@ -116,55 +114,48 @@ module.exports = class Miyako extends Client {
     if (count >= inhibitors.length) return cmdRun();
 
     function cmdRun() {
-      _this.commandsPerSecond += 1;
       cmd.run(msg, args);
       const finalizers = Object.keys(_this.finalizers);
-      if (finalizers.length < 1) return null;
-      for (const finalizer of finalizers) _this.finalizers[finalizer](_this);
-      return null;
+      if (finalizers.length > 0) for (const finalizer of finalizers) _this.finalizers[finalizer](_this);
     }
   }
 
   async updateCache() {
     const data = await this.db.get();
-    return this._cache.set(process.env.BOTID, data);
+    return this.cache.set(process.env.BOTID, data);
   }
 
+  /* Handle request sent by the websocket server */
   _handleRequests(data) {
     const request = JSON.parse(data);
+    const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
 
-    if (request.event === "connection") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.dashboard.url})`)}`);
+    if (request.event === "connection") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.wss.url})`)}`);
 
-    if (request.op) {
-      const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
-
-      try {
-        if (request.op === "pause") return this.player.pause(guild);
-        else if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
-        else if (request.op === "resume") return this.player.resume(guild);
-        else if (request.op === "skip") return this.player.skip(guild);
-        else if (request.op === "leave") return this.player.leave(guild);
-        else if (request.op === "init") return this._dashboardInit(guild, request);
-      } catch (error) {
-        return console.error(error);
-      }
+    if (request.op && guild) {
+      if (request.op === "pause") return this.player.pause(guild);
+      else if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
+      else if (request.op === "resume") return this.player.resume(guild);
+      else if (request.op === "skip") return this.player.skip(guild);
+      else if (request.op === "leave") return this.player.leave(guild);
+      else if (request.op === "init") return this._wssInit(guild, request);
     }
   }
 
-  _dashboardOnOpen() {
-    this.dashboard.send(JSON.stringify({
+  _wssOnOpen() {
+    this.wss.send(JSON.stringify({
       "op": "identify",
       "identifier": process.env.BOT_IDENTIFIER
     }));
   }
 
-  _dashboardOnError(error) {
-    this.dashboard = null;
+  _wssOnError(error) {
+    this.wss = null;
     return console.error(error);
   }
 
-  _dashboardInit(guild, request) {
-    this.dashboard.send(JSON.stringify({
+  _wssInit(guild, request) {
+    this.wss.send(JSON.stringify({
       ...request, // Merge the request object with this object.
       "op": "initB",
       "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],

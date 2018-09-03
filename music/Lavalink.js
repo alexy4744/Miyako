@@ -2,10 +2,9 @@ const EventEmitter = require("events");
 const WebSocket = require("ws");
 
 module.exports = class Lavalink extends EventEmitter {
-  constructor(client, botId, options = {}) {
+  constructor(client, options = {}) {
     super();
     this.client = client;
-    this.id = botId;
     this.shards = options.shard || 1;
     this.host = options.host || "localhost";
     this.port = options.port || 80;
@@ -13,7 +12,7 @@ module.exports = class Lavalink extends EventEmitter {
 
     this.ws = new WebSocket(`ws://${this.host}:${this.port}`, {
       headers: {
-        "User-Id": this.id,
+        "User-Id": process.env.BOTID,
         "Num-Shards": this.shards,
         "Authorization": options.password || "youshallnotpass"
       }
@@ -42,9 +41,7 @@ module.exports = class Lavalink extends EventEmitter {
       if (!obj.id && (obj.guildId || obj.guild_id)) obj.id = obj.guildId || obj.guild_id;
       obj.queue = this.client.guilds.has(obj.id) ? this.client.guilds.get(obj.id).player ? this.client.guilds.get(obj.id).player.queue : [] : [];
 
-      return this.client.dashboard.send(JSON.stringify(obj), err => {
-        if (err) return console.error(err); // Send it over to the web dashboard also.
-      });
+      return this.client.wss.send(obj);
     }
   }
 

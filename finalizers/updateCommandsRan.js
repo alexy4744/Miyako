@@ -9,8 +9,6 @@ module.exports = async client => {
 
     return client.db.update({
       "commandsRan": clientData.commandsRan
-    }).then(() => client.updateCache("commandsRan", clientData.commandsRan)
-      .catch(() => { }))
-      .catch(() => { }); // Don't really care if it errors, not really an important finalizer
+    }).catch(() => { }); // Don't really care if it errors, not really an important finalizer
   }
 };
