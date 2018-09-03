@@ -54,7 +54,6 @@ module.exports = class extends Command {
           await msg.guild.db.update({
             "muteRoleId": role.id
           });
-          await msg.guild.updateCache("muteRoleId", role.id);
         } catch (error) {
           return msg.error(error, `mute ${member.user.tag}!`);
         }
@@ -100,7 +99,6 @@ module.exports = class extends Command {
           await this.client.db.update({
             "mutedMembers": clientData.mutedMembers
           });
-          await this.client.updateCache("mutedMembers", clientData.mutedMembers);
         }
 
         await member.roles.add(role);

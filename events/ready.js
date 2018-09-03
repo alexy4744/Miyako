@@ -1,8 +1,8 @@
 const chalk = require("chalk");
+const os = require("os-utils");
 
 module.exports = client => {
   const readyMessage = [
-    `${client.dashboard ? `🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${client.dashboard.url})` : `❌  ${chalk.red("Failed")} to connect to the main websocket server!`}`,
     `👍  ${Object.keys(client.events).length.toLocaleString()} events ${chalk.green("loaded!")}`,
     `👍  ${Object.keys(client.inhibitors).length.toLocaleString()} inhibitors ${chalk.green("loaded!")}`,
     `👍  ${Object.keys(client.commands).length.toLocaleString()} commands ${chalk.green("loaded!")}`,
@@ -12,5 +12,21 @@ module.exports = client => {
     `🚀  ${client.user.tag} is ${chalk.green("ready!")} Serving for ${client.guilds.size.toLocaleString()} guilds and ${client.users.size.toLocaleString()} users!`
   ];
 
-  return readyMessage.forEach(msg => console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`));
+  readyMessage.forEach(msg => console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`));
+
+  client.setInterval(async () => { // Send new stats to the websocket server every second as long as the client has not been destroyed.
+    client.dashboard.send(JSON.stringify({
+      ...await os.allStats(),
+      "op": "stats",
+      "commands": Object.keys(client.commands).length.toLocaleString(),
+      "commandsRan": client.cache && client.cache.commandsRan ? client.cache.commandsRan.toLocaleString() : "Still retrieving...",
+      "commandsPerSecond": client.commandsPerSecond.toLocaleString(),
+      "messagesPerSecond": client.messagesPerSecond.toLocaleString(),
+      "memoryUsed": process.memoryUsage().heapUsed / 1024 / 1024,
+      "guilds": client.guilds.size.toLocaleString(),
+      "channels": client.channels.size.toLocaleString(),
+      "users": client.users.size.toLocaleString(),
+      "uptime": client.uptime
+    }));
+  }, 1000);
 };

@@ -36,9 +36,7 @@ module.exports = class extends Command {
 
     return this.client.db.update({
       "globallyDisabled": data.globallyDisabled
-    }).then(() => this.client.updateCache("globallyDisabled", data.globallyDisabled)
-      .then(() => msg.success(`"${cmd.options.name}" is now globally enabled!`))
-      .catch(e => msg.error(e, "globally enable this command!")))
+    }).then(() => msg.success(`"${cmd.options.name}" is now globally enabled!`))
       .catch(error => msg.error(error, "globally enable this command!"));
   }
 };

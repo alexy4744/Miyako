@@ -1,4 +1,4 @@
-  /* eslint curly: 0 */
+/* eslint curly: 0 */
 
 const Database = require("./rethinkdb");
 
@@ -15,7 +15,7 @@ module.exports = class RethinkDB extends Database {
       this.ready(this.tableName).then(ready => {
         if (ready === true) {
           this.insertDocument(this.tableName, object)
-            .then(changes => resolve(changes))
+            .then(changes => resolve(this._finished(changes)))
             .catch(e => reject(e));
         } else reject(new Error(`${this.tableName} is still not ready after 5 attempts while inserting objects into this table.`));
       }).catch(e => reject(e));
@@ -29,11 +29,11 @@ module.exports = class RethinkDB extends Database {
           this.has().then(has => { // Check if it has this record.
             if (has) { // If it has, then directly update the datebase.
               this.updateDocument(this.tableName, this.id, object)
-                .then(changes => resolve(changes))
+                .then(changes => resolve(this._finished(changes)))
                 .catch(e => reject(e));
             } else { // If it doesn't have this record,
               object.id = this.id; // Make a new property that corresponds to this id inside of the provided object, then insert it into the database.
-              this.insert(object).then(changes => resolve(changes)).catch(e => reject(e));
+              this.insert(object).then(changes => resolve(this._finished(changes))).catch(e => reject(e));
             }
           }).catch(e => reject(e));
         } else reject(new Error(`${this.tableName} is still not ready after 5 attempts while updating ${this.id}.`));
@@ -48,7 +48,7 @@ module.exports = class RethinkDB extends Database {
           this.has().then(has => {
             if (has) {
               this.replaceDocument(this.tableName, this.id, object)
-                .then(changes => resolve(changes))
+                .then(changes => resolve(this._finished(changes)))
                 .catch(e => reject(e));
             } else reject(new Error(`There is nothing to replace as this ID does not exist in ${this.tableName}!`));
           }).catch(e => reject(e));
@@ -64,7 +64,7 @@ module.exports = class RethinkDB extends Database {
           this.has().then(has => {
             if (has) {
               this.deleteDocument(this.tableName, this.id)
-                .then(changes => resolve(changes))
+                .then(changes => resolve(this._finished(changes)))
                 .catch(e => reject(e));
             } else reject(new Error(`${this.id} cannot be removed from ${this.tableName} as it does not exists!`));
           }).catch(e => reject(e));
@@ -145,5 +145,10 @@ module.exports = class RethinkDB extends Database {
         }
       }).catch(e => reject(e));
     });
+  }
+
+  _finished(changes) {
+    this.emit("updated", changes);
+    return changes;
   }
 };

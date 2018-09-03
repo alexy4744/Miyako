@@ -48,7 +48,6 @@ module.exports = class extends Command {
           await this.client.db.update({
             "mutedMembers": clientData.mutedMembers
           });
-          await this.client.updateCache("mutedMembers", clientData.mutedMembers);
         }
 
         await member.roles.remove(role);

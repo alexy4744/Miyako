@@ -90,7 +90,6 @@ module.exports = class extends Command {
               await msg.client.db.update({
                 "bannedMembers": clientData.bannedMembers
               });
-              await msg.client.updateCache("bannedMembers", clientData.bannedMembers);
             } catch (error) {
               return msg.error(error, `ban ${guildMember.user.tag}!`);
             }
@@ -113,7 +112,6 @@ module.exports = class extends Command {
                     await msg.client.db.update({
                       "bannedMembers": clientData.bannedMembers
                     });
-                    await msg.client.updateCache("bannedMembers", clientData.bannedMembers);
                   } catch (error) {
                     // noop
                   }

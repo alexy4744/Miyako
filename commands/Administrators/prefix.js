@@ -35,9 +35,7 @@ module.exports = class extends Command {
 
     return msg.guild.db.update({
       "prefix": newPrefix
-    }).then(() => msg.guild.updateCache("prefix", newPrefix)
-      .then(() => msg.success(`I have succesfully re-assigned the prefix to "${newPrefix}"`))
-      .catch(e => msg.error(e, "re-assign the prefix")))
+    }).then(() => msg.success(`I have succesfully re-assigned the prefix to "${newPrefix}"`))
       .catch(e => msg.error(e, "re-assign the prefix"));
   }
 };

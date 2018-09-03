@@ -1,11 +1,12 @@
 /* eslint no-undefined: 0 */
 
-module.exports = async (client, msg) => {
-  if (msg.guild && msg.guild.cache === undefined) await msg.guild.updateCache().catch(() => { });
+module.exports = (client, msg) => {
+  client.messagesPerSecond += 1;
+
   if (msg.author.bot) return;
   if (msg.guild && !msg.guild.me.hasPermission("SEND_MESSAGES")) return; // If bot doesn't have the permissions to send messages, dont even check for command.
 
-  const prefix = msg.guild ? msg.guild.cache ? msg.guild.cache.prefix ? msg.guild.cache.prefix : client.prefix : client.prefix : client.prefix;
+  const prefix = client._cache.has(msg.guild.id) ? client._cache.get(msg.guild.id).prefix ? client._cache.get(msg.guild.id).prefix : "m$" : "m$";
 
   if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
 

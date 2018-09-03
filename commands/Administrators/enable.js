@@ -37,9 +37,7 @@ module.exports = class extends Command {
 
     return msg.guild.db.update({
       "disabledCommands": filteredCommands
-    }).then(() => msg.guild.updateCache("disabledCommands", filteredCommands)
-      .then(() => msg.success(`I have successfully enabled "${args[0]}"`))
-      .catch(e => msg.error(e, "enable this command")))
+    }).then(() => msg.success(`I have successfully enabled "${args[0]}"`))
       .catch(e => msg.error(e, "enable this command"));
   }
 };

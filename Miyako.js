@@ -4,7 +4,7 @@ const Miyako = require("./structures/Client");
 const client = new Miyako({
   "owner": process.env.OWNER,
   "prefix": process.env.PREFIX,
-  "id": "415313696102023169",
+  "id": process.env.BOTID,
   "wsAddress": "ws://localhost:4000",
   "clientOptions": {
     "disabledEvents": ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],

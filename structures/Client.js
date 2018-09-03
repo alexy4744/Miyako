@@ -1,6 +1,7 @@
 /* eslint no-undefined: 0 */
 /* eslint no-use-before-define: 0 */
 
+const chalk = require("chalk");
 const { Client } = require("discord.js");
 const WebSocket = require("ws");
 const RethinkDB = require("../database/methods");
@@ -23,6 +24,7 @@ module.exports = class Miyako extends Client {
     });
 
     Object.assign(this, {
+      "_cache": new Map(),
       "categories": new Set(),
       "userCooldowns": new Set(),
       "player": new Lavalink(this, options.id, { port: 6666 }),
@@ -32,8 +34,17 @@ module.exports = class Miyako extends Client {
 
     Object.assign(this, {
       "owner": options.owner,
-      "prefix": options.prefix
+      "prefix": options.prefix,
+      "messagesPerSecond": 0,
+      "commandsPerSecond": 0
     });
+
+    this.setInterval(() => {
+      this.messagesPerSecond = 0;
+      this.commandsPerSecond = 0;
+    }, 1100);
+
+    this.db.on("updated", () => this.updateCache());
 
     this.dashboard.on("open", this._dashboardOnOpen.bind(this));
     this.dashboard.on("error", this._dashboardOnError.bind(this));
@@ -71,7 +82,7 @@ module.exports = class Miyako extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, cmd, args) {
+  runCmd(msg, cmd, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -85,15 +96,6 @@ module.exports = class Miyako extends Client {
 
     // Declaring a reference for this because cmdRun() cannot access this client class.
     const _this = this; // eslint-disable-line
-
-    try {
-      if (this.cache === undefined) await this.updateCache();
-      if (msg.author.cache === undefined) await msg.author.updateCache();
-      if (msg.member && msg.member.cache === undefined) await msg.member.updateCache();
-      if (msg.guild && msg.guild.cache === undefined) await msg.guild.updateCache();
-    } catch (error) {
-      return msg.error(error, `execute this command!`);
-    }
 
     const inhibitors = Object.keys(this.inhibitors);
 
@@ -114,6 +116,7 @@ module.exports = class Miyako extends Client {
     if (count >= inhibitors.length) return cmdRun();
 
     function cmdRun() {
+      _this.commandsPerSecond += 1;
       cmd.run(msg, args);
       const finalizers = Object.keys(_this.finalizers);
       if (finalizers.length < 1) return null;
@@ -122,34 +125,18 @@ module.exports = class Miyako extends Client {
     }
   }
 
-  /**
-   * Update the client's cache.
-   * @param {String} key The key to manually update the cache by.
-   * @param {String} value The value to set the key manually by.
-   * @returns {Promise<Object>} The updated key of the client's cache.
-   */
-  updateCache(key, value) {
-    return new Promise((resolve, reject) => {
-      this.db.get().then(data => resolve(this.cache = data)).catch(e => {
-        // If what ever reason it fails to get from database, try to manually update the key with the new value for the cache.
-        if (key && value) {
-          if (!this.cache) this.cache = {};
-          return resolve(this.cache[key] = value);
-        } else { // eslint-disable-line
-          if (this.cache === undefined) reject(e); // eslint-disable-line
-          else return this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
-        }
-      });
-    });
+  async updateCache() {
+    const data = await this.db.get();
+    return this._cache.set(process.env.BOTID, data);
   }
 
-  async _handleRequests(data) {
-    // Since the database is all updated in the dashboard's backend, all it has to do here is updating the cache for the bot.
+  _handleRequests(data) {
     const request = JSON.parse(data);
+
+    if (request.event === "connection") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.dashboard.url})`)}`);
 
     if (request.op) {
       const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
-      if (!guild) return;
 
       try {
         if (request.op === "pause") return this.player.pause(guild);
@@ -161,15 +148,6 @@ module.exports = class Miyako extends Client {
       } catch (error) {
         return console.error(error);
       }
-    } else {
-      // try {
-      //   if (request.data.table === "clientData") await this.updateCache(request.data.key, request.data.value);
-      //   if (request.data.table === "guildData") await this.guilds.get(request.data.id).updateCache(request.data.key, request.data.value);
-      //   if (request.data.table === "memberData") await this.guilds.get(request.data.guildId).members.fetch(request.data.memberId).updateCache(request.data.key, request.data.value);
-      //   if (request.data.table === "userData") await this.users.fetch(request.data.id).updateCache(request.data.key, request.data.value);
-      // } catch (error) {
-      //   return console.error(error);
-      // }
     }
   }
 

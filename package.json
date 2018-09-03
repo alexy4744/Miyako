@@ -24,6 +24,7 @@
     "js-beautify": "^1.7.5",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
+    "os-utils": "github:alexy4744/os-utils",
     "request-promise-native": "^1.0.5",
     "rethinkdbdash": "^2.3.31",
     "snekfetch": "^4.0.4",

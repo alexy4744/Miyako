@@ -1,6 +1,7 @@
 const r = require("rethinkdbdash")();
+const EventEmitter = require("events");
 
-module.exports = class Database {
+module.exports = class Database extends EventEmitter {
   ping() {
     return new Promise((resolve, reject) => {
       const init = Date.now();

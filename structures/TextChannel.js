@@ -3,8 +3,8 @@ const { Structures, Collection } = require("discord.js");
 Structures.extend("TextChannel", TextChannel => {
   class MiyakoChannel extends TextChannel {
     // https://github.com/discordjs/discord.js/blob/master/src/structures/interfaces/TextBasedChannel.js#L110
-    async send(...params) {
-      const msg = await super.send(...params).catch(e => console.log(e)); // Ignore any errors while sending the message
+    async send(...args) {
+      const msg = await super.send(...args).catch(e => console.log(e)); // Ignore any errors while sending the message
       if (msg) {
         if (!msg.guild.myMessages) msg.guild.myMessages = new Collection();
         if (!msg.guild.myMessages.has(msg.channel.id)) msg.guild.myMessages.set(msg.channel.id, []);

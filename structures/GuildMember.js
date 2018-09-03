@@ -8,27 +8,13 @@ Structures.extend("GuildMember", GuildMember => {
     constructor(...args) {
       super(...args);
       this.db = new RethinkDB("memberData", this.id);
+      this.db.on("updated", () => this.updateCache());
+      this.cache = this.client._cache.get(this.id);
     }
 
-    /**
-     * Update the member's cache.
-     * @param {String} key The key to manually update the cache by.
-     * @param {String} value The value to set the key manually by.
-     * @returns {Promise<Object>} The updated key of the member's cache.
-     */
-    updateCache(key, value) {
-      return new Promise((resolve, reject) => {
-        this.db.get().then(data => resolve(this.cache = data)).catch(e => {
-          // If what ever reason it fails to get from database, try to manually update the key with the new value for the cache.
-          if (key && value) {
-            if (!this.cache) this.cache = {};
-            return resolve(this.cache[key] = value);
-          } else { // eslint-disable-line
-            if (this.cache === undefined) reject(e); // eslint-disable-line
-            else return this.db.replace(this.cache).then(() => reject(e)).catch(err => reject(err));
-          }
-        });
-      });
+    async updateCache() {
+      const data = await this.db.get();
+      return this.client._cache.set(this.id, data);
     }
   }
 
