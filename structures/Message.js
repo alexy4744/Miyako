@@ -78,9 +78,9 @@ Structures.extend("Message", Message => {
       if (options.filter && !this.client.utils.is.function(options.filter)) throw new Error("Filter is not a function");
 
       return new Promise(async (resolve, reject) => {
-        if (this.guild.me.hasPermission("ADD_REACTIONS")) {
-          const yes = options.emojis.yes ? options.emojis.yes : this.emojis.success[0];
-          const no = options.emojis.no ? options.emojis.no : this.emojis.fail[0];
+        if ((this.guild && this.guild.me.hasPermission("ADD_REACTIONS")) || !this.guild) {
+          const yes = options.emojis && options.emojis.yes ? options.emojis.yes : this.emojis.success[0];
+          const no = options.emojis && options.emojis.no ? options.emojis.no : this.emojis.fail[0];
           const filter = options.filter ? options.filter : (reaction, user) => (reaction.emoji.name === yes || reaction.emoji.name === no) && user.id === id && !user.bot;
 
           try {

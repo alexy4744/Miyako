@@ -10,11 +10,12 @@ Structures.extend("Guild", Guild => {
       super(...args);
       this.db = new RethinkDB("guildData", this.id);
       this.db.on("updated", () => this.updateCache());
-      this.cache = this.client.cache.get(this.id);
     }
 
     async updateCache() {
       const data = await this.db.get();
+      if (!this.cache) this.cache = {};
+      this.cache = data;
       return this.client.cache.set(this.id, data);
     }
 

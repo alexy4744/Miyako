@@ -9,7 +9,6 @@ Structures.extend("User", User => {
       super(...args);
       this.db = new RethinkDB("userData", this.id);
       this.db.on("updated", () => this.updateCache());
-      this.cache = this.client.cache.get(this.id);
     }
 
     getAvatar(resolution) {
@@ -23,7 +22,12 @@ Structures.extend("User", User => {
 
     async updateCache() {
       const data = await this.db.get();
-      return this.client.cache.set(this.id, data);
+
+      if (!this.cache) this.cache = {};
+
+      for (const property in data) { // Merge the object
+        if (this.cache[property] === undefined) this.cache[property] = data[property];
+      }
     }
   }
 

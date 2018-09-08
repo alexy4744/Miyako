@@ -15,6 +15,7 @@ module.exports = class Miyako extends Client {
 
     Object.assign(this, {
       "events": {},
+      "monitors": {},
       "inhibitors": {},
       "finalizers": {},
       "commands": {},
@@ -82,7 +83,7 @@ module.exports = class Miyako extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  runCmd(msg, cmd, args) {
+  async runCmd(msg, cmd, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -93,6 +94,11 @@ module.exports = class Miyako extends Client {
      * There will always be client and user objects, but not member and guild objects,
      * since the command could be sent in DMs rather than a guild text channel.
      */
+
+    if (!this.cache.has(msg.author.id)) { // Might need to move this to the message event for other purposes than running commands
+      await msg.author.updateCache();
+      await msg.member.updateCache();
+    }
 
     const inhibitors = Object.keys(this.inhibitors);
 
