@@ -21,6 +21,7 @@
     "dotenv": "^6.0.0",
     "erlpack": "github:discordapp/erlpack",
     "fs-nextra": "^0.3.5",
+    "get-urls": "^8.0.0",
     "html-metadata": "^1.7.0",
     "js-beautify": "^1.7.5",
     "moment": "^2.22.2",

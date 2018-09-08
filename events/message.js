@@ -13,7 +13,7 @@ module.exports = async (client, msg) => {
   for (const monitor in client.monitors) { // eslint-disable-line
     try {
       if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
-      count += client.monitors[monitor](client, msg); // Inhibitors returns 1 if it doesn't fail or return any error.
+      count += await client.monitors[monitor](client, msg); // Inhibitors returns 1 if it doesn't fail or return any error.
     } catch (error) {
       break;
     }

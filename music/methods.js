@@ -1,16 +1,44 @@
 const Lavalink = require("../music/Lavalink");
+const regexps = require("./regexps");
+const scraper = require("../utils/scraper");
 const snekfetch = require("snekfetch");
 
-module.exports = class extends Lavalink {
+module.exports = class LavalinkMethods extends Lavalink {
   constructor(...args) { super(...args); } // eslint-disable-line
 
   async getSong(query) {
+    let found = false;
+    let source;
+
+    for (const regex in regexps) { // eslint-disable-line
+      for (const src in regexps[regex]) {
+        if (Array.isArray(regexps[regex][src])) {
+          for (const pattern of regexps[regex][src]) {
+            if (pattern.test(query)) {
+              found = true;
+              source = regex;
+              break;
+            }
+          }
+        } else if (regexps[regex][src].test(query)) {
+          found = true;
+          source = regex;
+          break;
+        }
+      }
+
+      if (found) break;
+    }
+
+    if (!found) {
+      query = `ytsearch:${query}`;
+      source = "youtube";
+    }
+
     const res = await snekfetch.get(`http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`)
-      .query({ identifier: `ytsearch:${query}` })
+      .query({ identifier: query })
       .set("Authorization", "youshallnotpass")
-      .catch(error => ({
-        "error": error
-      }));
+      .catch(error => ({ "error": error }));
 
     if (res.error) return Promise.reject(res.error);
     if (!res) return Promise.reject(new Error(`I couldn't GET from http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`));
@@ -19,21 +47,33 @@ module.exports = class extends Lavalink {
       track.info.looped = false;
       track.info.loadType = res.body.loadType;
       track.info.playlistInfo = res.body.playlistInfo;
+      track.info.source = source;
     }
 
     return Promise.resolve(res.body.tracks);
   }
 
   // Always get the highest quality thumbnail if possible
-  async getThumbnail(videoId) {
-    const res = await snekfetch.get(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet&key=${process.env.YT}`).catch(e => ({
-      "error": e
-    }));
+  async getThumbnail(source, trackInfo) {
+    if (source === "youtube") {
+      const res = await snekfetch.get(`https://www.googleapis.com/youtube/v3/videos?id=${trackInfo.identifier}&part=snippet&key=${process.env.YT}`).catch(e => ({
+        "error": e
+      }));
 
-    if (res.error) return `http://i3.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+      if (res.error) return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
 
-    if (res.body.items[0].snippet.thumbnails.maxres) return res.body.items[0].snippet.thumbnails.maxres.url;
-    else return `http://i3.ytimg.com/vi/${videoId}/hqdefault.jpg`; // eslint-disable-line
+      if (res.body.items[0].snippet.thumbnails.maxres) return res.body.items[0].snippet.thumbnails.maxres.url;
+
+      return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
+    } else if (source === "soundcloud") {
+      const res = await scraper(trackInfo.uri).catch(e => ({
+        "error": e
+      }));
+
+      if (res.error) return null;
+
+      return res.openGraph.image.url;
+    }
   }
 
   play(guild, track, target) {

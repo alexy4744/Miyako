@@ -1,4 +1,5 @@
 const Command = require("../../modules/Command");
+const moment = require("moment");
 
 module.exports = class extends Command {
   constructor(...args) {
@@ -32,15 +33,13 @@ module.exports = class extends Command {
       };
     }
 
-    const track = await this.client.player.getSong(args.join(" ")).catch(error => ({
-      "error": error
-    }));
+    const track = await this.client.player.getSong(args.join(" ")).catch(error => ({ "error": error }));
 
     if (track.error) return msg.error(track.error, `play this track!`);
     if (track.length < 1) return msg.fail(`No search results have returned!`);
     if (track[0].info.loadType === "LOAD_FAILED") return msg.fail(`"${track[0].info.title}" has failed to load!`);
 
-    track[0].info.thumbnail = await this.client.player.getThumbnail(track[0].info.identifier);
+    track[0].info.thumbnail = await this.client.player.getThumbnail(track[0].info.source, track[0].info);
 
     msg.guild.player.queue.push(track[0]);
 
@@ -54,7 +53,8 @@ module.exports = class extends Command {
     return msg.channel.send({
       embed: {
         title: `▶${msg.emojis.bar}Track has been added to the queue!`,
-        description: `[${track[0].info.title}](${track[0].info.uri})`,
+        description: `**Title**: [**${track[0].info.title}**](${track[0].info.uri})\n\n**Duration**: ${track[0].info.length}\n\n**Position**: #${msg.guild.player.queue.length}`,
+        thumbnail: { "url": track[0].info.thumbnail || null },
         color: msg.colors.default
       }
     });

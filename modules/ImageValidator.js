@@ -19,10 +19,12 @@ module.exports = class ImageValidator {
 
   init() {
     return new Promise(async (resolve, reject) => {
-      const buffer = await snekfetch.get(this.src).then(res => res.body).catch(e => ({ "error": e }));
+      let buffer = await snekfetch.get(this.src).catch(e => ({ "error": e }));
       if (buffer.error) return reject(buffer.error);
+      if (!buffer.headers["content-type"].match(/image\//)) return reject(new Error("The source did not return an image."));
+
+      buffer = buffer.body;
       if (!(buffer instanceof Buffer)) return reject(new Error("The image source did not return a buffer!"));
-      if (!buffer.headers["content-type"].match(/image\//)) return reject(new Error("The source did not return a valid image."));
 
       this.image.src = this.src;
       this.image.onerror = error => reject(error);
@@ -105,13 +107,14 @@ module.exports = class ImageValidator {
 
       let currentDistance = 1;
 
-      // Find the image that perceptually matches this image the most from the array of hashs.
+      // Find a hash that is most similar to the hash of this image
       for (const currentHash of hashArray) {
         if (currentHash.length !== 64 || isNaN(currentHash)) continue;
         const distance = hammingDistance(this.hash, currentHash);
         if (distance < currentDistance) currentDistance = distance;
       }
 
+      // If the most similar hash is less than 15% in differences (about 10 different bits), then it is similar enough to be resolved as true.
       if (currentDistance < 0.15) return resolve(true);
       else return resolve(false); // eslint-disable-line
     });

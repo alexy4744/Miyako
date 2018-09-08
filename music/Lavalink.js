@@ -41,7 +41,7 @@ module.exports = class Lavalink extends EventEmitter {
       if (!obj.id && (obj.guildId || obj.guild_id)) obj.id = obj.guildId || obj.guild_id;
       obj.queue = this.client.guilds.has(obj.id) ? this.client.guilds.get(obj.id).player ? this.client.guilds.get(obj.id).player.queue : [] : [];
 
-      return this.client.wss.send(obj);
+      return this.client.wss.send(JSON.stringify(obj));
     }
   }
 
