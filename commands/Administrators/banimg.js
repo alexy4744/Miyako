@@ -20,19 +20,29 @@ module.exports = class extends Command {
     });
   }
 
-  run(msg, args) {
+  async run(msg, args) {
     const messages = Array.from(msg.channel.messages);
 
     let found = false;
 
     if (args[0]) return validateImage(args[0]);
 
+    const pendingMessage = await msg.channel.send({
+      embed: {
+        title: `${msg.emojis.pending}Attempting to find the last message sent with an attachment...`,
+        color: msg.colors.pending
+      }
+    });
+
     for (let i = messages.length - 1; i > 0; i--) { // Start from the last message sent going backward.
       if (found) break;
       if (messages[i][1].attachments.size > 0) messages[i][1].attachments.forEach(attachment => validateImage(attachment.url, messages[i][1]));
     }
 
-    if (!found) return msg.fail(`I could not find any image attachments in the last couple of messages in this channel!`);
+    if (!found) {
+      await pendingMessage.delete().catch(() => { });
+      return msg.fail(`I could not find any image attachments in the last couple of messages in this channel!`);
+    }
 
     async function validateImage(url, m) {
       found = true;
@@ -41,6 +51,8 @@ module.exports = class extends Command {
       const image = await Validator.init().catch(e => ({ "error": e }));
 
       if (image.error) return msg.error(image.error, `ban this image!`);
+
+      await pendingMessage.delete().catch(() => { });
 
       const message = await msg.channel.send({
         embed: {
@@ -61,13 +73,15 @@ module.exports = class extends Command {
         const messageToDelete = m ? await m.delete().catch(e => ({ "error": e })) : null;
 
         try {
-          await Validator.saveBuffer(msg.guild);
+          await Validator.saveImage(msg.guild);
           message.success(`This image has been successfully banned!`, messageToDelete && messageToDelete.error ? `However this image needs to be deleted manually from the channel, as I have encountered an error while doing so` : null);
         } catch (error) {
           message.error(error, `ban this image!`);
         }
 
         await message.delete().catch(() => { });
+      } else if (!confirmation) {
+        return msg.cancelledCommand();
       }
     }
   }

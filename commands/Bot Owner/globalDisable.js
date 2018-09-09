@@ -35,9 +35,11 @@ module.exports = class extends Command {
     data.globallyDisabled.push(cmd.options.name);
     for (const alias of cmd.options.aliases) data.globallyDisabled.push(alias);
 
-    return this.client.db.update({
-      "globallyDisabled": data.globallyDisabled
-    }).then(() => msg.success(`"${cmd.options.name}" is now globally disabled!`))
-      .catch(error => msg.error(error, "globally enable this command!"));
+    try {
+      await this.client.db.update({ "globallyDisabled": data.globallyDisabled });
+      return msg.success(`"${cmd.options.name}" is now globally disabled!`);
+    } catch (error) {
+      return msg.error(error, "globally enable this command!");
+    }
   }
 };

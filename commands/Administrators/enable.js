@@ -35,9 +35,11 @@ module.exports = class extends Command {
     // Filter the array currently stored in the db, so that it does not contain the command aliases or the name
     const filteredCommands = data.disabledCommands.filter(command => !cmd.options.aliases.includes(command) && command !== args[0] && command !== cmd.options.name);
 
-    return msg.guild.db.update({
-      "disabledCommands": filteredCommands
-    }).then(() => msg.success(`I have successfully enabled "${args[0]}"`))
-      .catch(e => msg.error(e, "enable this command"));
+    try {
+      await msg.guild.db.update({ "disabledCommands": filteredCommands });
+      return msg.success(`I have successfully enabled "${args[0]}"`);
+    } catch (error) {
+      return msg.error(error, "enable this command");
+    }
   }
 };

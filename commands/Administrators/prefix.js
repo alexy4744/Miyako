@@ -33,9 +33,11 @@ module.exports = class extends Command {
     // Default prefix is v$, so if there's no entry for this guild, then the prefix must be the default.
     if ((!data.prefix && newPrefix === this.client.prefix) || data.prefix === newPrefix) return msg.fail(`"${newPrefix}" is already the current prefix!`);
 
-    return msg.guild.db.update({
-      "prefix": newPrefix
-    }).then(() => msg.success(`I have succesfully re-assigned the prefix to "${newPrefix}"`))
-      .catch(e => msg.error(e, "re-assign the prefix"));
+    try {
+      await msg.guild.db.update({ "prefix": newPrefix });
+      return msg.success(`I have succesfully re-assigned the prefix to "${newPrefix}"`);
+    } catch (error) {
+      return msg.error(error, "re-assign the prefix");
+    }
   }
 };

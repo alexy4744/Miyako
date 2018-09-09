@@ -63,6 +63,11 @@ module.exports = class Miyako extends Client {
           guild.player.musicPause = null;
 
           this.player.send({
+            "op": "stop",
+            "guildId": guild.id
+          }, "lavalink");
+
+          this.player.send({
             "op": "play",
             "guildId": guild.id,
             "track": guild.player.queue[0].track
@@ -145,7 +150,7 @@ module.exports = class Miyako extends Client {
       else if (request.op === "resume") return this.player.resume(guild);
       else if (request.op === "skip") return this.player.skip(guild);
       else if (request.op === "leave") return this.player.leave(guild);
-      else if (request.op === "init") return this._wssInit(guild, request);
+      else if (request.op === "init") return this._playerInit(guild, request);
     }
   }
 
@@ -161,7 +166,7 @@ module.exports = class Miyako extends Client {
     return console.error(error);
   }
 
-  _wssInit(guild, request) {
+  _playerInit(guild, request) {
     this.wss.send(JSON.stringify({
       ...request, // Merge the request object with this object.
       "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],

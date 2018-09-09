@@ -1,5 +1,7 @@
 const Command = require("../../modules/Command");
 const moment = require("moment");
+const momentDurationFormatSetup = require("moment-duration-format");
+momentDurationFormatSetup(moment);
 
 module.exports = class extends Command {
   constructor(...args) {
@@ -53,7 +55,7 @@ module.exports = class extends Command {
     return msg.channel.send({
       embed: {
         title: `▶${msg.emojis.bar}Track has been added to the queue!`,
-        description: `**Title**: [**${track[0].info.title}**](${track[0].info.uri})\n\n**Duration**: ${track[0].info.length}\n\n**Position**: #${msg.guild.player.queue.length}`,
+        description: `**Title**: [**${track[0].info.title}**](${track[0].info.uri})\n\n**Duration**: ${moment.duration(track[0].info.length, "milliseconds").format()}\n\n**Position**: #${msg.guild.player.queue.length}`,
         thumbnail: { "url": track[0].info.thumbnail || null },
         color: msg.colors.default
       }

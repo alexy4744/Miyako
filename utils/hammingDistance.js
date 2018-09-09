@@ -5,7 +5,7 @@ module.exports = (x, y) => {
 
   let difference = 0;
 
-  for (let i = 0; i < x.length; i++) if (x[i] ^ y[i] > 1) difference++; // Check if this bit on the first hash is different from the second hash
+  for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) difference++; // Check if this bit on the first hash is different from the second hash
 
-  return difference / x.length;
+  return difference / x.length; // Return it as a percentage
 };

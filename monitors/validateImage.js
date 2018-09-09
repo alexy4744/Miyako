@@ -28,7 +28,7 @@ module.exports = async (client, msg) => {
 
     if (image.error) return 1;
 
-    const match = await validator.matchArray(msg.guild.cache.imageHashes).catch(err => ({ "error": err }));
+    const match = await validator.matchArray(msg.guild.cache.imageHashes, msg.guild.cache.imageBuffers).catch(err => ({ "error": err }));
 
     if (match.error) return 1;
 

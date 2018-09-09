@@ -38,9 +38,11 @@ module.exports = class extends Command {
     data.disabledCommands.push(cmd.options.name || args[0]);
     cmd.options.aliases.forEach(alias => data.disabledCommands.push(alias));
 
-    return msg.guild.db.update({
-      "disabledCommands": data.disabledCommands
-    }).then(() => msg.success(`I have successfully disabled "${args[0]}"`))
-      .catch(e => msg.error(e, "disable this command"));
+    try {
+      await msg.guild.db.update({ "disabledCommands": data.disabledCommands });
+      return msg.success(`I have successfully disabled "${args[0]}"`);
+    } catch (error) {
+      return msg.error(error, "disable this command");
+    }
   }
 };

@@ -62,11 +62,12 @@ module.exports = class extends Command {
       }
 
       if (member.roles.has(role.id)) {
+        const cache = this.client.cache.get(this.client.user.id);
         let muteData;
 
-        if (this.client.cache && this.client.cache.mutedMembers) {
-          const index = this.client.cache.mutedMembers.findIndex(el => el.memberId === member.id);
-          if (index > -1) muteData = this.client.cache.mutedMembers[index];
+        if (cache && cache.mutedMembers) {
+          const index = cache.mutedMembers.findIndex(el => el.memberId === member.id);
+          if (index > -1) muteData = cache.mutedMembers[index];
         }
 
         if (muteData && muteData.mutedUntil && muteData.mutedBy) {
@@ -78,7 +79,7 @@ module.exports = class extends Command {
           return msg.fail(`${member.user.tag} is already muted by ${muter.user.tag}!`, `**Muted Until**: ${moment(muteData.mutedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}`);
         }
 
-        return msg.fail(`${member.user.tag} is already muted!`);
+        return msg.fail(`${member.user.tag} is already muted indefinitely until this member is manually unmuted!`);
       }
 
       try {

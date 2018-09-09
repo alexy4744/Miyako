@@ -26,7 +26,7 @@ module.exports = class extends Command {
           {
             "name": `📈${msg.emojis.bar}Statistics`,
             "value": `
-**Username**: ${this.client.user.tag} (\`${this.client.user.id}\`)\n
+**Username**: ${this.client.user.toString()} (\`${this.client.user.id}\`)\n
 **Owner**: ${this.client.users.get(this.client.owner).tag} (\`${this.client.owner}\`)\n
 **Created On**: ${moment(this.client.user.createdAt).format("dddd, MMMM Do YYYY, hh:mm:ss A")}\n
 **Uptime**: ${moment.duration(this.client.uptime).format(" D [days], H [hours], m [minutes], s [seconds]")}\n
@@ -35,7 +35,7 @@ module.exports = class extends Command {
 **Channels**: \`${this.client.channels.size.toLocaleString()}\`\n
 **Emojis**: \`${this.client.emojis.size.toLocaleString()}\`\n
 **Commands**: \`${Object.keys(this.client.commands).length.toLocaleString()}\`\n
-**Commands Ran**: \`${this.client.cache && this.client.cache.commandsRan ? this.client.cache.commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
+**Commands Ran**: \`${this.client.cache.get(this.client.user.id).commandsRan ? this.client.cache.get(this.client.user.id).commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
           },
           {
             "name": `🖥${msg.emojis.bar}System Information`,
@@ -50,7 +50,8 @@ module.exports = class extends Command {
             "name": `🔗${msg.emojis.bar}Links`,
             "value": `
 **Invite URL**: **${await this.client.generateInvite().then(link => link.replace("permissions=0", "permissions=8")).catch(() => "Failed to generate an invite link")}**\n
-**Github Repository**: **https://github.com/alexy4744/${this.client.user.username}**`
+**GitHub Repository**: **https://github.com/alexy4744/${this.client.user.username}**\n
+**Real Time Statistics**: **https://miyako.xyz/stats**`
           }
         ],
         thumbnail: {
