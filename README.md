@@ -1,5 +1,5 @@
 # Miyako
-## A WIP Discord bot with powerful moderation/anti-raid features.
+### A WIP Discord bot with powerful moderation/anti-raid features.
 ### As of now, it has the ability to:
 **1.** Detect images that are perceptually similar against banned images set by the administrators.
 
