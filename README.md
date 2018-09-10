@@ -21,6 +21,8 @@
 # Prerequisite
 1. **[Node.js 10.10.0](https://nodejs.org/en/download/current/)**
 
+#
+
 # Hosting Miyako locally (Ubuntu)
 **1.** Clone this repository along with Miyako's dashboard
 ```bash
