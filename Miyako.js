@@ -1,4 +1,4 @@
-require("dotenv").config({ "path": `${__dirname}\\process.env` });
+require("dotenv").config({ "path": `${__dirname}${process.platform === "linux" ? "/" : "\\"}process.env` });
 
 const Miyako = require("./structures/Miyako");
 const client = new Miyako({
