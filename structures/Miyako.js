@@ -30,7 +30,7 @@ module.exports = class Miyako extends Client {
       "userCooldowns": new Set(),
       "player": new Lavalink(this, { port: 6666 }),
       "db": new RethinkDB("clientData", process.env.BOTID),
-      "wss": new WebSocket(process.env.WEBSOCKETSERVER)
+      "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
     });
 
     Object.assign(this, {

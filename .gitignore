@@ -1,7 +1,11 @@
 # Bot files
 config.json
 process.env
+
+# Certificates / Amazon Web Services
 *.pem
+*.ppk
+*.key
 
 # Lavalink
 Lavalink.jar*
