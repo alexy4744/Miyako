@@ -1,0 +1,1 @@
+mongod --dbpath="c:\data\miyako" --bind_ip 127.0.0.1

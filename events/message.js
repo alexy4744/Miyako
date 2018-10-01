@@ -3,10 +3,7 @@
 module.exports = async (client, msg) => {
   client.messagesPerSecond++;
 
-  if (msg.guild) {
-    if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return; // If bot doesn't have the permissions to send messages, dont even check for command.
-    else if (!client.cache.has(msg.guild.id)) await msg.guild.updateCache();
-  }
+  if (msg.guild && !msg.guild.me.hasPermission("SEND_MESSAGES")) return; 
 
   let count = 0;
 
@@ -23,7 +20,7 @@ module.exports = async (client, msg) => {
 
   if (msg.author.bot) return;
 
-  const prefix = client.cache.has(msg.guild.id) ? client.cache.get(msg.guild.id).prefix ? client.cache.get(msg.guild.id).prefix : client.prefix : client.prefix;
+  const prefix = client.prefix;
 
   if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
 

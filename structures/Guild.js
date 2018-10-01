@@ -2,23 +2,9 @@
 /* eslint curly: 0 */
 
 const { Structures } = require("discord.js");
-const RethinkDB = require("../database/methods");
 
 Structures.extend("Guild", Guild => {
   class MiyakoGuild extends Guild {
-    constructor(...args) {
-      super(...args);
-      this.db = new RethinkDB("guildData", this.id);
-      this.db.on("updated", () => this.updateCache());
-    }
-
-    async updateCache() {
-      const data = await this.db.get();
-      if (!this.cache) this.cache = {};
-      this.cache = data;
-      return this.client.cache.set(this.id, data);
-    }
-
     /**
      * Find a member that matches the best to the given query.
      * @param {String} query The query to find by.

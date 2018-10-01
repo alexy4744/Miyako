@@ -4,14 +4,13 @@
 const { Client } = require("discord.js");
 const chalk = require("chalk");
 const WebSocket = require("ws");
-const RethinkDB = require("../database/methods");
 const Lavalink = require("../music/methods");
 require("./Structures")();
 
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    for (const option in options.clientOptions) Object.assign(this.options, { [option]: options.clientOptions[option] }); // eslint-disable-line
+    Object.assign(this.options, options.clientOptions);
 
     Object.assign(this, {
       "events": {},
@@ -25,11 +24,15 @@ module.exports = class Miyako extends Client {
     });
 
     Object.assign(this, {
-      "cache": new Map(),
+      "cache": {
+        "me": new Map(),
+        "users": new Map(),
+        "guilds": new Map(),
+        "members": new Map()
+      },
       "categories": new Set(),
       "userCooldowns": new Set(),
       "player": new Lavalink(this, { port: 6666 }),
-      "db": new RethinkDB("clientData", process.env.BOTID),
       "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
     });
 
@@ -45,11 +48,9 @@ module.exports = class Miyako extends Client {
       this.commandsPerSecond = 0;
     }, 1100);
 
-    this.db.on("updated", () => this.updateCache());
-
-    this.wss.on("open", this._wssOnOpen.bind(this));
-    this.wss.on("error", this._wssOnError.bind(this));
-    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    // this.wss.on("open", this._wssOnOpen.bind(this));
+    // this.wss.on("error", this._wssOnError.bind(this));
+    // this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
 
     this.player.on("error", err => console.error(err));
 
@@ -85,6 +86,10 @@ module.exports = class Miyako extends Client {
     });
 
     require("../loaders/loader")(this);
+  }
+
+  async init() {
+
   }
 
   // Perform a check against all inhibitors before executing the command.
@@ -133,8 +138,8 @@ module.exports = class Miyako extends Client {
   }
 
   async updateCache() {
-    const data = await this.db.get();
-    return this.cache.set(process.env.BOTID, data);
+    // const data = await this.db.get();
+    // return this.cache.set(process.env.BOTID, data);
   }
 
   /* Handle request sent by the websocket server */

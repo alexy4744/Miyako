@@ -1,12 +1,10 @@
 const fs = require("fs-nextra");
 
-module.exports = client => {
-  require("./commandLoader")(client, fs);
-  require("./databaseLoader")(client);
-  require("./eventLoader")(client, fs);
-  require("./finalizerLoader")(client, fs);
-  require("./inhibitorLoader")(client, fs);
-  require("./monitorLoader")(client, fs);
-  require("./tasksLoader")(client, fs);
-  require("./utilitiesLoader")(client, fs);
+module.exports = async client => {
+  const loaders = await fs.readdir("./loaders").catch(e => { throw e; });
+
+  for (const loader of loaders) {
+    if (loader instanceof Promise) await require(`./${loader}`)(client, fs);
+    else require(`./${loader}`)(client, fs);
+  }
 };
