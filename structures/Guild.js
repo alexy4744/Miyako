@@ -1,10 +1,13 @@
-/* eslint no-undefined: 0 */
 /* eslint curly: 0 */
 
 const { Structures } = require("discord.js");
 
 Structures.extend("Guild", Guild => {
   class MiyakoGuild extends Guild {
+    get cache() {
+      return this.client.cache.guilds.get(this.id);
+    }
+
     /**
      * Find a member that matches the best to the given query.
      * @param {String} query The query to find by.

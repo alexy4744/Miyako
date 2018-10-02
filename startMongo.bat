@@ -1,1 +1,1 @@
-mongod --dbpath="c:\data\miyako" --bind_ip 127.0.0.1
+mongod --port 27017 --dbpath c:/data/miyako --replSet rs0 --bind_ip=0.0.0.0

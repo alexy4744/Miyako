@@ -1,7 +1,6 @@
 const chalk = require("chalk");
-const os = require("os-utils");
 
-module.exports = async client => {
+module.exports = client => {
   const readyMessage = [
     `👍  ${Object.keys(client.events).length.toLocaleString()} events ${chalk.green("loaded!")}`,
     `👍  ${Object.keys(client.inhibitors).length.toLocaleString()} inhibitors ${chalk.green("loaded!")}`,
@@ -13,20 +12,4 @@ module.exports = async client => {
   ];
 
   readyMessage.forEach(msg => console.log(`${chalk.green(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(msg)}`));
-
-  // client.setInterval(async () => { // Send new stats to the websocket server every second as long as the client has not been destroyed.
-  //   client.wss.send(JSON.stringify({
-  //     ...await os.allStats(),
-  //     "op": "stats",
-  //     "commands": Object.keys(client.commands).length.toLocaleString(),
-  //     // "commandsRan": client.cache.get(client.user.id).commandsRan ? client.cache.get(client.user.id).commandsRan.toLocaleString() : "Still retrieving...",
-  //     "commandsPerSecond": client.commandsPerSecond.toLocaleString(),
-  //     "messagesPerSecond": client.messagesPerSecond.toLocaleString(),
-  //     "memoryUsed": process.memoryUsage().heapUsed / 1024 / 1024,
-  //     "guilds": client.guilds.size.toLocaleString(),
-  //     "channels": client.channels.size.toLocaleString(),
-  //     "users": client.users.size.toLocaleString(),
-  //     "uptime": client.uptime
-  //   }));
-  // }, 1000);
 };

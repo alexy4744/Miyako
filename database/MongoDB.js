@@ -1,7 +1,9 @@
+const EventEmitter = require("events");
 const { MongoClient } = require("mongodb");
 
-class MongoDB {
+class MongoDB extends EventEmitter {
   constructor() {
+    super();
     this.database = null;
   }
 
@@ -13,13 +15,14 @@ class MongoDB {
 
   async _init() {
     await this._checkDatabase();
+    this._watch();
   }
 
   async _checkDatabase() {
     await this.connect().catch(error => { throw error; });
 
     const collections = await this.database.collections()
-      .then(cols => cols.map(collection => collection.s.name))
+      .then(colls => colls.map(collection => collection.s.name))
       .catch(e => ({ "error": e }));
 
     if (collections.error) throw collections.error;
@@ -36,6 +39,22 @@ class MongoDB {
         }
       }
     }
+
+    // Check whether the database has the document for the bot itself under the "client" collection.
+    const botDocument = await this.get("client", process.env.BOTID).catch(e => ({ "error": e }));
+    if (botDocument && botDocument.error) throw botDocument.error;
+
+    if (!botDocument) {
+      try {
+        await this.insert("client", { _id: process.env.BOTID });
+      } catch (error) {
+        throw error;
+      }
+    }
+  }
+
+  _watch() {
+    this.database.watch().on("change", data => this.emit("change", data));
   }
 
   async connect() {
@@ -44,13 +63,19 @@ class MongoDB {
     return Promise.resolve(this.database = connection.db("miyako"));
   }
 
+  async ping() {
+    const ping = await this.database.admin().ping().catch(e => ({ "error": e }));
+    if (ping.error) return Promise.reject(ping.error);
+    return Promise.resolve(ping);
+  }
+
   getCollection(where) {
     return new Promise((resolve, reject) => {
       if (!where) return reject(new Error("'where' needs to be specified as a string!"));
 
-      this.database.collection(where, { strict: true }, (error, col) => {
+      this.database.collection(where, { strict: true }, (error, coll) => {
         if (error) return reject(error);
-        return resolve(col);
+        return resolve(coll);
       });
     });
   }

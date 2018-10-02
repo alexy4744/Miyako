@@ -1,7 +1,8 @@
-require("dotenv").config({ "path": `${__dirname}${process.platform === "linux" ? "/" : "\\"}process.env` });
-
 const Miyako = require("./structures/Miyako");
 const MongoDB = require("./database/MongoDB");
+const path = require("path");
+
+require("dotenv").config({ "path": path.join(__dirname, "process.env") });
 
 (async () => {
   const Database = await MongoDB.create();
@@ -15,12 +16,16 @@ const MongoDB = require("./database/MongoDB");
     }
   });
 
+  const clientCache = await Database.get("client", process.env.BOTID).catch(e => ({ "error": e }));
+  if (clientCache.error) throw clientCache.error;
+  client.cache.client.set(process.env.BOTID, clientCache);
+
   client.db = Database;
+  client.db.on("change", data => client.updateCache(data));
 
   client.once("ready", () => client.events.ready(client));
   client.on("error", error => client.events.error(error));
-  client.on("guildCreate", guild => client.events.guildCreate(guild));
-  // client.on("message", msg => client.events.message(client, msg));
+  client.on("message", msg => client.events.message(client, msg));
 
   client.login(process.env.TOKEN).catch(error => { throw error; });
 })();

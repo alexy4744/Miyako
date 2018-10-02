@@ -6,7 +6,7 @@ const regex = /\.(jpe?g|png|gif|bmp|tiff)$/gi;
 
 module.exports = async (client, msg) => {
   if (!msg.guild) return 1;
-  if (!msg.guild.cache.imageHashes || msg.guild.cache.imageHashes.length < 1) return 1;
+  if (!msg.guild.cache || !msg.guild.cache.imageHashes || msg.guild.cache.imageHashes.length < 1) return 1;
 
   if (msg.attachments.size > 0) {
     for (const attachment of msg.attachments) {

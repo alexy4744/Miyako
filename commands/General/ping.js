@@ -19,7 +19,6 @@ module.exports = class extends Command {
 
   async run(msg) {
     const init = Date.now(); // Get the ms before editing the message.
-    const datebasePing = await this.client.db.ping().catch(() => "Failed");
     const message = await msg.channel.send({
       embed: {
         title: `⏱${msg.emojis.bar}Checking my latency!`,
@@ -39,11 +38,6 @@ module.exports = class extends Command {
           {
             "name": "Heartbeat \\💙",
             "value": `${String(Math.round(this.client.ping))} ms`,
-            "inline": true
-          },
-          {
-            "name": "Database Latency",
-            "value": `${String(datebasePing)} ms`,
             "inline": true
           }
         ],

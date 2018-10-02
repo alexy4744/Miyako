@@ -25,7 +25,7 @@ module.exports = class Miyako extends Client {
 
     Object.assign(this, {
       "cache": {
-        "me": new Map(),
+        "client": new Map(),
         "users": new Map(),
         "guilds": new Map(),
         "members": new Map()
@@ -88,12 +88,8 @@ module.exports = class Miyako extends Client {
     require("../loaders/loader")(this);
   }
 
-  async init() {
-
-  }
-
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, cmd, args) {
+  runCmd(msg, cmd, args) {
     /* Update the cache of the guild's database before checking inhibitors.
      * --------------------------------------------------------------------------------------------------------
      * Only caching because it would be superrr slowwww if each inhibitor had to await each method
@@ -104,11 +100,6 @@ module.exports = class Miyako extends Client {
      * There will always be client and user objects, but not member and guild objects,
      * since the command could be sent in DMs rather than a guild text channel.
      */
-
-    if (!this.cache.has(msg.author.id)) { // Might need to move this to the message event for other purposes than running commands
-      await msg.author.updateCache();
-      await msg.member.updateCache();
-    }
 
     const inhibitors = Object.keys(this.inhibitors);
 
@@ -137,9 +128,10 @@ module.exports = class Miyako extends Client {
     }
   }
 
-  async updateCache() {
-    // const data = await this.db.get();
-    // return this.cache.set(process.env.BOTID, data);
+  updateCache(data) {
+    if (!this.cache[data.ns.coll].has(data.documentKey._id)) return;
+    if (data.operationType === "delete") return this.cache[data.ns.coll].delete(data.documentKey._id);
+    if (data.operationType === "insert" || data.operationType === "replace") return this.cache[data.ns.coll].set(data.documentKey._id, data.fullDocument);
   }
 
   /* Handle request sent by the websocket server */
