@@ -132,6 +132,22 @@ module.exports = class Miyako extends Client {
     if (!this.cache[data.ns.coll].has(data.documentKey._id)) return;
     if (data.operationType === "delete") return this.cache[data.ns.coll].delete(data.documentKey._id);
     if (data.operationType === "insert" || data.operationType === "replace") return this.cache[data.ns.coll].set(data.documentKey._id, data.fullDocument);
+    if (data.operationType === "update") {
+      const updated = data.updateDescription.updatedFields; // Object with newly added properties
+      const removed = data.updateDescription.removedFields; // Array of removed property names
+      const cache = this.cache[data.ns.coll].get(data.documentKey._id);
+
+      if (Object.keys(removed).length > 0) {
+        for (const prop of removed) {
+          if (cache[prop]) delete cache[prop]; // If it has this property, then delete it.
+        }
+      }
+
+      this.cache[data.ns.coll].set(data.documentKey._id, {
+        ...cache,
+        ...updated
+      });
+    }
   }
 
   /* Handle request sent by the websocket server */

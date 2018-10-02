@@ -68,9 +68,7 @@ module.exports = class extends Command {
       // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
       if (guildMember.bannable) {
         if (days) { // Only save it to the database if this is a timed ban.
-          const clientData = await msg.client.db.get().catch(e => ({
-            "error": e
-          }));
+          const clientData = await msg.client.db.get("client", msg.client.user.id).catch(e => ({ "error": e }));
 
           if (clientData.error) return msg.error(clientData.error, `ban ${guildMember.user.tag}!`);
           if (!(clientData.bannedMembers instanceof Array)) clientData.bannedMembers = [];
@@ -80,47 +78,43 @@ module.exports = class extends Command {
             clientData.bannedMembers.push({
               "memberId": guildMember.id,
               "guildId": msg.guild.id,
-              "reason": reason.length > 0 ? reason : null,
-              "bannedBy": msg.author.id,
-              "bannedOn": Date.now(),
               "bannedUntil": days ? Date.now() + days : null
             });
 
             try {
-              await msg.client.db.update({
-                "bannedMembers": clientData.bannedMembers
-              });
+              await msg.client.db.update("client", clientData);
             } catch (error) {
               return msg.error(error, `ban ${guildMember.user.tag}!`);
             }
           }
         }
 
-        return guildMember.ban({
-          "reason": reason
-        }).then(() => msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason ? reason : `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`))
-          .catch(e => {
-            // Only revert database if it is a timed ban.
-            // Ignoring errors because I can check if this member is actually banned later in my loop
-            if (days) {
-              msg.client.db.get().then(async clientData => {
-                const index = clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id);
+        try {
+          await guildMember.ban({ reason });
+          return msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason ? reason : `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`);
+        } catch (error) {
+          // Only revert database if it is a timed ban.
+          // Ignoring errors because I can check if this member is actually banned later in my loop
+          if (days) {
+            try {
+              const clientData = await msg.client.db.get("client", msg.client.user.id);
+              const index = clientData.bannedMembers.findIndex(el => el.memberId === guildMember.id);
 
-                if (index > -1) {
-                  try {
-                    clientData.bannedMembers.splice(index, 1);
-                    await msg.client.db.update({
-                      "bannedMembers": clientData.bannedMembers
-                    });
-                  } catch (error) {
-                    // noop
-                  }
+              if (index > -1) {
+                try {
+                  clientData.bannedMembers.splice(index, 1);
+                  await msg.client.db.update("client", clientData);
+                } catch (err) {
+                  // noop
                 }
-              }).catch(() => { });
+              }
+            } catch (e) {
+              // noop
             }
+          }
 
-            return msg.error(e, `ban ${guildMember.user.tag}!`); // eslint-disable-line
-          });
+          return msg.error(e, `ban ${guildMember.user.tag}!`); // eslint-disable-line
+        }
       } else { // eslint-disable-line
         return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);
       }

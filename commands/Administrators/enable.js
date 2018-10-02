@@ -20,11 +20,8 @@ module.exports = class extends Command {
   async run(msg, args) {
     if (!this.client.commands[args[0]] && !this.client.aliases[args[0]]) return msg.fail(`Please enter a valid command to be enabled!`);
 
-    const data = await msg.guild.db.get().catch(e => ({
-      "error": e
-    }));
-
-    if (data.error) return msg.error(data.error, "enable this command");
+    const data = await this.client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
+    if (data && data.error) return msg.error(data.error, "enable this command");
 
     if (!data.disabledCommands) data.disabledCommands = [];
 
@@ -36,7 +33,7 @@ module.exports = class extends Command {
     const filteredCommands = data.disabledCommands.filter(command => !cmd.options.aliases.includes(command) && command !== args[0] && command !== cmd.options.name);
 
     try {
-      await msg.guild.db.update({ "disabledCommands": filteredCommands });
+      await this.client.db.update("guilds", { ...data, "disabledCommands": filteredCommands });
       return msg.success(`I have successfully enabled "${args[0]}"`);
     } catch (error) {
       return msg.error(error, "enable this command");

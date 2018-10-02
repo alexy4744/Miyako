@@ -51,9 +51,7 @@ module.exports = class extends Command {
         if (role.error) return msg.error(role.error, `mute ${member.user.tag}!`);
 
         try {
-          await msg.guild.db.update({
-            "muteRoleId": role.id
-          });
+          await this.client.db.update("guilds", { _id: msg.guild.id, "muteRoleId": role.id });
         } catch (error) {
           return msg.error(error, `mute ${member.user.tag}!`);
         }
@@ -90,16 +88,10 @@ module.exports = class extends Command {
           clientData.mutedMembers.push({
             "memberId": member.id,
             "guildId": msg.guild.id,
-            "muteRoleId": role.id,
-            "mutedBy": msg.author.id,
-            "mutedSince": Date.now(),
-            "mutedUntil": days ? Date.now() + days : null,
-            "reason": reason
+            "mutedUntil": days ? Date.now() + days : null
           });
 
-          await this.client.db.update({
-            "mutedMembers": clientData.mutedMembers
-          });
+          await this.client.db.update("client", clientData);
         }
 
         await member.roles.add(role);

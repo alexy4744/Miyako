@@ -24,11 +24,8 @@ module.exports = class extends Command {
 
     if (cmd.options.guarded) return msg.fail(`${msg.author.username}, this command is guarded and cannot be disabled!`);
 
-    const data = await msg.guild.db.get().catch(e => ({
-      "error": e
-    }));
-
-    if (data.error) return msg.error(data.error, "disable this command");
+    const data = await this.client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
+    if (data && data.error) return msg.error(data.error, "disable this command");
 
     if (!data.disabledCommands) data.disabledCommands = [];
 
@@ -39,7 +36,7 @@ module.exports = class extends Command {
     cmd.options.aliases.forEach(alias => data.disabledCommands.push(alias));
 
     try {
-      await msg.guild.db.update({ "disabledCommands": data.disabledCommands });
+      await this.client.db.update("guilds", data);
       return msg.success(`I have successfully disabled "${args[0]}"`);
     } catch (error) {
       return msg.error(error, "disable this command");

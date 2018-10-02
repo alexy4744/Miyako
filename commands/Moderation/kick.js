@@ -66,7 +66,6 @@ module.exports = class extends Command {
       if (guildMember.kickable) {
         try {
           await guildMember.kick(reason);
-
           return msg.success(`${guildMember.user.tag} has been succesfully kicked by ${msg.author.tag}!`, `${reason ? `**Reason**: ${reason}` : ``}`);
         } catch (error) {
           return msg.error(error, `kick ${guildMember.user.tag}!`);
