@@ -150,6 +150,10 @@ module.exports = class Miyako extends Client {
     }
   }
 
+  get myCache() {
+    return this.cache.client.get(process.env.BOTID);
+  }
+
   /* Handle request sent by the websocket server */
   _handleRequests(data) {
     const request = JSON.parse(data);

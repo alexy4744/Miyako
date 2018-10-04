@@ -23,7 +23,6 @@ module.exports = class extends Command {
   async run(msg, args) {
     let member = msg.mentions.members.size > 0 ? msg.mentions.members.first() : args[0] !== undefined ? args[0] : null; // eslint-disable-line
     args = args.filter(arg => (member instanceof Object) ? arg !== member.toString() : arg !== member); // Remove member from array of arguments
-    const reason = args.join(" ").length > 0 ? args.join(" ") : null; // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
 
     if (!member) return msg.fail(`Please mention the member or enter their username/ID in order for me to unmute them!`);
 
@@ -32,32 +31,26 @@ module.exports = class extends Command {
       else member = msg.guild.findMember(member);
     }
 
-    if (member.manageable) { // If Miyako can assign new roles to this member
-      const role = msg.guild.cache.muteRoleId || null;
+    if (member.manageable) return msg.fail("I can't unmute a member with higher privilege/roles than me!");
 
-      if (!role || !msg.guild.roles.has(role) || !member.roles.has(role)) return msg.fail(`${member.user.tag} is already unmuted!`);
+    const role = msg.guild.cache.muteRole || null;
+    if (!role || !msg.guild.roles.has(role) || !member.roles.has(role)) return msg.fail(`${member.user.tag} is already unmuted!`);
 
-      try {
-        const clientData = await this.client.db.get();
+    try {
+      const clientCache = this.client.myCache;
 
-        if (clientData.mutedMembers instanceof Array) {
-          const index = clientData.mutedMembers.findIndex(el => el.memberId === member.id);
+      if (clientCache.mutedMembers instanceof Array) {
+        const index = clientCache.mutedMembers.findIndex(el => el.memberId === member.id);
+        if (index > -1) clientCache.mutedMembers.splice(index, 1);
 
-          if (index > -1) clientData.mutedMembers.splice(index, 1);
-
-          await this.client.db.update({
-            "mutedMembers": clientData.mutedMembers
-          });
-        }
-
-        await member.roles.remove(role);
-
-        return msg.success(`${member.user.tag} has been succesfully unmuted by ${msg.author.tag}!`, `${reason ? `**Reason**: ${reason}` : ``}`);
-      } catch (error) {
-        return msg.error(error, `unmute ${member.user.tag}!`);
+        await this.client.db.update("client", clientCache);
       }
-    } else {
-      return msg.fail("I can't unmute a member with higher privilege/roles than me!");
+
+      await member.roles.remove(role);
+
+      return msg.success(`${member.user.tag} has been succesfully unmuted by ${msg.author.tag}!`);
+    } catch (error) {
+      return msg.error(error, `unmute ${member.user.tag}!`);
     }
   }
 };

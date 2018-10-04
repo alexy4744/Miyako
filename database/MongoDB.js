@@ -27,7 +27,7 @@ class MongoDB extends EventEmitter {
 
     if (collections.error) throw collections.error;
 
-    const expectedCollections = ["client", "users", "guilds", "members", "sessions"];
+    const expectedCollections = ["client", "users", "guilds", "members", "tasks", "sessions"];
 
     /* Create the collection if it does not currently exists */
     for (const collection of expectedCollections) {
