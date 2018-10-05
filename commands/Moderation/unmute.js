@@ -31,7 +31,7 @@ module.exports = class extends Command {
       else member = msg.guild.findMember(member);
     }
 
-    if (member.manageable) return msg.fail("I can't unmute a member with higher privilege/roles than me!");
+    if (!member.manageable) return msg.fail("I can't unmute a member with higher privilege/roles than me!");
 
     const role = msg.guild.cache.muteRole || null;
     if (!role || !msg.guild.roles.has(role) || !member.roles.has(role)) return msg.fail(`${member.user.tag} is already unmuted!`);

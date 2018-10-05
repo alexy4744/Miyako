@@ -73,7 +73,7 @@ module.exports = class extends Command {
           "memberId": member.id,
           "guildId": msg.guild.id,
           "muteRole": role,
-          "mutedUntil": days ? Date.now() + days : null
+          "mutedUntil": Date.now() + days
         });
 
         await this.client.db.update("client", clientCache);
