@@ -1,6 +1,21 @@
-/* eslint no-use-before-define: 0 */
-
 module.exports = client => {
+  const updateDatabase = async cache => {
+    try {
+      await client.db.update("client", cache);
+    } catch (error) {
+      // Ignore all errors as it can try again in the next interval.
+    }
+  };
+
+  const removeFromDatabase = (cache, memberId) => {
+    const index = cache.bannedMembers.findIndex(el => el.memberId === memberId);
+
+    if (index > -1) {
+      cache.bannedMembers.splice(index, 1);
+      return updateDatabase(cache);
+    }
+  };
+
   client.setInterval(async () => { // Using setInterval from client so that if the client gets destroyed, it will stop the interval.
     const cache = client.myCache;
 
@@ -30,21 +45,4 @@ module.exports = client => {
       }
     }
   }, 5000);
-
-  function removeFromDatabase(cache, memberId) {
-    const index = cache.bannedMembers.findIndex(el => el.memberId === memberId);
-
-    if (index > -1) {
-      cache.bannedMembers.splice(index, 1);
-      return updateDatabase(cache);
-    }
-  }
-
-  async function updateDatabase(cache) {
-    try {
-      await client.db.update("client", cache);
-    } catch (error) {
-      // Ignore all errors as it can try again in the next interval.
-    }
-  }
 };

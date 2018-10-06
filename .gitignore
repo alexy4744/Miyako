@@ -10,10 +10,6 @@ process.env
 # Lavalink
 Lavalink.jar*
 
-# RethinkDB
-rethinkdb.exe*
-rethinkdb_data/
-
 # Visual Studio Code Workspace
 .eslintrc.json*
 .vscode/

@@ -90,17 +90,7 @@ module.exports = class Miyako extends Client {
 
   // Perform a check against all inhibitors before executing the command.
   runCmd(msg, cmd, args) {
-    /* Update the cache of the guild's database before checking inhibitors.
-     * --------------------------------------------------------------------------------------------------------
-     * Only caching because it would be superrr slowwww if each inhibitor had to await each method
-     * for the database, while this takes less than 0.05 milliseconds for the bot to execute a command.
-     * --------------------------------------------------------------------------------------------------------
-     * Check for undefined only because null is valid if the record doesn't exist.
-     * --------------------------------------------------------------------------------------------------------
-     * There will always be client and user objects, but not member and guild objects,
-     * since the command could be sent in DMs rather than a guild text channel.
-     */
-
+    // TODO: Update author/member cache if needed below this line
     const inhibitors = Object.keys(this.inhibitors);
 
     if (inhibitors.length < 1) return cmdRun(this); // If there's no inhibitors, just run the command.
@@ -130,7 +120,7 @@ module.exports = class Miyako extends Client {
 
   updateCache(data) {
     if (!this.cache[data.ns.coll].has(data.documentKey._id)) return;
-    if (data.operationType === "delete") return this.cache[data.ns.coll].delete(data.documentKey._id);
+    if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.cache[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
     if (data.operationType === "insert" || data.operationType === "replace") return this.cache[data.ns.coll].set(data.documentKey._id, data.fullDocument);
     if (data.operationType === "update") {
       const updated = data.updateDescription.updatedFields; // Object with newly added properties
@@ -139,7 +129,8 @@ module.exports = class Miyako extends Client {
 
       if (Object.keys(removed).length > 0) {
         for (const prop of removed) {
-          if (cache[prop]) delete cache[prop]; // If it has this property, then delete it.
+          if (cache[prop] === process.env.CLIENT_ID) continue; // Don't allow it to delete database reference of itself
+          else if (cache[prop]) delete cache[prop]; // If it has this property, then delete it.
         }
       }
 
@@ -151,10 +142,10 @@ module.exports = class Miyako extends Client {
   }
 
   get myCache() {
-    return this.cache.client.get(process.env.BOTID);
+    return this.cache.client.get(process.env.CLIENT_ID);
   }
 
-  /* Handle request sent by the websocket server */
+  /* Handle requests sent by the websocket server */
   _handleRequests(data) {
     const request = JSON.parse(data);
     const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;

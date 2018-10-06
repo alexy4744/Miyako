@@ -27,7 +27,7 @@ class MongoDB extends EventEmitter {
 
     if (collections.error) throw collections.error;
 
-    const expectedCollections = ["client", "users", "guilds", "members", "tasks", "sessions"];
+    const expectedCollections = ["client", "users", "guilds", "members"];
 
     /* Create the collection if it does not currently exists */
     for (const collection of expectedCollections) {
@@ -41,12 +41,12 @@ class MongoDB extends EventEmitter {
     }
 
     // Check whether the database has the document for the bot itself under the "client" collection.
-    const botDocument = await this.get("client", process.env.BOTID).catch(e => ({ "error": e }));
+    const botDocument = await this.get("client", process.env.CLIENT_ID).catch(e => ({ "error": e }));
     if (botDocument && botDocument.error) throw botDocument.error;
 
     if (!botDocument) {
       try {
-        await this.insert("client", { _id: process.env.BOTID });
+        await this.insert("client", { _id: process.env.CLIENT_ID });
       } catch (error) {
         throw error;
       }
@@ -58,7 +58,7 @@ class MongoDB extends EventEmitter {
   }
 
   async connect() {
-    const connection = await MongoClient.connect("mongodb://localhost:27017/").catch(e => ({ "error": e }));
+    const connection = await MongoClient.connect("mongodb://localhost:27017/", { useNewUrlParser: true }).catch(e => ({ "error": e }));
     if (connection.error) return Promise.reject(connection.error);
     return Promise.resolve(this.database = connection.db("miyako"));
   }
