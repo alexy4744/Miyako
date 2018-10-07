@@ -4,8 +4,22 @@ module.exports = async (client, msg) => {
   client.messagesPerSecond++;
 
   if (msg.guild) {
-    if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return; // If bot doesn't have the permissions to send messages, dont even check for command.
-    else if (!client.cache.has(msg.guild.id)) await msg.guild.updateCache();
+    if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return;
+    if (!client.cache.guilds.has(msg.guild.id)) { // If the cache does not exist in the Map, then cache it
+      let guildCache = await client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
+      if (guildCache && guildCache.error) return console.error(guildCache.error); // Silently fail if an error occurs
+
+      if (!guildCache) {
+        try {
+          guildCache = { _id: msg.guild.id };
+          await client.db.insert("guilds", guildCache);
+        } catch (error) {
+          return console.error(error); // Silently fail if an error occurs
+        }
+      }
+
+      client.cache.guilds.set(msg.guild.id, guildCache);
+    }
   }
 
   let count = 0;
@@ -20,10 +34,9 @@ module.exports = async (client, msg) => {
   }
 
   if (count < Object.keys(client.monitors).length) return;
-
   if (msg.author.bot) return;
 
-  const prefix = client.cache.has(msg.guild.id) ? client.cache.get(msg.guild.id).prefix ? client.cache.get(msg.guild.id).prefix : client.prefix : client.prefix;
+  const prefix = msg.guild.cache.prefix || client.prefix;
 
   if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
 

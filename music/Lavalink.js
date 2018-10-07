@@ -12,7 +12,7 @@ module.exports = class Lavalink extends EventEmitter {
 
     this.ws = new WebSocket(`ws://${this.host}:${this.port}`, {
       headers: {
-        "User-Id": process.env.BOTID,
+        "User-Id": process.env.CLIENT_ID,
         "Num-Shards": this.shards,
         "Authorization": options.password || "youshallnotpass"
       }

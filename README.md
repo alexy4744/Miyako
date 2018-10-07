@@ -10,7 +10,7 @@
 ### **[To Do List](https://trello.com/b/8oubeSKz/miyako)**
 [ ] Spam / mention spamming / new line / invite link / message filter.
 
-[ ] Chat slow mode
+[x] ~~Chat slow mode~~ Already got implemented by Discord's update.
 
 [ ] Some other anti-raid features I can't think of
 
@@ -19,9 +19,10 @@
 #### You can invite this bot to your guild via **[this link](https://discordapp.com/oauth2/authorize?client_id=415313696102023169&permissions=8&scope=bot)** or host it locally
 
 # Prerequisite
-1. **[Node.js 10.10.0](https://nodejs.org/en/download/current/)**
+1. **[Node.js >= 10.10.0](https://nodejs.org/en/download/current/)**
+2. **[MongoDB >= 4.0](https://www.mongodb.com/download-center?utm_source=manual&utm_campaign=download-mongodb-navbar-cta&utm_medium=docs#community)**
 
-#
+###
 
 # Hosting Miyako locally (Ubuntu)
 **1.** Clone this repository along with Miyako's dashboard
@@ -30,32 +31,24 @@ git clone https://github.com/alexy4744/Miyako.git
 git clone https://github.com/alexy4744/Miyako-Dashboard.git
 ```
 
-**2.** Install **[RethinkDB](https://www.rethinkdb.com/docs/install/ubuntu/)**
-```bash
-source /etc/lsb-release && echo "deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
-wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
-sudo apt-get update
-sudo apt-get install rethinkdb
-```
-
-**3.** Install Java version >= 10
+**2.** Install Java version >= 10
 ```bash 
 sudo add-apt-repository ppa:linuxuprising/java
 sudo apt-get update
 sudo apt-get install oracle-java10-installer
 ```
 
-**4.** Install node-gyp
+**3.** Install node-gyp
 ```bash
 sudo npm i -g node-gyp
 ```
 
-**5.** Install cairo and other canvas dependencies 
+**4.** Install cairo and other canvas dependencies 
 ```bash
 sudo apt install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev 
 ```
 
-**6.** Install dependencies
+**5.** Install dependencies
 ```bash
 sudo su
 sudo npm i
@@ -63,16 +56,9 @@ sudo npm i
 
 Also, download **[Lavalink](https://github.com/Frederikam/Lavalink)** and place it in `/Miyako/music/` folder.
 
-**7.** Rename `process.env.EXAMPLE` to `process.env` and replace each dummy value with actual values
+**6.** Rename `process.env.EXAMPLE` to `process.env` and replace each dummy value with actual values
 
-**First time starting up:**
-1. Start RethinkDB and Lavalink.
-2. Start Miyako to allow it to setup the database. Ignore any websocket connection errors.
-3. Quit Miyako.
-4. Start dashboard and websocket server.
-5. Start Miyako.
-
-**After that you can just run each part in this sequence now:**
-1. Start RethinkDB and Lavalink.
+**Start-up Process**
+1. Start MongoDB and Lavalink.
 2. Start dashboard and websocket server.
 3. Start Miyako.

@@ -34,82 +34,56 @@ module.exports = class extends Command {
       else member = msg.guild.findMember(member);
     }
 
-    if (member.manageable) { // If Miyako can assign new roles to this member
-      let role = msg.guild.cache.muteRoleId || null;
+    if (!member.manageable) return msg.fail("I can't mute a member with higher privilege/roles than me!");
 
-      if (!role || !msg.guild.roles.has(role)) {
+    let role = msg.guild.cache.muteRole || null;
+
+    if (!role || !msg.guild.roles.has(role)) {
+      try {
         role = await msg.guild.roles.create({
           "data": {
             "name": "Muted",
             "mentionable": false,
             "color": 0x6b6b6b
           }
-        }).catch(e => ({
-          "error": e
-        }));
+        }).then(r => r.id);
 
-        if (role.error) return msg.error(role.error, `mute ${member.user.tag}!`);
-
+        // Update the mute role of this guild with the newly created role.
         try {
-          await msg.guild.db.update({
-            "muteRoleId": role.id
+          await this.client.db.update("guilds", {
+            _id: msg.guild.id,
+            "muteRole": role
           });
         } catch (error) {
           return msg.error(error, `mute ${member.user.tag}!`);
         }
-      } else {
-        role = msg.guild.roles.get(role);
-      }
-
-      if (member.roles.has(role.id)) {
-        const cache = this.client.cache.get(this.client.user.id);
-        let muteData;
-
-        if (cache && cache.mutedMembers) {
-          const index = cache.mutedMembers.findIndex(el => el.memberId === member.id);
-          if (index > -1) muteData = cache.mutedMembers[index];
-        }
-
-        if (muteData && muteData.mutedUntil && muteData.mutedBy) {
-          const muter = await msg.guild.members.fetch(muteData.mutedBy).catch(e => ({
-            "error": e
-          }));
-
-          if (muter.error) return msg.fail(`${member.user.tag} is already muted!`, `**Muted Until**: ${moment(muteData.mutedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}`);
-          return msg.fail(`${member.user.tag} is already muted by ${muter.user.tag}!`, `**Muted Until**: ${moment(muteData.mutedUntil).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}`);
-        }
-
-        return msg.fail(`${member.user.tag} is already muted indefinitely until this member is manually unmuted!`);
-      }
-
-      try {
-        if (days) {
-          const clientData = await this.client.db.get();
-          if (!(clientData.mutedMembers instanceof Array)) clientData.mutedMembers = [];
-
-          clientData.mutedMembers.push({
-            "memberId": member.id,
-            "guildId": msg.guild.id,
-            "muteRoleId": role.id,
-            "mutedBy": msg.author.id,
-            "mutedSince": Date.now(),
-            "mutedUntil": days ? Date.now() + days : null,
-            "reason": reason
-          });
-
-          await this.client.db.update({
-            "mutedMembers": clientData.mutedMembers
-          });
-        }
-
-        await member.roles.add(role);
-
-        return msg.success(`${member.user.tag} has been succesfully muted by ${msg.author.tag}!`, `${reason ? `**Reason**: ${reason}` : ``}\n\n${days ? `**Muted Until**: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`);
       } catch (error) {
-        return msg.error(error, `mute ${member.user.tag}!`);
+        return msg.error(error, `mute ${member.user.tag}`);
       }
-    } else {
-      msg.fail("I can't mute a member with higher privilege/roles than me!");
+    }
+
+    if (member.roles.has(role)) return msg.fail(`${member.user.tag} is already muted!`);
+
+    try {
+      if (days) {
+        const clientCache = this.client.myCache;
+        if (!(clientCache.mutedMembers instanceof Array)) clientCache.mutedMembers = [];
+
+        clientCache.mutedMembers.push({
+          "memberId": member.id,
+          "guildId": msg.guild.id,
+          "muteRole": role,
+          "mutedUntil": Date.now() + days
+        });
+
+        await this.client.db.update("client", clientCache);
+      }
+
+      await member.roles.add(role);
+
+      return msg.success(`${member.user.tag} has been succesfully muted by ${msg.author.tag}!`, `${reason ? `**Reason**: ${reason}` : ``}\n\n${days ? `**Muted Until**: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`);
+    } catch (error) {
+      return msg.error(error, `mute ${member.user.tag}!`);
     }
   }
 };

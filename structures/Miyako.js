@@ -4,14 +4,13 @@
 const { Client } = require("discord.js");
 const chalk = require("chalk");
 const WebSocket = require("ws");
-const RethinkDB = require("../database/methods");
 const Lavalink = require("../music/methods");
 require("./Structures")();
 
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    for (const option in options.clientOptions) Object.assign(this.options, { [option]: options.clientOptions[option] }); // eslint-disable-line
+    Object.assign(this.options, options.clientOptions);
 
     Object.assign(this, {
       "events": {},
@@ -25,11 +24,15 @@ module.exports = class Miyako extends Client {
     });
 
     Object.assign(this, {
-      "cache": new Map(),
+      "cache": {
+        "client": new Map(),
+        "users": new Map(),
+        "guilds": new Map(),
+        "members": new Map()
+      },
       "categories": new Set(),
       "userCooldowns": new Set(),
       "player": new Lavalink(this, { port: 6666 }),
-      "db": new RethinkDB("clientData", process.env.BOTID),
       "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
     });
 
@@ -45,11 +48,9 @@ module.exports = class Miyako extends Client {
       this.commandsPerSecond = 0;
     }, 1100);
 
-    this.db.on("updated", () => this.updateCache());
-
-    this.wss.on("open", this._wssOnOpen.bind(this));
-    this.wss.on("error", this._wssOnError.bind(this));
-    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    // this.wss.on("open", this._wssOnOpen.bind(this));
+    // this.wss.on("error", this._wssOnError.bind(this));
+    // this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
 
     this.player.on("error", err => console.error(err));
 
@@ -88,23 +89,8 @@ module.exports = class Miyako extends Client {
   }
 
   // Perform a check against all inhibitors before executing the command.
-  async runCmd(msg, cmd, args) {
-    /* Update the cache of the guild's database before checking inhibitors.
-     * --------------------------------------------------------------------------------------------------------
-     * Only caching because it would be superrr slowwww if each inhibitor had to await each method
-     * for the database, while this takes less than 0.05 milliseconds for the bot to execute a command.
-     * --------------------------------------------------------------------------------------------------------
-     * Check for undefined only because null is valid if the record doesn't exist.
-     * --------------------------------------------------------------------------------------------------------
-     * There will always be client and user objects, but not member and guild objects,
-     * since the command could be sent in DMs rather than a guild text channel.
-     */
-
-    if (!this.cache.has(msg.author.id)) { // Might need to move this to the message event for other purposes than running commands
-      await msg.author.updateCache();
-      await msg.member.updateCache();
-    }
-
+  runCmd(msg, cmd, args) {
+    // TODO: Update author/member cache if needed below this line
     const inhibitors = Object.keys(this.inhibitors);
 
     if (inhibitors.length < 1) return cmdRun(this); // If there's no inhibitors, just run the command.
@@ -132,12 +118,34 @@ module.exports = class Miyako extends Client {
     }
   }
 
-  async updateCache() {
-    const data = await this.db.get();
-    return this.cache.set(process.env.BOTID, data);
+  updateCache(data) {
+    if (!this.cache[data.ns.coll].has(data.documentKey._id)) return;
+    if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.cache[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
+    if (data.operationType === "insert" || data.operationType === "replace") return this.cache[data.ns.coll].set(data.documentKey._id, data.fullDocument);
+    if (data.operationType === "update") {
+      const updated = data.updateDescription.updatedFields; // Object with newly added properties
+      const removed = data.updateDescription.removedFields; // Array of removed property names
+      const cache = this.cache[data.ns.coll].get(data.documentKey._id);
+
+      if (Object.keys(removed).length > 0) {
+        for (const prop of removed) {
+          if (cache[prop] === process.env.CLIENT_ID) continue; // Don't allow it to delete database reference of itself
+          else if (cache[prop]) delete cache[prop]; // If it has this property, then delete it.
+        }
+      }
+
+      this.cache[data.ns.coll].set(data.documentKey._id, {
+        ...cache,
+        ...updated
+      });
+    }
   }
 
-  /* Handle request sent by the websocket server */
+  get myCache() {
+    return this.cache.client.get(process.env.CLIENT_ID);
+  }
+
+  /* Handle requests sent by the websocket server */
   _handleRequests(data) {
     const request = JSON.parse(data);
     const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;

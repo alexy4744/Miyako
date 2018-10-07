@@ -35,7 +35,7 @@ module.exports = class extends Command {
 **Channels**: \`${this.client.channels.size.toLocaleString()}\`\n
 **Emojis**: \`${this.client.emojis.size.toLocaleString()}\`\n
 **Commands**: \`${Object.keys(this.client.commands).length.toLocaleString()}\`\n
-**Commands Ran**: \`${this.client.cache.get(this.client.user.id).commandsRan ? this.client.cache.get(this.client.user.id).commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
+**Commands Ran**: \`${this.client.cache.client.get(this.client.user.id).commandsRan ? this.client.cache.client.get(this.client.user.id).commandsRan.toLocaleString() : `Still retrieving...`}\`\n\u200B`
           },
           {
             "name": `🖥${msg.emojis.bar}System Information`,
