@@ -48,9 +48,9 @@ module.exports = class Miyako extends Client {
       this.commandsPerSecond = 0;
     }, 1100);
 
-    // this.wss.on("open", this._wssOnOpen.bind(this));
-    // this.wss.on("error", this._wssOnError.bind(this));
-    // this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    this.wss.on("open", this._wssOnOpen.bind(this));
+    this.wss.on("error", this._wssOnError.bind(this));
+    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
 
     this.player.on("error", err => console.error(err));
 

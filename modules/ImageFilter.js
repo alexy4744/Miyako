@@ -9,7 +9,7 @@ const canvas = createCanvas(8, 8);
 const ctx = canvas.getContext("2d");
 const snekfetch = require("snekfetch");
 
-module.exports = class ImageValidator {
+module.exports = class ImageFilter {
   constructor(src, options = {}) {
     this.src = src;
     this.options = options;
@@ -133,28 +133,5 @@ module.exports = class ImageValidator {
       if (currentDistance <= sensitivity || currentDiff / this.image.height <= sensitivity) return resolve(true);
       else return resolve(false); // eslint-disable-line
     });
-  }
-
-  async saveImage(guild) {
-    try {
-      if (!this.hash) await this.generateHash();
-      if (!guild.cache.imageHashes) await guild.db.update({ "imageHashes": [] });
-      if (!guild.cache.imageBuffers) await guild.db.update({ "imageBuffers": [] });
-
-      if (!this.buffer) this.buffer = await this.getBuffer().catch(e => ({ "error": e }));
-      if (this.buffer.error) return Promise.reject(this.buffer.error);
-
-      if (!guild.cache.imageHashes || !(guild.cache.imageHashes instanceof Array)) await guild.db.update({ "imageHashes": [] });
-      if (!guild.cache.imageBuffers || !(guild.cache.imageBuffers instanceof Array)) await guild.db.update({ "imageBuffers": [] });
-
-      await guild.db.update({
-        "imageHashes": [...guild.cache.imageHashes, this.hash], // append to the array with the spread operator
-        "imageBuffers": [...guild.cache.imageBuffers, this.buffer]
-      });
-
-      return Promise.resolve(guild.cache);
-    } catch (error) {
-      return Promise.reject(error);
-    }
   }
 };

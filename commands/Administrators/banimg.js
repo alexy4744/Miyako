@@ -1,7 +1,7 @@
 /* eslint no-use-before-define: 0 */
 
 const Command = require("../../modules/Command");
-const ImageValidator = require("../../modules/ImageValidator");
+const ImageFilter = require("../../modules/ImageFilter");
 
 module.exports = class extends Command {
   constructor(...args) {
@@ -47,8 +47,8 @@ module.exports = class extends Command {
     async function validateImage(url, m) {
       found = true;
 
-      const Validator = new ImageValidator(url);
-      const image = await Validator.init().catch(e => ({ "error": e }));
+      const Filter = new ImageFilter(url);
+      const image = await Filter.init().catch(e => ({ "error": e }));
 
       if (image.error) return msg.error(image.error, `ban this image!`);
 
@@ -70,18 +70,40 @@ module.exports = class extends Command {
       if (confirmation.error) return msg.cancelledCommand(`${msg.author.toString()} has failed to provide a response within **15** seconds, therefore I have cancelled the command!`);
 
       if (confirmation) {
-        const messageToDelete = m ? await m.delete().catch(e => ({ "error": e })) : null;
+        if (m) await m.delete().catch(() => { });
 
         try {
-          await Validator.saveImage(msg.guild);
-          message.success(`This image has been successfully banned!`, messageToDelete && messageToDelete.error ? `However this image needs to be deleted manually from the channel, as I have encountered an error while doing so` : null);
+          if (!Filter.hash) await Filter.generateHash();
+          if (!Filter.buffer) await Filter.getBuffer();
+          await saveImage(Filter.hash, Filter.buffer);
+          message.success(`This image has been successfully banned!`);
         } catch (error) {
           message.error(error, `ban this image!`);
         }
 
         await message.delete().catch(() => { });
-      } else if (!confirmation) {
+      } else {
         return msg.cancelledCommand();
+      }
+    }
+
+    async function saveImage(hash, buffer) {
+      try {
+        if (!msg.guild.cache.imageHashes) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageHashes": [] });
+        if (!msg.guild.cache.imageBuffers) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageBuffers": [] });
+
+        if (!msg.guild.cache.imageHashes || !(msg.guild.cache.imageHashes instanceof Array)) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageHashes": [] });
+        if (!msg.guild.cache.imageBuffers || !(msg.guild.cache.imageBuffers instanceof Array)) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageBuffers": [] });
+
+        await msg.client.db.update("guilds", {
+          ...msg.guild.cache,
+          "imageHashes": [...msg.guild.cache.imageHashes, hash], // append to the array with the spread operator
+          "imageBuffers": [...msg.guild.cache.imageBuffers, buffer]
+        });
+
+        return Promise.resolve(msg.guild.cache);
+      } catch (error) {
+        return Promise.reject(error);
       }
     }
   }

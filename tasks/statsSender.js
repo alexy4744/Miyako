@@ -2,6 +2,8 @@ const os = require("os-utils");
 
 module.exports = client => {
   client.setInterval(async () => {
+    if (!client.wss) return;
+
     client.wss.send(JSON.stringify({
       ...await os.allStats(),
       "op": "stats",

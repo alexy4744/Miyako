@@ -1,6 +1,6 @@
 /* eslint no-use-before-define: 0 */
 
-const ImageValidator = require("../modules/ImageValidator");
+const ImageFilter = require("../modules/ImageFilter");
 const getURL = require("get-urls");
 const regex = /\.(jpe?g|png|gif|bmp|tiff)$/gi;
 
@@ -23,12 +23,12 @@ module.exports = async (client, msg) => {
   }
 
   async function validate(src) {
-    const validator = new ImageValidator(src);
-    const image = await validator.init().catch(e => ({ "error": e }));
+    const Filter = new ImageFilter(src);
+    const image = await Filter.init().catch(e => ({ "error": e }));
 
     if (image.error) return 1;
 
-    const match = await validator.matchArray(msg.guild.cache.imageHashes, msg.guild.cache.imageBuffers).catch(err => ({ "error": err }));
+    const match = await Filter.matchArray(msg.guild.cache.imageHashes, msg.guild.cache.imageBuffers).catch(err => ({ "error": err }));
 
     if (match.error) return 1;
 
