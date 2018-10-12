@@ -47,8 +47,8 @@ module.exports = class extends Command {
     async function validateImage(url, m) {
       found = true;
 
-      const Filter = new ImageFilter(url);
-      const image = await Filter.init().catch(e => ({ "error": e }));
+      const Filter = new ImageFilter();
+      const image = await Filter.loadImage(url).catch(e => ({ "error": e }));
 
       if (image.error) return msg.error(image.error, `ban this image!`);
 
@@ -57,15 +57,13 @@ module.exports = class extends Command {
       const message = await msg.channel.send({
         embed: {
           title: `${msg.emojis.pending}Are you sure you want to ban this image?`,
-          image: { "url": url },
+          image: { url },
           footer: { "text": m ? `Sent by ${m.author.tag} on ${m.createdAt.toLocaleString()}` : null },
           color: msg.colors.pending
         }
       });
 
-      const confirmation = await message.prompt(msg.author.id).catch(e => ({
-        "error": e
-      }));
+      const confirmation = await message.prompt(msg.author.id).catch(e => ({ "error": e }));
 
       if (confirmation.error) return msg.cancelledCommand(`${msg.author.toString()} has failed to provide a response within **15** seconds, therefore I have cancelled the command!`);
 
@@ -89,21 +87,32 @@ module.exports = class extends Command {
 
     async function saveImage(hash, buffer) {
       try {
-        if (!msg.guild.cache.imageHashes) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageHashes": [] });
-        if (!msg.guild.cache.imageBuffers) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageBuffers": [] });
-
-        if (!msg.guild.cache.imageHashes || !(msg.guild.cache.imageHashes instanceof Array)) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageHashes": [] });
-        if (!msg.guild.cache.imageBuffers || !(msg.guild.cache.imageBuffers instanceof Array)) await msg.client.db.update("guilds", { ...msg.guild.cache, "imageBuffers": [] });
-
-        await msg.client.db.update("guilds", {
+        const guildData = {
           ...msg.guild.cache,
-          "imageHashes": [...msg.guild.cache.imageHashes, hash], // append to the array with the spread operator
-          "imageBuffers": [...msg.guild.cache.imageBuffers, buffer]
-        });
+          imageHashes: [],
+          imageBuffers: []
+        };
+
+        if (msg.guild.cache.imageHashes) {
+          for (const imageHash of msg.guild.cache.imageHashes) {
+            guildData.imageHashes.push(imageHash);
+          }
+        }
+
+        if (msg.guild.cache.imageBuffers) {
+          for (const imageBuffer of msg.guild.cache.imageBuffers) {
+            guildData.imageBuffers.push(imageBuffer);
+          }
+        }
+
+        guildData.imageHashes.push(hash);
+        guildData.imageBuffers.push(buffer);
+
+        await msg.client.db.update("guilds", guildData);
 
         return Promise.resolve(msg.guild.cache);
       } catch (error) {
-        return Promise.reject(error);
+        return Promise.reject(error.stack);
       }
     }
   }
