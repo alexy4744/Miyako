@@ -74,7 +74,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     }
   }
 
-  play(guild, track, target) {
+  play(guild, track) {
     guild.player.playing = true;
     guild.player.musicStart = new Date(); // when the song start I get the date when it starts
     guild.player.musicPauseAll = null; // this is only to make sure everything is back to default
@@ -123,32 +123,32 @@ module.exports = class LavalinkMethods extends Lavalink {
       "op": "play",
       "guildId": guild.id,
       "track": track
-    }, target);
+    });
   }
 
-  seek(guild, pos, target) {
+  seek(guild, pos) {
     guild.player.seekTime(pos);
 
     return this.send({
       "op": "seek",
       "guildId": guild.id,
       "position": pos
-    }, target);
+    });
   }
 
-  skip(guild, target) {
+  skip(guild) {
     if (guild.player.queue.length >= 2) {
       guild.player.queue.shift();
-      return this.play(guild, guild.player.queue[0].track, target);
+      return this.play(guild, guild.player.queue[0].track);
     }
   }
 
-  resume(guild, target) {
+  resume(guild) {
     this.send({
       "op": "pause",
       "guildId": guild.id,
       "pause": false
-    }, target);
+    });
 
     // so here when it's resume I look if there is something in musicPauseAll since it's where all the paused miliseconds will go added together
     // with the math that you can is basically to get the miliseconds but not from the date but the duration
@@ -161,7 +161,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     return guild.player.playing = true;
   }
 
-  pause(guild, target) {
+  pause(guild) {
     // When pause is used I get the date of when the user paused the music
     guild.player.musicPause = new Date();
     guild.player.paused = true;
@@ -171,30 +171,30 @@ module.exports = class LavalinkMethods extends Lavalink {
       "op": "pause",
       "guildId": guild.id,
       "pause": true
-    }, target);
+    });
   }
 
-  volume(guild, vol, target) {
+  volume(guild, vol) {
     this.send({
       "op": "volume",
       "guildId": guild.id,
       "volume": vol
-    }, target);
+    });
 
     return guild.player.volume = parseInt(vol);
   }
 
-  stop(guild, target) {
+  stop(guild) {
     this.send({
       "op": "stop",
       "guildId": guild.id
-    }, target);
+    });
 
     guild.player.paused = false;
     return guild.player.playing = false;
   }
 
-  destroy(guild, target) {
+  destroy(guild) {
     this.emit("finished", guild);
 
     guild.player.queue = [];
@@ -202,10 +202,10 @@ module.exports = class LavalinkMethods extends Lavalink {
     return this.send({
       "op": "destroy",
       "guildId": guild.id
-    }, target);
+    });
   }
 
-  leave(guild, target) {
+  leave(guild) {
     this.send({
       "op": 4,
       "shard": this.client.player.shards,
@@ -215,13 +215,13 @@ module.exports = class LavalinkMethods extends Lavalink {
         "self_mute": false,
         "self_deaf": false
       }
-    }, target);
+    });
 
     guild.player.channelId = null;
     return guild.player.playing = false;
   }
 
-  join(msg, target) {
+  join(msg) {
     return this.send({
       "op": 4,
       "shard": this.client.player.shards,
@@ -231,6 +231,6 @@ module.exports = class LavalinkMethods extends Lavalink {
         "self_mute": false,
         "self_deaf": false
       }
-    }, target);
+    });
   }
 };

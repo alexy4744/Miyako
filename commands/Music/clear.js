@@ -17,23 +17,18 @@ module.exports = class extends Command {
     });
   }
 
-  async run(msg) {
-    if (!(msg.guild.player instanceof Object) || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing in the queue to clear!`);
+  run(msg) {
+    if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing in the queue to clear!`);
 
     this.client.player.stop(msg.guild);
+
     msg.guild.player.queue = [];
 
-    msg.channel.send({
+    return msg.channel.send({
       embed: {
         title: `⚡${msg.emojis.bar}The queue has been cleared!`,
         color: msg.colors.pending
       }
     });
-
-    try {
-      await this.client.player.updateDatabase(msg.guild, "queue", null);
-    } catch (error) {
-      return console.error(error);
-    }
   }
 };

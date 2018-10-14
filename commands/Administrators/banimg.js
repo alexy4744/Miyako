@@ -21,10 +21,6 @@ module.exports = class extends Command {
   }
 
   async run(msg, args) {
-    const messages = Array.from(msg.channel.messages);
-
-    let found = false;
-
     if (args[0]) return validateImage(args[0]);
 
     const pendingMessage = await msg.channel.send({
@@ -34,19 +30,15 @@ module.exports = class extends Command {
       }
     });
 
-    for (let i = messages.length - 1; i > 0; i--) { // Start from the last message sent going backward.
-      if (found) break;
-      if (messages[i][1].attachments.size > 0) messages[i][1].attachments.forEach(attachment => validateImage(attachment.url, messages[i][1]));
-    }
+    const attachments = msg.channel.messages.filter(m => m.attachments.size > 0);
 
-    if (!found) {
-      await pendingMessage.delete().catch(() => { });
-      return msg.fail(`I could not find any image attachments in the last couple of messages in this channel!`);
-    }
+    await pendingMessage.delete().catch(() => { });
+
+    if (attachments.size < 1) return msg.fail(`I could not find any image attachments in the last couple of messages in this channel!`);
+
+    return validateImage(attachments.last().attachments.first().url, attachments.last());
 
     async function validateImage(url, m) {
-      found = true;
-
       const Filter = new ImageFilter();
       const image = await Filter.loadImage(url).catch(e => ({ "error": e }));
 

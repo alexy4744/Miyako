@@ -26,7 +26,7 @@ module.exports = class Lavalink extends EventEmitter {
     });
   }
 
-  send(obj, target) {
+  send(obj) {
     if (!this.ws) return this._error(new Error(`No Lavalink player found!`));
     if (!isNaN(obj.op)) {
       this.client.ws.send(obj); // If it is a number, then send it to client ws.
@@ -36,9 +36,7 @@ module.exports = class Lavalink extends EventEmitter {
       });
     }
 
-    if (target && target === "lavalink") return; // eslint-disable-line
-    else { // eslint-disable-line
-      if (!this.client.wss) return;
+    if (this.client.wss) {
       if (!obj.id && (obj.guildId || obj.guild_id)) obj.id = obj.guildId || obj.guild_id;
       obj.queue = this.client.guilds.has(obj.id) ? this.client.guilds.get(obj.id).player ? this.client.guilds.get(obj.id).player.queue : [] : [];
 
@@ -68,7 +66,8 @@ module.exports = class Lavalink extends EventEmitter {
   }
 
   _sendVoiceUpdate(packet) {
-    if (!this.client.guilds.has(packet.guild_id)) return console.error("Couldn't find this guild while intercepting packets.");
+    if (!this.client.guilds.has(packet.guild_id)) return;
+
     const guild = this.client.guilds.get(packet.guild_id);
 
     return this.send({

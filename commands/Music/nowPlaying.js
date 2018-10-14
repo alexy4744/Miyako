@@ -9,7 +9,7 @@ module.exports = class extends Command {
       nsfw: false,
       cooldown: 5,
       description: () => `Show the currently playing song and it's progress.`,
-      aliases: [],
+      aliases: ["np"],
       userPermissions: [],
       botPermissions: [],
       runIn: ["text"]
@@ -23,10 +23,12 @@ module.exports = class extends Command {
     const thumbnail = await this.client.player.getThumbnail(currSong);
 
     return msg.channel.send({
-      title: `💽${msg.emojis.bar}Now Playing`,
-      description: `**Title**: ${currSong.title}`,
-      thumbnail: { url: thumbnail },
-      color: msg.color.default
+      embed: {
+        title: `💽${msg.emojis.bar}Now Playing`,
+        description: `**Title**: [**${currSong.title}**](${currSong.uri})`,
+        thumbnail: { url: thumbnail },
+        color: msg.colors.default
+      }
     });
   }
 };
