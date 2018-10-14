@@ -12,7 +12,7 @@ module.exports = class extends Command {
       nsfw: false,
       checkVC: true,
       cooldown: 5,
-      description: () => `Play a track from an available source.`,
+      description: () => `Play a tracks from an available source.`,
       usage: () => [`Illenium Afterlife`, `Echos Fiction`],
       aliases: [],
       userPermissions: [],
@@ -35,28 +35,33 @@ module.exports = class extends Command {
       };
     }
 
-    const track = await this.client.player.getSong(args.join(" ")).catch(error => ({ "error": error }));
+    const tracks = await this.client.player.getSong(args.join(" ")).catch(error => ({ "error": error }));
 
-    if (track.error) return msg.error(track.error, `play this track!`);
-    if (track.length < 1) return msg.fail(`No search results have returned!`);
-    if (track[0].info.loadType === "LOAD_FAILED") return msg.fail(`"${track[0].info.title}" has failed to load!`);
+    if (tracks.error) return msg.error(tracks.error, `play this track!`);
+    if (tracks.length < 1) return msg.fail(`No search results have returned!`);
+    if (tracks[0].info.loadType === "LOAD_FAILED") return msg.fail(`"${tracks[0].info.title}" has failed to load!`);
 
-    track[0].info.thumbnail = await this.client.player.getThumbnail(track[0].info.source, track[0].info);
-
-    msg.guild.player.queue.push(track[0]);
+    if (tracks[0].info.loadType === "PLAYLIST_LOADED") {
+      for (const track of tracks) msg.guild.player.queue.push(track);
+    } else {
+      msg.guild.player.queue.push(tracks[0]);
+    }
 
     this.client.player.send({
       "op": "new song",
       "guildId": msg.guild.id
     });
 
-    if (!msg.guild.player.playing && msg.guild.player.queue.length < 2) this.client.player.play(msg.guild, track[0].track);
+    if (!msg.guild.player.playing && !msg.guild.player.paused) this.client.player.play(msg.guild, msg.guild.player.queue[0].track);
+
+    const thumbnail = await this.client.player.getThumbnail(msg.guild.player.queue[0].info);
+    const position = msg.guild.player.queue.findIndex(track => track.info.identifier === tracks[0].info.identifier);
 
     return msg.channel.send({
       embed: {
         title: `▶${msg.emojis.bar}Track has been added to the queue!`,
-        description: `**Title**: [**${track[0].info.title}**](${track[0].info.uri})\n\n**Duration**: ${moment.duration(track[0].info.length, "milliseconds").format()}\n\n**Position**: #${msg.guild.player.queue.length}`,
-        thumbnail: { "url": track[0].info.thumbnail || null },
+        description: `**Title**: [**${tracks[0].info.title}**](${tracks[0].info.uri})\n\n**Duration**: ${moment.duration(tracks[0].info.length, "milliseconds").format()}\n\n**Position**: #${position}`,
+        thumbnail: { "url": thumbnail },
         color: msg.colors.default
       }
     });

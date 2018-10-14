@@ -7,7 +7,7 @@ module.exports = class Lavalink extends EventEmitter {
     this.client = client;
     this.shards = options.shard || 1;
     this.host = options.host || "localhost";
-    this.port = options.port || 80;
+    this.port = process.env.LAVALINK || options.port || 80;
     this.APIport = options.APIport || 2333;
 
     this.ws = new WebSocket(`ws://${this.host}:${this.port}`, {
@@ -38,6 +38,7 @@ module.exports = class Lavalink extends EventEmitter {
 
     if (target && target === "lavalink") return; // eslint-disable-line
     else { // eslint-disable-line
+      if (!this.client.wss) return;
       if (!obj.id && (obj.guildId || obj.guild_id)) obj.id = obj.guildId || obj.guild_id;
       obj.queue = this.client.guilds.has(obj.id) ? this.client.guilds.get(obj.id).player ? this.client.guilds.get(obj.id).player.queue : [] : [];
 

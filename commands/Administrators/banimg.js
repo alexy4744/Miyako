@@ -72,8 +72,7 @@ module.exports = class extends Command {
 
         try {
           if (!Filter.hash) await Filter.generateHash();
-          if (!Filter.buffer) await Filter.getBuffer();
-          await saveImage(Filter.hash, Filter.buffer);
+          await saveImage(Filter.hash);
           message.success(`This image has been successfully banned!`);
         } catch (error) {
           message.error(error, `ban this image!`);
@@ -85,12 +84,11 @@ module.exports = class extends Command {
       }
     }
 
-    async function saveImage(hash, buffer) {
+    async function saveImage(hash) {
       try {
         const guildData = {
           ...msg.guild.cache,
-          imageHashes: [],
-          imageBuffers: []
+          imageHashes: []
         };
 
         if (msg.guild.cache.imageHashes) {
@@ -99,14 +97,7 @@ module.exports = class extends Command {
           }
         }
 
-        if (msg.guild.cache.imageBuffers) {
-          for (const imageBuffer of msg.guild.cache.imageBuffers) {
-            guildData.imageBuffers.push(imageBuffer);
-          }
-        }
-
         guildData.imageHashes.push(hash);
-        guildData.imageBuffers.push(buffer);
 
         await msg.client.db.update("guilds", guildData);
 

@@ -54,8 +54,8 @@ module.exports = class LavalinkMethods extends Lavalink {
   }
 
   // Always get the highest quality thumbnail if possible
-  async getThumbnail(source, trackInfo) {
-    if (source === "youtube") {
+  async getThumbnail(trackInfo) {
+    if (trackInfo.source === "youtube") {
       const res = await snekfetch.get(`https://www.googleapis.com/youtube/v3/videos?id=${trackInfo.identifier}&part=snippet&key=${process.env.YT}`).catch(e => ({
         "error": e
       }));
@@ -65,10 +65,8 @@ module.exports = class LavalinkMethods extends Lavalink {
       if (res.body.items[0].snippet.thumbnails.maxres) return res.body.items[0].snippet.thumbnails.maxres.url;
 
       return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
-    } else if (source === "soundcloud") {
-      const res = await scraper(trackInfo.uri).catch(e => ({
-        "error": e
-      }));
+    } else if (trackInfo.source === "soundcloud") {
+      const res = await scraper(trackInfo.uri).catch(e => ({ "error": e }));
 
       if (res.error) return null;
 

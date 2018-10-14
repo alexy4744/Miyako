@@ -32,7 +32,7 @@ module.exports = class Miyako extends Client {
       },
       "categories": new Set(),
       "userCooldowns": new Set(),
-      "player": new Lavalink(this, { port: 6666 }),
+      "player": new Lavalink(this),
       "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
     });
 
@@ -53,37 +53,7 @@ module.exports = class Miyako extends Client {
     this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
 
     this.player.on("error", err => console.error(err));
-
-    this.player.on("finished", guild => {
-      if (guild.player && guild.player.queue[0] && !guild.player.queue[0].info.looped) guild.player.queue.shift();
-
-      if (guild.player) {
-        if (guild.player.queue.length > 0) {
-          guild.player.musicStart = new Date();
-          guild.player.musicPauseAll = null;
-          guild.player.musicPause = null;
-
-          this.player.send({
-            "op": "stop",
-            "guildId": guild.id
-          }, "lavalink");
-
-          this.player.send({
-            "op": "play",
-            "guildId": guild.id,
-            "track": guild.player.queue[0].track
-          });
-        } else {
-          guild.player.musicPause = new Date();
-          guild.player.playing = false;
-
-          this.wss.send(JSON.stringify({
-            "op": "finished",
-            "id": guild.id
-          }));
-        }
-      }
-    });
+    this.player.on("finished", this._playerFinish.bind(this));
 
     require("../loaders/loader")(this);
   }
@@ -181,5 +151,33 @@ module.exports = class Miyako extends Client {
       "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
       "time": guild.player ? guild.player.musicPlayTime() : false
     }));
+  }
+
+  _playerFinish(guild) {
+    if (guild.player && guild.player.queue[0] && !guild.player.queue[0].info.looped) guild.player.queue.shift();
+
+    if (guild.player) {
+      if (guild.player.queue.length > 0) {
+        guild.player.musicStart = new Date();
+        guild.player.musicPauseAll = null;
+        guild.player.musicPause = null;
+
+        this.player.send({
+          "op": "play",
+          "guildId": guild.id,
+          "track": guild.player.queue[0].track
+        });
+      } else {
+        guild.player.musicPause = new Date();
+        guild.player.playing = false;
+
+        if (this.wss) {
+          this.wss.send(JSON.stringify({
+            "op": "finished",
+            "id": guild.id
+          }));
+        }
+      }
+    }
   }
 };

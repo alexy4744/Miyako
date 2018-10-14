@@ -63,69 +63,110 @@ Structures.extend("Message", Message => {
       });
     }
 
-    noArgs(action) {
-      return this.channel.send({
-        embed: {
-          title: `${this.emojis.fail}${this.author.username}, you must ${action} in order to execute this command!`,
-          color: this.colors.fail
+    async prompt(id, options = {}) {
+      if (options.filter && !this.client.utils.is.function(options.filter)) return Promise.reject(new Error("Filter is not a function"));
+
+      if ((this.guild && this.guild.me.hasPermission("ADD_REACTIONS")) || !this.guild) {
+        const yes = options.emojis && options.emojis.yes ? options.emojis.yes : this.emojis.success[0];
+        const no = options.emojis && options.emojis.no ? options.emojis.no : this.emojis.fail[0];
+        const filter = options.filter ? options.filter : (reaction, user) => (reaction.emoji.name === yes || reaction.emoji.name === no) && user.id === id;
+
+        try {
+          await this.react(yes);
+          await this.react(no);
+        } catch (error) {
+          await this.delete().catch(() => { });
+          return;
         }
-      });
+
+        const collectedEmoji = await this.awaitReactions(filter, {
+          "time": options.time || 15000,
+          "max": options.max || 1,
+          "maxEmojis": options.maxEmojis || 1,
+          "maxUsers": options.maxUsers || 1,
+          "errors": options.error || ["time"]
+        }).catch(e => ({
+          "error": e
+        }));
+
+        await this.delete().catch(() => { });
+
+        if (collectedEmoji.error) return Promise.reject(collectedEmoji.error);
+
+        if (collectedEmoji.first().emoji.name === yes) return Promise.resolve(true);
+        else if (collectedEmoji.first().emoji.name === no) return Promise.resolve(false);
+      } else {
+        const yes = options.yes ? options.yes : "YES";
+        const no = options.no ? options.no : "NO";
+        const filter = options.filter ? options.filter : message => (message.content === yes || message.content === no) && message.author.id === id;
+
+        const collectedMessages = await this.channel.awaitMessages(filter, {
+          "time": options.time || 15000,
+          "max": options.max || 1,
+          "errors": options.errors || ["time"]
+        }).catch(e => ({
+          "error": e
+        }));
+
+        await this.delete().catch(() => { });
+
+        if (collectedMessages.error) return Promise.reject(collectedMessages.error);
+
+        if (collectedMessages.first().content === yes) return Promise.resolve(true);
+        else if (collectedMessages.first().content === no) return Promise.resolve(false);
+      }
     }
 
-    prompt(id, options = {}) {
-      return new Promise(async (resolve, reject) => {
-        if (options.filter && !this.client.utils.is.function(options.filter)) return reject(new Error("Filter is not a function"));
+    async paginate(pages) {
+      if (!pages || !Array.isArray(pages)) return Promise.reject(new Error("No pages provided!"));
 
-        if ((this.guild && this.guild.me.hasPermission("ADD_REACTIONS")) || !this.guild) {
-          const yes = options.emojis && options.emojis.yes ? options.emojis.yes : this.emojis.success[0];
-          const no = options.emojis && options.emojis.no ? options.emojis.no : this.emojis.fail[0];
-          const filter = options.filter ? options.filter : (reaction, user) => (reaction.emoji.name === yes || reaction.emoji.name === no) && user.id === id && !user.bot;
+      let currPage = 0;
+      let prevPage = 0;
 
-          try {
-            await this.react(yes);
-            await this.react(no);
-          } catch (error) {
-            await this.delete().catch(() => { });
-            return;
+      const emojis = {
+        "⬅": currPage < 1 ? 0 : currPage - 1,
+        "➡": currPage < pages.length - 2 ? currPage + 1 : pages.length - 1,
+        "⏮": 0,
+        "⏭": pages.length - 1,
+        "⏹": 0,
+        "🔢": 0
+      };
+
+      try {
+        const message = await this.channel.send(pages[0]);
+
+        for (const emoji in emojis) await message.react(emoji); // eslint-disable-line
+
+        const filter = (reaction, user) => reaction.emoji.name in emojis && user.id === this.author.id;
+        const collector = message.createReactionCollector(filter, { time: 300000 });
+
+        collector.on("collect", async reaction => {
+          if (message.editable) {
+            if (reaction.emoji.name === "⏹") return collector.stop();
+
+            if (reaction.emoji.name === "🔢") {
+              const ask = await this.channel.send(`${this.author.toString()}, what page would you like to jump to?`);
+              const askFilter = msg => msg.author.id === this.author.id && msg.content > 0 && msg.content < pages.length;
+              const response = await this.channel.awaitMessages(askFilter, { max: 1, time: 15000, errors: ["time"] }).catch(() => null); // eslint-disable-line
+              if (response) currPage = parseInt(response.first().content) - 1;
+              await ask.delete().catch(() => { });
+            } else {
+              currPage = emojis[reaction.emoji.name];
+            }
+
+            reaction.users.remove(this.author);
+
+            if (prevPage === currPage) return;
+
+            prevPage = currPage;
+            message.edit(pages[currPage]);
           }
+        });
 
-          const collectedEmoji = await this.awaitReactions(filter, {
-            "time": options.time || 15000,
-            "max": options.max || 1,
-            "maxEmojis": options.maxEmojis || 1,
-            "maxUsers": options.maxUsers || 1,
-            "errors": options.error || ["time"]
-          }).catch(e => ({
-            "error": e
-          }));
-
-          await this.delete().catch(() => { });
-
-          if (collectedEmoji.error) return reject(collectedEmoji.error);
-
-          if (collectedEmoji.first().emoji.name === yes) return resolve(true);
-          else if (collectedEmoji.first().emoji.name === no) return resolve(false);
-        } else {
-          const yes = options.yes ? options.yes : "YES";
-          const no = options.no ? options.no : "NO";
-          const filter = options.filter ? options.filter : message => (message.content === yes || message.content === no) && message.author.id === id && !message.author.bot;
-
-          const collectedMessages = await this.channel.awaitMessages(filter, {
-            "time": options.time || 15000,
-            "max": options.max || 1,
-            "errors": options.errors || ["time"]
-          }).catch(e => ({
-            "error": e
-          }));
-
-          await this.delete().catch(() => { });
-
-          if (collectedMessages.error) return reject(collectedMessages.error);
-
-          if (collectedMessages.first().content === yes) return resolve(true);
-          else if (collectedMessages.first().content === no) return resolve(false);
-        }
-      });
+        collector.on("end", () => message.reactions.removeAll());
+      } catch (error) {
+        return null;
+      }
     }
   }
 

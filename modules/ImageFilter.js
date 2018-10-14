@@ -3,7 +3,6 @@
 // https://www.hackerfactor.com/blog/?/archives/432-Looks-Like-It.html
 
 const hammingDistance = require("../utils/hammingDistance");
-const pixelmatch = require("pixelmatch");
 const snekfetch = require("snekfetch");
 const { createCanvas, Image } = require("canvas");
 const canvas = createCanvas(8, 8);
@@ -12,7 +11,6 @@ const ctx = canvas.getContext("2d");
 module.exports = class ImageFilter {
   constructor() {
     this.image = new Image();
-    this.buffer = null;
     this.hash = null;
   }
 
@@ -49,7 +47,7 @@ module.exports = class ImageFilter {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const colors = imageData.data;
     const greyScaleFormula = (r, g, b) => { // http://entropymine.com/imageworsener/grayscale/
-      const red = 0.2126 * (r ** 2.2); // ** is essentially the same as Math.pow();
+      const red = 0.2126 * (r ** 2.2);
       const green = 0.7152 * (g ** 2.2);
       const blue = 0.0722 * (b ** 2.2);
 
@@ -72,16 +70,6 @@ module.exports = class ImageFilter {
     return imageData;
   }
 
-  getBuffer() {
-    return new Promise((resolve, reject) => {
-      canvas.toBuffer((err, buffer) => {
-        if (err) return reject(err);
-        this.buffer = buffer;
-        return resolve(buffer);
-      });
-    });
-  }
-
   generateHash() {
     let hash = "";
 
@@ -98,16 +86,11 @@ module.exports = class ImageFilter {
     return hash;
   }
 
-  async matchArray(hashArray, bufferArray, sensitivity) {
+  matchArray(hashArray, sensitivity) {
     if (!this.image || !this.hash) return Promise.reject(new Error("Run loadImage() first"));
     if (!hashArray) return Promise.reject(new Error("Hash array must be provided"));
-    if (!bufferArray) return Promise.reject(new Error("Buffer array must be proveded"));
-
-    if (!this.buffer) await this.getBuffer().catch(e => ({ "error": e }));
-    if (this.buffer.error) return Promise.reject(this.buffer.error);
 
     let currentDistance = 1;
-    let currentDiff = this.image.height;
 
     // Find a hash that is most similar to the hash of this image
     for (const currentHash of hashArray) {
@@ -122,22 +105,10 @@ module.exports = class ImageFilter {
       if (distance < currentDistance) currentDistance = distance;
     }
 
-    for (const currentBuffer of bufferArray) {
-      if (!(currentBuffer instanceof Buffer)) continue;
-
-      if (this.buffer.equals(currentBuffer)) {
-        currentDiff = 0;
-        break;
-      }
-
-      const diff = pixelmatch(this.buffer, currentBuffer, null, this.image.width, this.image.height);
-      if (diff < currentDiff) currentDiff = diff;
-    }
-
     sensitivity = sensitivity || 0.078125;
 
     // If the most similar hash is less than 7% in differences (about 5 different bits), then it is similar enough to be resolved as true.
-    if (currentDistance <= sensitivity || currentDiff / this.image.height <= sensitivity) return Promise.resolve(true);
+    if (currentDistance <= sensitivity) return Promise.resolve(true);
     else return Promise.resolve(false); // eslint-disable-line
   }
 };

@@ -33,7 +33,7 @@ module.exports = (client, msg) => {
 
     if (image.error) return 1;
 
-    const match = await Filter.matchArray(msg.guild.cache.imageHashes, msg.guild.cache.imageBuffers).catch(e => ({ "error": e }));
+    const match = await Filter.matchArray(msg.guild.cache.imageHashes).catch(e => ({ "error": e }));
 
     if (match.error) return 1;
 
