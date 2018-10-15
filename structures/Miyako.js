@@ -82,9 +82,8 @@ module.exports = class Miyako extends Client {
     function cmdRun(client) {
       cmd.run(msg, args);
       const finalizers = Object.keys(client.finalizers);
-      if (finalizers.length < 1) return null;
+      if (finalizers.length < 1) return;
       for (const finalizer of finalizers) client.finalizers[finalizer](client);
-      return null;
     }
   }
 
@@ -154,30 +153,25 @@ module.exports = class Miyako extends Client {
   }
 
   _playerFinish(guild) {
-    if (guild.player && guild.player.queue[0] && !guild.player.queue[0].info.looped) guild.player.queue.shift();
+    if (!guild.player) return;
 
-    if (guild.player) {
-      if (guild.player.queue.length > 0) {
-        guild.player.musicStart = new Date();
-        guild.player.musicPauseAll = null;
-        guild.player.musicPause = null;
+    guild.player.playing = false;
 
-        this.player.send({
-          "op": "play",
-          "guildId": guild.id,
-          "track": guild.player.queue[0].track
-        });
-      } else {
-        guild.player.musicPause = new Date();
-        guild.player.playing = false;
+    if (guild.player.queue.length > 0) {
+      guild.player.musicStart = new Date();
+      guild.player.musicPauseAll = null;
+      guild.player.musicPause = null;
 
-        if (this.wss) {
-          this.wss.send(JSON.stringify({
-            "op": "finished",
-            "id": guild.id
-          }));
-        }
-      }
+      if (!guild.player.queue[0].info.looped) this.player.skip(guild);
+    } else {
+      guild.player.musicPause = new Date();
+
+      if (!this.wss) return;
+
+      this.wss.send(JSON.stringify({
+        "op": "finished",
+        "id": guild.id
+      }));
     }
   }
 };

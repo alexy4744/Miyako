@@ -30,6 +30,7 @@ module.exports = class LavalinkMethods extends Lavalink {
       if (found) break;
     }
 
+    // Default to youtube search if it doesnt match any links
     if (!found) {
       query = `ytsearch:${query}`;
       source = "youtube";
@@ -74,7 +75,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     }
   }
 
-  play(guild, track) {
+  play(guild) {
     guild.player.playing = true;
     guild.player.musicStart = new Date(); // when the song start I get the date when it starts
     guild.player.musicPauseAll = null; // this is only to make sure everything is back to default
@@ -122,7 +123,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     return this.send({
       "op": "play",
       "guildId": guild.id,
-      "track": track
+      "track": guild.player.queue[0].track
     });
   }
 
@@ -137,10 +138,8 @@ module.exports = class LavalinkMethods extends Lavalink {
   }
 
   skip(guild) {
-    if (guild.player.queue.length >= 2) {
-      guild.player.queue.shift();
-      return this.play(guild, guild.player.queue[0].track);
-    }
+    guild.player.queue.shift();
+    if (guild.player.queue.length > 0) return this.play(guild);
   }
 
   resume(guild) {

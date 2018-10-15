@@ -28,7 +28,7 @@ module.exports = class extends Command {
         this.client.player.skip(msg.guild);
       } else {
         msg.guild.player.queue = msg.guild.player.queue.slice(amount);
-        this.client.player.play(msg.guild, msg.guild.player.queue[0].track);
+        this.client.player.play(msg.guild);
       }
     } else {
       this.client.player.stop(msg.guild);

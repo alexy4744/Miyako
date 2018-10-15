@@ -47,7 +47,7 @@ module.exports = class extends Command {
       msg.guild.player.queue.push(tracks[0]);
     }
 
-    if (!msg.guild.player.playing && !msg.guild.player.paused) this.client.player.play(msg.guild, msg.guild.player.queue[0].track);
+    if (!msg.guild.player.playing && !msg.guild.player.paused) this.client.player.play(msg.guild);
 
     const thumbnail = await this.client.player.getThumbnail(msg.guild.player.queue[0].info);
     const position = msg.guild.player.queue.findIndex(track => track.info.identifier === tracks[0].info.identifier) + 1;
