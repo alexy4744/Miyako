@@ -38,7 +38,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     const res = await snekfetch.get(`http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`)
       .query({ identifier: query })
       .set("Authorization", "youshallnotpass")
-      .catch(error => ({ "error": error }));
+      .catch(error => ({ error }));
 
     if (res.error) return Promise.reject(res.error);
     if (!res) return Promise.reject(new Error(`I couldn't GET from http://${this.client.player.host}:${this.client.player.APIport}/loadtracks`));

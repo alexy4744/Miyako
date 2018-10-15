@@ -17,23 +17,22 @@ module.exports = class extends Command {
     });
   }
 
-  async run(msg) {
+  run(msg, args) {
     if (!msg.guild.player || (msg.guild.player && msg.guild.player.queue.length < 1)) return msg.fail(`There is nothing to skip!`);
 
     const songToSkip = msg.guild.player.queue[0];
+    const amount = args[0] ? parseInt(args[0]) : 1;
 
     if (msg.guild.player.queue.length > 1) {
-      this.client.player.skip(msg.guild);
+      if (amount === 1) {
+        this.client.player.skip(msg.guild);
+      } else {
+        msg.guild.player.queue = msg.guild.player.queue.slice(amount);
+        this.client.player.play(msg.guild, msg.guild.player.queue[0].track);
+      }
     } else {
       this.client.player.stop(msg.guild);
-      this.client.player.leave(msg.guild);
-      this.client.player.join(msg);
       msg.guild.player.queue = [];
-      try {
-        await this.client.player.updateDatabase(msg.guild, "queue", null);
-      } catch (error) {
-        return console.error(error);
-      }
     }
 
     return msg.channel.send({

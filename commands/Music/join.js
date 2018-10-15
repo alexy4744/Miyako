@@ -31,7 +31,6 @@ module.exports = class extends Command {
       msg.guild.player = {
         queue: [],
         channelId: voiceChannel.id,
-        sessionId: msg.guild.me.voice.sessionId,
         playing: false,
         paused: false,
         volume: 75

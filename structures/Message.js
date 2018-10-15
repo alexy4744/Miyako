@@ -128,6 +128,7 @@ Structures.extend("Message", Message => {
         "➡": currPage < pages.length - 2 ? currPage + 1 : pages.length - 1,
         "⏮": 0,
         "⏭": pages.length - 1,
+        // These buttons should not change the page when clicked.
         "⏹": 0,
         "🔢": 0
       };
@@ -148,13 +149,16 @@ Structures.extend("Message", Message => {
               const ask = await this.channel.send(`${this.author.toString()}, what page would you like to jump to?`);
               const askFilter = msg => msg.author.id === this.author.id && msg.content > 0 && msg.content < pages.length;
               const response = await this.channel.awaitMessages(askFilter, { max: 1, time: 15000, errors: ["time"] }).catch(() => null); // eslint-disable-line
-              if (response) currPage = parseInt(response.first().content) - 1;
-              await ask.delete().catch(() => { });
+              if (response) {
+                currPage = parseInt(response.first().content) - 1;
+                if (this.guild.me.hasPermission("MANAGE_MESSAGES")) response.first().delete().catch(() => { });
+              }
+              ask.delete().catch(() => { });
             } else {
               currPage = emojis[reaction.emoji.name];
             }
 
-            reaction.users.remove(this.author);
+            if (this.guild.me.hasPermission("MANAGE_MESSAGES")) reaction.users.remove(this.author);
 
             if (prevPage === currPage) return;
 
@@ -163,7 +167,9 @@ Structures.extend("Message", Message => {
           }
         });
 
-        collector.on("end", () => message.reactions.removeAll());
+        collector.on("end", () => {
+          if (this.guild.me.hasPermission("MANAGE_MESSAGES")) message.reactions.removeAll();
+        });
       } catch (error) {
         return null;
       }
