@@ -17,9 +17,7 @@ module.exports = class extends Command {
   }
 
   async run(msg) {
-    const data = await this.client.db.get().catch(e => ({
-      "error": e
-    }));
+    const data = this.client.myCache;
 
     if (data.error) return msg.error(data.error, "activate/deactivate developer mode!");
 
@@ -27,7 +25,7 @@ module.exports = class extends Command {
     else data.devMode = false;
 
     try {
-      await this.client.db.update({ "devMode": data.devMode });
+      await this.client.db.update("client", { "devMode": data.devMode });
       return msg.channel.send({
         embed: {
           title: `⚙${msg.emojis.bar}Developer Mode has been ${data.devMode === true ? `activated` : `deactivated`}!`,
