@@ -1,26 +1,26 @@
 # Miyako
 ### A WIP Discord bot with powerful moderation/anti-raid features.
 ### As of now, it has the ability to:
-**1.** Detect images that are perceptually similar against banned images set by the administrators.
+**1.** Filter images perceptually and remove them if its matched against a set of images set by admins.
 
 **2.** Banning/muting members with optional time limit.
 
 **3.** Play music or live streams from various sources other than YouTube, i.e. Soundcloud, Twitch, Mixer, etc.
 
 ### **[To Do List](https://trello.com/b/8oubeSKz/miyako)**
-[ ] Spam / mention spamming / new line / invite link / message filter.
+- [ ] Spam / mention spamming / new line / invite link / message filter.
 
-[x] ~~Chat slow mode~~ Already got implemented by Discord's update.
+- [x] ~~Chat slow mode~~ Already got implemented by Discord's update.
 
-[ ] Some other anti-raid features I can't think of
+- [ ] Some other anti-raid features I can't think of
 
-[ ] Voice-activated commands?
+- [ ] Voice-activated commands?
 
-#### You can invite this bot to your guild via **[this link](https://discordapp.com/oauth2/authorize?client_id=415313696102023169&permissions=8&scope=bot)** or host it locally
+#### You can invite this bot to your guild via [**this link**](https://discordapp.com/oauth2/authorize?client_id=415313696102023169&permissions=8&scope=bot) or host it locally
 
 # Prerequisite
-1. **[Node.js >= 10.10.0](https://nodejs.org/en/download/current/)**
-2. **[MongoDB >= 4.0](https://www.mongodb.com/download-center?utm_source=manual&utm_campaign=download-mongodb-navbar-cta&utm_medium=docs#community)**
+1. [**Node.js >= 10.10.0**](https://nodejs.org/en/download/current/)
+2. [**MongoDB >= 4.0**](https://www.mongodb.com/download-center?utm_source=manual&utm_campaign=download-mongodb-navbar-cta&utm_medium=docs#community)
 
 ###
 
