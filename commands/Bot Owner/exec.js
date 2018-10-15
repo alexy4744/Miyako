@@ -2,7 +2,6 @@ const { post } = require("snekfetch");
 const childProcess = require("child_process");
 const { promisify } = require("util");
 const exec = promisify(childProcess.exec);
-
 const Command = require("../../modules/Command");
 
 module.exports = class extends Command {
@@ -14,8 +13,8 @@ module.exports = class extends Command {
       nsfw: false,
       cooldown: 5,
       description: () => `Execute shell commands`,
-      usage: () => [`dir`, `tree`],
-      aliases: ["exe"],
+      usage: () => [`git`, `dir`, `tree`],
+      aliases: ["exe", "shell", "$"],
       userPermissions: [],
       botPermissions: [],
       runIn: []

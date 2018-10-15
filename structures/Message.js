@@ -136,7 +136,7 @@ Structures.extend("Message", Message => {
       try {
         const message = await this.channel.send(pages[0]);
 
-        for (const emoji in emojis) await message.react(emoji); // eslint-disable-line
+        for (const emoji in emojis) await message.react(emoji).catch(() => { }); // eslint-disable-line
 
         const filter = (reaction, user) => reaction.emoji.name in emojis && user.id === this.author.id;
         const collector = message.createReactionCollector(filter, { time: 300000 });
@@ -163,7 +163,8 @@ Structures.extend("Message", Message => {
             if (prevPage === currPage) return;
 
             prevPage = currPage;
-            message.edit(pages[currPage]);
+
+            message.edit(pages[currPage]).catch(() => { });
           }
         });
 
@@ -171,7 +172,7 @@ Structures.extend("Message", Message => {
           if (this.guild.me.hasPermission("MANAGE_MESSAGES")) message.reactions.removeAll();
         });
       } catch (error) {
-        return null;
+        // noop
       }
     }
   }

@@ -155,23 +155,7 @@ module.exports = class Miyako extends Client {
   _playerFinish(guild) {
     if (!guild.player) return;
 
-    guild.player.playing = false;
-
-    if (guild.player.queue.length > 0) {
-      guild.player.musicStart = new Date();
-      guild.player.musicPauseAll = null;
-      guild.player.musicPause = null;
-
-      if (!guild.player.queue[0].info.looped) this.player.skip(guild);
-    } else {
-      guild.player.musicPause = new Date();
-
-      if (!this.wss) return;
-
-      this.wss.send(JSON.stringify({
-        "op": "finished",
-        "id": guild.id
-      }));
-    }
+    this.player.stop(guild);
+    this.setTimeout(() => this.player.skip(guild), 100);
   }
 };

@@ -57,20 +57,16 @@ module.exports = class LavalinkMethods extends Lavalink {
   // Always get the highest quality thumbnail if possible
   async getThumbnail(trackInfo) {
     if (trackInfo.source === "youtube") {
-      const res = await snekfetch.get(`https://www.googleapis.com/youtube/v3/videos?id=${trackInfo.identifier}&part=snippet&key=${process.env.YT}`).catch(e => ({
-        "error": e
-      }));
+      const youtubeAPI = `https://www.googleapis.com/youtube/v3/videos?id=${trackInfo.identifier}&part=snippet&key=${process.env.YT}`;
+      const res = await snekfetch.get(youtubeAPI).catch(error => ({ error }));
 
       if (res.error) return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
-
       if (res.body.items[0].snippet.thumbnails.maxres) return res.body.items[0].snippet.thumbnails.maxres.url;
 
       return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
     } else if (trackInfo.source === "soundcloud") {
-      const res = await scraper(trackInfo.uri).catch(e => ({ "error": e }));
-
+      const res = await scraper(trackInfo.uri).catch(error => ({ error }));
       if (res.error) return null;
-
       return res.openGraph.image.url;
     }
   }
@@ -120,7 +116,7 @@ module.exports = class LavalinkMethods extends Lavalink {
       guild.player.musicPauseAll = null;
     };
 
-    return this.send({
+    this.send({
       "op": "play",
       "guildId": guild.id,
       "track": guild.player.queue[0].track
@@ -130,7 +126,7 @@ module.exports = class LavalinkMethods extends Lavalink {
   seek(guild, pos) {
     guild.player.seekTime(pos);
 
-    return this.send({
+    this.send({
       "op": "seek",
       "guildId": guild.id,
       "position": pos
@@ -138,8 +134,22 @@ module.exports = class LavalinkMethods extends Lavalink {
   }
 
   skip(guild) {
+    if (!guild.player.queue[0] || guild.player.queue[0].info.looped) return;
+
     guild.player.queue.shift();
-    if (guild.player.queue.length > 0) return this.play(guild);
+
+    if (guild.player.queue.length > 0) {
+      this.play(guild);
+    } else {
+      if (!this.client.wss) return;
+
+      this.stop(guild);
+
+      this.client.wss.send({
+        "op": "finished",
+        "id": guild.id
+      });
+    }
   }
 
   resume(guild) {
@@ -155,9 +165,10 @@ module.exports = class LavalinkMethods extends Lavalink {
     // after I just add it to musicPauseAll or I set the value to the miliseconds of the pause if there is nothing in it
     if (guild.player.musicPauseAll) guild.player.musicPauseAll += ((new Date()).getTime() - guild.player.musicPause.getTime());
     else guild.player.musicPauseAll = (new Date()).getTime() - guild.player.musicPause.getTime();
+
     guild.player.musicPause = null; // this is an extremely important line since I make musicPause null again, and this is to know if the music is currently in pause or not if null == not paused if there is something the music is paused
     guild.player.paused = false;
-    return guild.player.playing = true;
+    guild.player.playing = true;
   }
 
   pause(guild) {
@@ -166,7 +177,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     guild.player.paused = true;
     guild.player.playing = false;
 
-    return this.send({
+    this.send({
       "op": "pause",
       "guildId": guild.id,
       "pause": true
@@ -180,7 +191,7 @@ module.exports = class LavalinkMethods extends Lavalink {
       "volume": vol
     });
 
-    return guild.player.volume = parseInt(vol);
+    guild.player.volume = parseInt(vol);
   }
 
   stop(guild) {
@@ -190,11 +201,15 @@ module.exports = class LavalinkMethods extends Lavalink {
     });
 
     guild.player.paused = false;
-    return guild.player.playing = false;
+    guild.player.playing = false;
+
+    guild.player.musicStart = null;
+    guild.player.musicPauseAll = null;
+    guild.player.musicPause = null;
   }
 
   destroy(guild) {
-    this.emit("finished", guild);
+    this.stop(guild);
 
     guild.player.queue = [];
 
@@ -217,7 +232,7 @@ module.exports = class LavalinkMethods extends Lavalink {
     });
 
     guild.player.channelId = null;
-    return guild.player.playing = false;
+    guild.player.playing = false;
   }
 
   join(msg) {
