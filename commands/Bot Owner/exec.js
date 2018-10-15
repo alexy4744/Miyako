@@ -43,7 +43,7 @@ module.exports = class extends Command {
         })
         .catch(e => msg.error(e, "execute this shell command!"));
     } else {
-      msg.channel.send(`**Input**\n\`\`\`dos\n${args.join(" ")}\n\`\`\`\n**Output**\n\`\`\`dos\n${result.stdout}\n\`\`\``);
+      msg.channel.send(`**Input**\n\`\`\`\n${args.join(" ")}\n\`\`\`\n**Output**\n\`\`\`\n${result.stdout}\n\`\`\``);
     }
   }
 };

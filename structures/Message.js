@@ -124,9 +124,9 @@ Structures.extend("Message", Message => {
       let prevPage = 0;
 
       const emojis = {
+        "⏮": 0,
         "⬅": currPage < 1 ? 0 : currPage - 1,
         "➡": currPage < pages.length - 2 ? currPage + 1 : pages.length - 1,
-        "⏮": 0,
         "⏭": pages.length - 1,
         // These buttons should not change the page when clicked.
         "⏹": 0,
