@@ -8,6 +8,7 @@ module.exports = class extends Command {
       botOwnerOnly: false,
       nsfw: false,
       checkVC: true,
+      checkDJ: true,
       cooldown: 5,
       description: () => `Destroys the player and resets the queue for this guild, then leaves the voice channel.`,
       aliases: [],

@@ -7,6 +7,7 @@ module.exports = class extends Command {
       guarded: false,
       botOwnerOnly: false,
       nsfw: false,
+      checkDJ: true,
       cooldown: 5,
       description: () => `Join your voice channel.`,
       aliases: [],

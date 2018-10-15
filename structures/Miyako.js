@@ -80,7 +80,25 @@ module.exports = class Miyako extends Client {
     if (count >= inhibitors.length) return cmdRun(this);
 
     function cmdRun(client) {
-      cmd.run(msg, args);
+      if (cmd.options.subcommands && cmd.options.subcommands.length > 0) {
+        if (!args[0] || !cmd.options.subcommands.includes(args[0])) {
+          return msg.fail(`Invalid subcommand for "${cmd.options.name}"!`, `Available subcommands: \`${cmd.options.subcommands.join(", ")}\``);
+        }
+
+        for (const command of cmd.options.subcommands) {
+          if (command === args[0]) { // If the first argument is a subcommand
+            // If theres a run method inside a command with subcommands, then use the run method sort of as a inhibitor local to that command.
+            // Has to return either true/false
+            if (typeof cmd.run === "function" && !cmd.run(msg, args.slice(1))) return;
+            if (cmd[args[0]]) return cmd[args[0]](msg, args.slice(1));
+          }
+        }
+      } else if (cmd.run) {
+        cmd.run(msg, args);
+      } else {
+        return;
+      }
+
       const finalizers = Object.keys(client.finalizers);
       if (finalizers.length < 1) return;
       for (const finalizer of finalizers) client.finalizers[finalizer](client);

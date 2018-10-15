@@ -1,7 +1,6 @@
 const Command = require("../../modules/Command");
 const moment = require("moment");
-const momentDurationFormatSetup = require("moment-duration-format");
-momentDurationFormatSetup(moment);
+require("moment-duration-format")(moment);
 
 module.exports = class extends Command {
   constructor(...args) {
@@ -11,6 +10,7 @@ module.exports = class extends Command {
       botOwnerOnly: false,
       nsfw: false,
       checkVC: true,
+      checkDJ: true,
       cooldown: 5,
       description: () => `Play a tracks from an available source.`,
       usage: () => [`Illenium Afterlife`, `Echos Fiction`],

@@ -11,6 +11,7 @@ module.exports = class extends Command {
       botOwnerOnly: false,
       nsfw: false,
       checkVC: true,
+      checkDJ: true,
       cooldown: 5,
       description: () => `Resume a song that is currently paused.`,
       aliases: [],
