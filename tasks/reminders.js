@@ -5,15 +5,14 @@ module.exports = client => {
     for (const reminder of client.myCache.reminders) {
       if (Date.now() >= reminder.when) {
         try {
+          const clientData = client.myCache;
           const user = await client.users.fetch(reminder.id);
           await user.send(reminder.reminder);
-          const index = client.myCache.reminders.findIndex(r => r.content === reminder.content && r.id === reminder.id);
-          const reminders = client.myCache.reminders.splice(index, 1);
-          client.myCache = {
-            ...client.myCache,
-            reminders
-          };
-          await client.db.update("client", client.myCache);
+          const index = clientData.reminders.findIndex(r => r.content === reminder.content && r.id === reminder.id);
+
+          clientData.reminders.splice(index, 1);
+
+          await client.db.update("client", clientData);
         } catch (error) {
           // noop
         }

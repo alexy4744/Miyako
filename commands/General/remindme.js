@@ -26,7 +26,7 @@ module.exports = class extends Command {
 
     const clientData = await this.client.db.get("client", this.client.user.id).catch(error => ({ error }));
 
-    if (clientData.error) return msg.error("set your reminder!", clientData.error);
+    if (clientData && clientData.error) return msg.error("set your reminder!", clientData.error);
 
     if (!clientData.reminders) clientData.reminders = [];
 
