@@ -36,7 +36,7 @@ module.exports = async (client, msg) => {
   if (count < Object.keys(client.monitors).length) return;
   if (msg.author.bot) return;
 
-  const prefix = msg.guild.cache.prefix || client.prefix;
+  const prefix = msg.guild ? msg.guild.cache.prefix || client.prefix : client.prefix;
 
   if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
 
