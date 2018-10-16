@@ -1,4 +1,3 @@
-/* eslint no-undefined: 0 */
 /* eslint no-use-before-define: 0 */
 
 const { Client } = require("discord.js");
@@ -43,16 +42,11 @@ module.exports = class Miyako extends Client {
       "commandsPerSecond": 0
     });
 
-    this.setInterval(() => {
-      this.messagesPerSecond = 0;
-      this.commandsPerSecond = 0;
-    }, 1100);
-
     this.wss.on("open", this._wssOnOpen.bind(this));
     this.wss.on("error", this._wssOnError.bind(this));
     this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
 
-    this.player.on("error", err => console.error(err));
+    this.player.on("error", console.error);
     this.player.on("finished", this._playerFinish.bind(this));
 
     require("../loaders/loader")(this);

@@ -11,7 +11,7 @@ module.exports = class extends Command {
       cooldown: 5,
       description: () => `Create a reminder.`,
       subcommands: [],
-      aliases: ["remind"],
+      aliases: [],
       userPermissions: [],
       botPermissions: [],
       runIn: []
@@ -41,10 +41,9 @@ module.exports = class extends Command {
         ...this.client.myCache,
         reminders: clientData.reminders
       });
+      return msg.success("I have successfully set a reminder for you!", `**Reminder**: ${reminder}\n\n**When**: ${moment(when).format("dddd, MMMM Do YYYY, hh:mm:ss A")}`);
     } catch (error) {
-      // noop
+      return msg.error("set your reminder!", error);
     }
-
-    return msg.success("I have successfully set a reminder for you!", `**Reminder**: ${reminder}\n\n**When**: ${moment(when).format("dddd, MMMM Do YYYY, hh:mm:ss A")}`);
   }
 };

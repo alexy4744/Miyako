@@ -9,7 +9,7 @@ module.exports = class extends Command {
       nsfw: false,
       checkVC: false,
       cooldown: 5,
-      description: () => `Adds/removes a DJ. Adding a DJ will disable music controls to everyone else except admins.`,
+      description: () => `Adds/removes a DJ. Adding a DJ will disable music controls to everyone else except DJs and admins.`,
       aliases: [],
       subcommands: ["add", "remove"],
       userPermissions: [],
@@ -41,7 +41,7 @@ module.exports = class extends Command {
       await this.client.db.update("guilds", cache);
       return msg.success(`I have added ${member.user.tag} as a DJ!`);
     } catch (error) {
-      // noop
+      return msg.error("add DJs", error);
     }
   }
 
@@ -62,7 +62,7 @@ module.exports = class extends Command {
       await this.client.db.update("guilds", cache);
       return msg.success(`I have removed ${member.user.tag} as a DJ!`);
     } catch (error) {
-      // noop
+      return msg.error("remove DJs", error);
     }
   }
 };

@@ -32,8 +32,7 @@ module.exports = class extends Command {
       **Guilds**: \`${this.client.guilds.size.toLocaleString()}\`\n
       **Channels**: \`${this.client.channels.size.toLocaleString()}\`\n
       **Emojis**: \`${this.client.emojis.size.toLocaleString()}\`\n
-      **Commands**: \`${Object.keys(this.client.commands).length.toLocaleString()}\`\n
-      **Commands Ran**: \`${this.client.cache.client.get(this.client.user.id).commandsRan ? this.client.cache.client.get(this.client.user.id).commandsRan.toLocaleString() : `Still retrieving...`}\``);
+      **Commands**: \`${Object.keys(this.client.commands).length.toLocaleString()}\``);
 
     const system = new MessageEmbed()
       .setTitle(`🖥${msg.emojis.bar}System Information`)
