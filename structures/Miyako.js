@@ -52,12 +52,16 @@ module.exports = class Miyako extends Client {
     require("../loaders/loader")(this);
   }
 
+  get myCache() {
+    return this.cache.client.get(process.env.CLIENT_ID);
+  }
+
   // Perform a check against all inhibitors before executing the command.
-  runCmd(msg, cmd, args) {
+  runInhibitors(msg, cmd, args) {
     // TODO: Update author/member cache if needed below this line
     const inhibitors = Object.keys(this.inhibitors);
 
-    if (inhibitors.length < 1) return cmdRun(this); // If there's no inhibitors, just run the command.
+    if (inhibitors.length < 1) return this.runCommand(msg, cmd, args); // If there's no inhibitors, just run the command.
 
     let count = 0; // Keep track of the total inhibitors that allow the command to be passed though.
 
@@ -71,32 +75,61 @@ module.exports = class Miyako extends Client {
     }
 
     // If all inhibitors return 1 and equals to the total number of inhibitor, run the command.
-    if (count >= inhibitors.length) return cmdRun(this);
+    if (count >= inhibitors.length) return this.runCommand(msg, cmd, args);
+  }
 
-    function cmdRun(client) {
-      if (cmd.options.subcommands && cmd.options.subcommands.length > 0) {
-        if (!args[0] || !cmd.options.subcommands.includes(args[0])) {
-          return msg.fail(`Invalid subcommand for "${cmd.options.name}"!`, `Available subcommands: \`${cmd.options.subcommands.join(", ")}\``);
-        }
+  runCommand(msg, cmd, args) {
+    if (cmd.options.subcommands && cmd.options.subcommands.length > 0) {
+      // if (!args[0] || !cmd.options.subcommands.includes(args[0]) || cmd.options.subcommands.findIndex(c => Object.keys(c).includes(args[0])) < 0) {
+      //   return msg.fail(`Invalid subcommand for "${cmd.options.name}"!`, `Available subcommands: \`${cmd.options.subcommands.join(", ")}\``);
+      // }
 
-        for (const command of cmd.options.subcommands) {
-          if (command === args[0]) { // If the first argument is a subcommand
-            // If theres a run method inside a command with subcommands, then use the run method sort of as a inhibitor local to that command.
-            // Has to return either true/false
-            if (typeof cmd.run === "function" && !cmd.run(msg, args.slice(1))) return;
-            if (cmd[args[0]]) return cmd[args[0]](msg, args.slice(1));
+      if (typeof cmd.run === "function" && !cmd.run(msg, args)) return;
+
+      let match = false;
+
+      for (const command of cmd.options.subcommands) {
+        if (match) break;
+
+        if (command instanceof Object) { // If there is a sub command in a subcommand
+          for (const subcommand of Object.keys(command)) {
+            if (match) break;
+
+            if (args[0] === subcommand) {
+              const index = cmd.options.subcommands.findIndex(c => Object.keys(c)[0] === subcommand);
+
+              if (!args[1] || index < 0) { // if there is no extended sub cmd provided
+                return msg.fail(`Invalid extended subcommand for "${cmd.options.name}"!`, `Available Extended Subcommands: \`${cmd.options.subcommands.map(c => Object.keys(c)).join(" | ")}\``);
+              }
+
+              const extendedSubCommand = cmd.options.subcommands[index][subcommand];
+
+              for (const subcmd of extendedSubCommand) {
+                if (args[1] === subcmd && typeof cmd[subcommand] === "function") {
+                  cmd[subcommand](msg, subcmd, args.slice(2));
+                  match = true;
+                  break;
+                }
+              }
+            }
           }
+        } else if (command === args[0]) {
+          cmd[args[0]](msg, args.slice(1));
         }
-      } else if (cmd.run) {
-        cmd.run(msg, args);
-      } else {
-        return;
       }
-
-      const finalizers = Object.keys(client.finalizers);
-      if (finalizers.length < 1) return;
-      for (const finalizer of finalizers) client.finalizers[finalizer](client);
+    } else if (cmd.run) {
+      cmd.run(msg, args);
+    } else {
+      return;
     }
+
+    return this.runFinalizers();
+  }
+
+  runFinalizers() {
+    const finalizers = Object.keys(this.finalizers);
+    if (finalizers.length < 1) return;
+    for (const finalizer of finalizers) this.finalizers[finalizer](this);
   }
 
   updateCache(data) {
@@ -120,10 +153,6 @@ module.exports = class Miyako extends Client {
         ...updated
       });
     }
-  }
-
-  get myCache() {
-    return this.cache.client.get(process.env.CLIENT_ID);
   }
 
   /* Handle requests sent by the websocket server */

@@ -8,9 +8,7 @@ module.exports = (client, msg) => {
   if (!msg.guild ||
     !msg.guild.cache ||
     !msg.guild.cache.imageHashes ||
-    !msg.guild.cache.imageBuffers ||
-    msg.guild.cache.imageHashes.length < 1 ||
-    msg.guild.cache.imageBuffers < 1) return 1;
+    msg.guild.cache.imageHashes.length < 1) return 1;
 
   if (msg.attachments.size > 0) {
     for (const attachment of msg.attachments) {

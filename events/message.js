@@ -43,6 +43,6 @@ module.exports = async (client, msg) => {
   const args = msg.content.slice(prefix.length).trim().split(/ +/g);
   const cmd = args.shift().toLowerCase();
 
-  if (client.commands[cmd]) return client.runCmd(msg, client.commands[cmd], args);
-  else if (client.aliases[cmd]) return client.runCmd(msg, client.commands[client.aliases[cmd]], args);
+  if (client.commands[cmd]) return client.runInhibitors(msg, client.commands[cmd], args);
+  else if (client.aliases[cmd]) return client.runInhibitors(msg, client.commands[client.aliases[cmd]], args);
 };
