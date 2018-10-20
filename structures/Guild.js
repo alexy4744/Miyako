@@ -8,6 +8,15 @@ Structures.extend("Guild", Guild => {
       return this.client.cache.guilds.get(this.id);
     }
 
+    async syncDatabase() {
+      const data = await this.client.db.get("guilds", this.id).catch(error => ({ error }));
+      if (data.error) return Promise.reject(data.error);
+
+      this.client.cache.guilds.set(this.id, data);
+
+      return Promise.resolve(this.cache);
+    }
+
     /**
      * Find a member that matches the best to the given query.
      * @param {String} query The query to find by.

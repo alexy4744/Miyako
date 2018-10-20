@@ -78,13 +78,13 @@ module.exports = class Miyako extends Client {
     if (count >= inhibitors.length) return this.runCommand(msg, cmd, args);
   }
 
-  runCommand(msg, cmd, args) {
+  async runCommand(msg, cmd, args) {
     if (cmd.options.subcommands && cmd.options.subcommands.length > 0) {
-      // if (!args[0] || !cmd.options.subcommands.includes(args[0]) || cmd.options.subcommands.findIndex(c => Object.keys(c).includes(args[0])) < 0) {
-      //   return msg.fail(`Invalid subcommand for "${cmd.options.name}"!`, `Available subcommands: \`${cmd.options.subcommands.join(", ")}\``);
-      // }
-
-      if (typeof cmd.run === "function" && !cmd.run(msg, args)) return;
+      if (typeof cmd.run === "function") {
+        let run = cmd.run(msg, args);
+        if (run instanceof Promise) run = await run;
+        if (!run) return;
+      }
 
       let match = false;
 
@@ -98,9 +98,7 @@ module.exports = class Miyako extends Client {
             if (args[0] === subcommand) {
               const index = cmd.options.subcommands.findIndex(c => Object.keys(c)[0] === subcommand);
 
-              if (!args[1] || index < 0) { // if there is no extended sub cmd provided
-                return msg.fail(`Invalid extended subcommand for "${cmd.options.name}"!`, `Available Extended Subcommands: \`${cmd.options.subcommands.map(c => Object.keys(c)).join(" | ")}\``);
-              }
+              if (!args[1] || index < 0) break; // exit the loop, leaving match = false.
 
               const extendedSubCommand = cmd.options.subcommands[index][subcommand];
 
@@ -116,6 +114,10 @@ module.exports = class Miyako extends Client {
         } else if (command === args[0]) {
           cmd[args[0]](msg, args.slice(1));
         }
+      }
+
+      if (!match) {
+        return msg.fail(`Invalid extended subcommand for "${cmd.options.name}"!`, `Available Extended Subcommands: \`${cmd.options.subcommands.filter(c => c).join(" | ")}\``);
       }
     } else if (cmd.run) {
       cmd.run(msg, args);
