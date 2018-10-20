@@ -45,16 +45,13 @@ module.exports = class extends Command {
     }
 
     /* Use sync database so that the cache is updated instantly without waiting for the database watch event to fire. */
+    let data = msg.guild.cache;
+    if (!data.words) data = await msg.guild.syncDatabase();
 
     this.add = async () => {
       try {
-        let data = msg.guild.cache;
-        if (!data.words) data = await msg.guild.syncDatabase();
-
         data.words.push(word);
-
         await this.client.db.update("guilds", data);
-
         return msg.success(`"${word}" has been added to the word filter!`);
       } catch (error) {
         return msg.error(error);
@@ -63,14 +60,10 @@ module.exports = class extends Command {
 
     this.remove = async () => {
       try {
-        let data = msg.guild.cache;
-        if (!data.words || (data.words && !data.words.includes(word))) data = await msg.guild.syncDatabase();
-
         const index = data.words.findIndex(w => w === word);
         if (index < 0) return msg.fail(`"${word}" is not found in the word filter!`);
 
         data.words.splice(index, 1);
-
         await this.client.db.update("guilds", data);
 
         return msg.success(`"${word}" has been removed from the word filter!`);
@@ -97,64 +90,39 @@ module.exports = class extends Command {
     const attachment = args[0] ? { url: args[0] } : fetchLastImage();
     if (!attachment) return msg.fail(`I could not find any image attachments in the last couple of messages in this channel!`);
 
-    this.add = () => {
-      return validateImage(attachment.url, attachment.msg);
+    const Filter = new ImageFilter();
+    const image = await Filter.loadImage(attachment.url).catch(error => ({ error }));
 
-      async function validateImage(url, m) {
-        const Filter = new ImageFilter();
-        const image = await Filter.loadImage(url).catch(error => ({ error }));
+    if (image.error) return msg.error(image.error, `failed to load this image!`);
 
-        if (image.error) return msg.error(image.error, `remove this image from the filter!`);
+    let data = msg.guild.cache;
+    if (!data.images) data = await msg.guild.syncDatabase();
 
-        const message = await msg.channel.send({
-          embed: {
-            title: `${msg.emojis.pending}Are you sure you want to ban this image?`,
-            image: { url },
-            footer: { "text": m ? `Sent by ${m.author.tag} on ${m.createdAt.toLocaleString()}` : null },
-            color: msg.colors.pending
-          }
-        });
+    this.add = async () => {
+      const confirmation = await prompt("Are you sure you want to add this image to the filter?");
+      if (!confirmation) return;
 
-        const confirmation = await message.prompt(msg.author.id).catch(error => ({ error }));
-
-        if (confirmation.error) return msg.cancelledCommand(`${msg.author.toString()} has failed to provide a response within **15** seconds, therefore I have cancelled the command!`);
-
-        if (confirmation) {
-          if (m) m.delete().catch(() => { });
-
-          try {
-            if (!Filter.hash) await Filter.generateHash();
-
-            let data = msg.guild.cache;
-            if (!data.images) data = await msg.guild.syncDatabase();
-
-            data.images.push(Filter.hash);
-
-            await msg.client.db.update("guilds", data);
-
-            message.success(`This image has been successfully added to the filter!`);
-          } catch (error) {
-            message.error(error.stack);
-          }
-
-          message.delete().catch(() => { });
-        } else {
-          return msg.cancelledCommand();
-        }
-      }
-    };
-
-    this.remove = async () => {
-      const Filter = new ImageFilter();
-      const image = await Filter.loadImage(attachment.url).catch(error => ({ error }));
-
-      if (image.error) return msg.error(image.error, `remove this image from the filter!`);
+      if (attachment.msg) attachment.msg.delete().catch(() => { });
 
       try {
         if (!Filter.hash) await Filter.generateHash();
 
-        let data = msg.guild.cache;
-        if (!data.images) data = await msg.guild.syncDatabase();
+        data.images.push(Filter.hash);
+
+        await msg.client.db.update("guilds", data);
+
+        return msg.success(`This image has been successfully added to the filter!`);
+      } catch (error) {
+        return msg.error(error.stack);
+      }
+    };
+
+    this.remove = async () => {
+      const confirmation = await prompt("Are you sure you want to remove this image from the filter?");
+      if (!confirmation) return;
+
+      try {
+        if (!Filter.hash) await Filter.generateHash();
 
         const index = msg.guild.cache.images.findIndex(hash => hash === Filter.hash);
         if (index < 0) return msg.fail("This image was not found in the image filter!");
@@ -178,6 +146,32 @@ module.exports = class extends Command {
         msg: attachments.last(),
         url: attachments.last().attachments.first().url
       };
+    }
+
+    async function prompt(title) {
+      const message = await msg.channel.send({
+        embed: {
+          title: `${msg.emojis.pending}${title}`,
+          image: { url: attachment.url },
+          footer: { "text": attachment.msg ? `Sent by ${attachment.msg.author.tag} on ${attachment.msg.createdAt.toLocaleString()}` : null },
+          color: msg.colors.pending
+        }
+      });
+
+      const confirmation = await message.prompt(msg.author.id).catch(error => ({ error }));
+
+      if (confirmation.error) {
+        msg.cancelledCommand(`${msg.author.toString()} has failed to provide a response within **15** seconds, therefore I have cancelled the command!`);
+        return Promise.resolve(false);
+      }
+
+      if (confirmation) {
+        message.delete().catch(() => { });
+        return Promise.resolve(true);
+      }
+
+      msg.cancelledCommand();
+      return Promise.resolve(false);
     }
 
     return this[subcommand]();

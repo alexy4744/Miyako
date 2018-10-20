@@ -3,7 +3,7 @@
 const { Client } = require("discord.js");
 const chalk = require("chalk");
 const WebSocket = require("ws");
-const Lavalink = require("../music/methods");
+const Lavalink = require("../music/Lavalink");
 require("./Structures")();
 
 module.exports = class Miyako extends Client {

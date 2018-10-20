@@ -36,21 +36,18 @@ module.exports = (client, msg) => {
     if (match.error) return 1;
 
     if (match) {
-      try {
-        await msg.author.send({
-          embed: {
-            title: `${msg.emojis.fail}Your message has been deleted in ${msg.guild.name}!`,
-            description: `[**This image**](${url}) has been banned by the admins of this guild; therefore, your message has been deleted.`,
-            image: { url },
-            color: msg.colors.fail
-          }
-        });
-        await msg.delete();
-      } catch (error) {
-        // noop
-      } finally {
-        return 0; // eslint-disable-line
-      }
+      msg.delete().catch(() => { });
+
+      msg.author.send({
+        embed: {
+          title: `${msg.emojis.fail}Your message has been deleted in ${msg.guild.name}!`,
+          description: `[**This image**](${url}) has been banned by the admins of this guild; therefore, your message has been deleted.`,
+          image: { url },
+          color: msg.colors.fail
+        }
+      }).catch(() => { });
+
+      return 0;
     } else return 1; //eslint-disable-line
   }
 };

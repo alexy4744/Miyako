@@ -18,5 +18,5 @@ module.exports = client => {
         }
       }
     }
-  }, 500);
+  }, 1000);
 };
