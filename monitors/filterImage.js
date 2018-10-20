@@ -7,8 +7,8 @@ const regex = /\.(jpe?g|png|gif|bmp|tiff)$/gi;
 module.exports = (client, msg) => {
   if (!msg.guild ||
     !msg.guild.cache ||
-    !msg.guild.cache.imageHashes ||
-    msg.guild.cache.imageHashes.length < 1) return 1;
+    !msg.guild.cache.images ||
+    msg.guild.cache.images.length < 1) return 1;
 
   if (msg.attachments.size > 0) {
     for (const attachment of msg.attachments) {
@@ -31,7 +31,7 @@ module.exports = (client, msg) => {
 
     if (image.error) return 1;
 
-    const match = await Filter.matchArray(msg.guild.cache.imageHashes).catch(e => ({ "error": e }));
+    const match = await Filter.matchArray(msg.guild.cache.images).catch(e => ({ "error": e }));
 
     if (match.error) return 1;
 
