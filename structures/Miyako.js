@@ -79,7 +79,7 @@ module.exports = class Miyako extends Client {
   }
 
   async runCommand(msg, cmd, args) {
-    if (this.utils.is.object(cmd.options.subcommands) || (this.utils.is.array(cmd.options.subcommands) && cmd.options.subcommands.length > 0)) {
+    if (cmd.options.subcommands && (this.utils.is.object(cmd.options.subcommands) || (this.utils.is.array(cmd.options.subcommands) && cmd.options.subcommands.length > 0))) {
       if (this.utils.is.function(cmd.run)) {
         let run = cmd.run(msg, args);
         if (this.utils.is.thenable(run)) run = await run;

@@ -40,8 +40,8 @@ module.exports = class extends Command {
       const message = await msg.channel.send(`\`\`\`bash\nAdded all unstaged files...\n\`\`\``);
       const commit = await exec(`git commit -m "${commitMessage}"`);
       await message.edit(`\`\`\`bash\nCommit message has been set to "${commitMessage}"\n\n${commit.stdout}\`\`\``);
-      const push = await exec(`git push`);
-      await message.edit(`\`\`\`bash\n${push.stdout.length > 1 ? push.stdout : "I have sucessfully pushed the commit to the repository!"}\n\`\`\``);
+      await exec(`git push`);
+      await message.edit(`\`\`\`bash\nI have sucessfully pushed the commit to the repository!\n\n${commit.stdout}\n\`\`\``);
     } catch (error) {
       return msg.error(error);
     }
