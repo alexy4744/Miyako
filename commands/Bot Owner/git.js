@@ -21,9 +21,11 @@ module.exports = class extends Command {
     });
   }
 
-  async pull(msg) {
+  async pull(msg, args) {
+    const branch = args[0] ? args.join(" ") : null;
+
     try {
-      const pull = await exec("git pull origin master");
+      const pull = await exec(`git pull origin ${branch || "master"}`);
       return msg.channel.send(`I have successfully pulled from the repository!\n\n\`\`\`bash\n${pull.stdout}\n\`\`\``);
     } catch (error) {
       return msg.error(error);
@@ -34,16 +36,16 @@ module.exports = class extends Command {
     if (!args[0]) return msg.fail("Must enter a commit message!");
 
     const commitMessage = args.join(" ");
+    const message = await msg.channel.send(`\`\`\`bash\nAdding all unstaged files...\n\`\`\``);
 
     try {
-      await exec("git add .").catch(error => ({ error }));
-      const message = await msg.channel.send(`\`\`\`bash\nAdded all unstaged files...\n\`\`\``);
+      await exec("git add .");
       const commit = await exec(`git commit -m "${commitMessage}"`);
       await message.edit(`\`\`\`bash\nCommit message has been set to "${commitMessage}"\n\n${commit.stdout}\`\`\``);
       await exec(`git push`);
       await message.edit(`\`\`\`bash\nI have sucessfully pushed the commit to the repository!\n\n${commit.stdout}\n\`\`\``);
     } catch (error) {
-      return msg.error(error);
+      return message.edit(`\`\`\`bash\n${error}\n\`\`\``);
     }
   }
 };
