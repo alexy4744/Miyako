@@ -14,14 +14,10 @@ module.exports = class extends Command {
       description: () => `Add/remove items from filters.`,
       usage: () => [``],
       aliases: [],
-      subcommands: [
-        {
-          "word": ["add", "remove"]
-        },
-        {
-          "image": ["add", "remove"]
-        }
-      ],
+      subcommands: {
+        "word": ["add", "remove"],
+        "image": ["add", "remove"]
+      },
       userPermissions: ["administrator"],
       botPermissions: [],
       runIn: ["text"]

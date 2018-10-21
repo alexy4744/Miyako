@@ -79,46 +79,51 @@ module.exports = class Miyako extends Client {
   }
 
   async runCommand(msg, cmd, args) {
-    if (cmd.options.subcommands && cmd.options.subcommands.length > 0) {
-      if (typeof cmd.run === "function") {
+    if (this.utils.is.object(cmd.options.subcommands) || (this.utils.is.array(cmd.options.subcommands) && cmd.options.subcommands.length > 0)) {
+      if (this.utils.is.function(cmd.run)) {
         let run = cmd.run(msg, args);
-        if (run instanceof Promise) run = await run;
+        if (this.utils.is.thenable(run)) run = await run;
         if (!run) return;
       }
 
-      let match = false;
-      let extendedSubCommands;
+      let found = false;
 
-      for (const command of cmd.options.subcommands) {
-        if (match) break;
+      if (this.utils.is.object(cmd.options.subcommands)) {
+        let subcmd;
 
-        if (command instanceof Object) { // If there is a sub command in a subcommand
-          for (const subcommand of Object.keys(command)) {
-            if (match) break;
+        if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.options.name}`, `Available Subcommands: \`${Object.keys(cmd.options.subcommands).join(" | ")}\``);
 
-            if (args[0] === subcommand) {
-              const index = cmd.options.subcommands.findIndex(c => Object.keys(c)[0] === subcommand);
+        for (const subcommand in cmd.options.subcommands) {
+          if (args[0] === subcommand) {
+            subcmd = subcommand;
 
-              if (!args[1] || index < 0) break; // exit the loop, leaving match = false.
+            if (!args[1]) break;
 
-              extendedSubCommands = cmd.options.subcommands[index][subcommand];
-
-              for (const subcmd of extendedSubCommands) {
-                if (args[1] === subcmd && typeof cmd[subcommand] === "function") {
-                  cmd[subcommand](msg, subcmd, args.slice(2));
-                  match = true;
-                  break;
-                }
+            for (const extendedSubCommand of cmd.options.subcommands[subcommand]) {
+              if (args[1] === extendedSubCommand) {
+                cmd[subcommand](msg, extendedSubCommand, args.slice(2));
+                found = true;
+                break;
               }
             }
           }
-
-          if (!match) {
-            return msg.fail(`Invalid extended subcommand for "${cmd.options.name}"!`, `Available Extended Subcommands: \`${extendedSubCommands.join(", ")}\``);
-          }
-        } else if (command === args[0]) {
-          cmd[args[0]](msg, args.slice(1));
         }
+
+        if (!found) return msg.fail(`Invalid extended subcommand for ${cmd.options.name}`, `Available Extended Subcommands: \`${cmd.options.subcommands[subcmd].join(" | ")}\``);
+      } else if (this.utils.is.array(cmd.options.subcommands)) {
+        if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.options.name}`, `Available Subcommands: \`${cmd.options.subcommands.join(" | ")}\``);
+
+        for (const subcommand of cmd.options.subcommands) {
+          if (args[0] === subcommand) {
+            cmd[subcommand](msg, args.slice(1));
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) return msg.fail(`Invalid subcommand for ${cmd.options.name}`, `Available Subcommands: \`${cmd.options.subcommands.join(" | ")}\``);
+      } else {
+        return;
       }
     } else if (cmd.run) {
       cmd.run(msg, args);
