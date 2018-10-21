@@ -87,6 +87,7 @@ module.exports = class Miyako extends Client {
       }
 
       let match = false;
+      let extendedSubCommands;
 
       for (const command of cmd.options.subcommands) {
         if (match) break;
@@ -100,9 +101,9 @@ module.exports = class Miyako extends Client {
 
               if (!args[1] || index < 0) break; // exit the loop, leaving match = false.
 
-              const extendedSubCommand = cmd.options.subcommands[index][subcommand];
+              extendedSubCommands = cmd.options.subcommands[index][subcommand];
 
-              for (const subcmd of extendedSubCommand) {
+              for (const subcmd of extendedSubCommands) {
                 if (args[1] === subcmd && typeof cmd[subcommand] === "function") {
                   cmd[subcommand](msg, subcmd, args.slice(2));
                   match = true;
@@ -111,13 +112,13 @@ module.exports = class Miyako extends Client {
               }
             }
           }
+
+          if (!match) {
+            return msg.fail(`Invalid extended subcommand for "${cmd.options.name}"!`, `Available Extended Subcommands: \`${extendedSubCommands.join(", ")}\``);
+          }
         } else if (command === args[0]) {
           cmd[args[0]](msg, args.slice(1));
         }
-      }
-
-      if (!match) {
-        return msg.fail(`Invalid extended subcommand for "${cmd.options.name}"!`, `Available Extended Subcommands: \`${cmd.options.subcommands.filter(c => c).join(" | ")}\``);
       }
     } else if (cmd.run) {
       cmd.run(msg, args);
