@@ -19,7 +19,7 @@ module.exports = class extends Command {
   }
 
   run(msg, args) {
-    if (msg.mentions.members.size < 1 && !args[0]) {
+    if (msg.mentions.members.size < 1 && !args[1]) {
       msg.fail("You must supply a member to be added as a DJ!");
       return false;
     }

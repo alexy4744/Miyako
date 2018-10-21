@@ -9,7 +9,7 @@ module.exports = class extends Command {
       nsfw: false,
       cooldown: 5,
       description: () => `Reload commands, inhibitors and utilities`,
-      usage: () => [`checkNSFW`, `ban`],
+      usage: () => [`ban`, `checkNSFW`, `is`],
       aliases: [],
       userPermissions: [],
       botPermissions: [],

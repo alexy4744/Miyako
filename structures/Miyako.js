@@ -80,10 +80,13 @@ module.exports = class Miyako extends Client {
 
   async runCommand(msg, cmd, args) {
     if (cmd.options.subcommands && (this.utils.is.object(cmd.options.subcommands) || (this.utils.is.array(cmd.options.subcommands) && cmd.options.subcommands.length > 0))) {
+      let sharedVariables = null;
+
       if (this.utils.is.function(cmd.run)) {
         let run = cmd.run(msg, args);
         if (this.utils.is.thenable(run)) run = await run;
         if (!run) return;
+        if (this.utils.is.object(run)) sharedVariables = run; // If it returns an object, then the object should be a shared object across all subcommands
       }
 
       let found = false;
@@ -101,6 +104,7 @@ module.exports = class Miyako extends Client {
 
             for (const extendedSubCommand of cmd.options.subcommands[subcommand]) {
               if (args[1] === extendedSubCommand) {
+                cmd.shared = sharedVariables;
                 cmd[subcommand](msg, extendedSubCommand, args.slice(2));
                 found = true;
                 break;
@@ -115,6 +119,7 @@ module.exports = class Miyako extends Client {
 
         for (const subcommand of cmd.options.subcommands) {
           if (args[0] === subcommand) {
+            cmd.shared = sharedVariables;
             cmd[subcommand](msg, args.slice(1));
             found = true;
             break;
@@ -138,6 +143,15 @@ module.exports = class Miyako extends Client {
     const finalizers = Object.keys(this.finalizers);
     if (finalizers.length < 1) return;
     for (const finalizer of finalizers) this.finalizers[finalizer](this);
+  }
+
+  async syncDatabase() {
+    const data = await this.db.get("client", process.env.CLIENT_ID).catch(error => ({ error }));
+    if (data.error) return Promise.reject(data.error);
+
+    this.cache.client.set(process.env.CLIENT_ID, data);
+
+    return Promise.resolve(this.myCache);
   }
 
   updateCache(data) {
