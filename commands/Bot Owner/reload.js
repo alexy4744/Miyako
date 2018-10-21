@@ -18,23 +18,24 @@ module.exports = class extends Command {
   }
 
   run(msg, args) {
+    if (!args[0]) return msg.fail("You must supply a command/inhibitor/utility to reload!");
+
     const thingToReload = args[0];
 
     if (this.client.commands[thingToReload] || this.client.aliases[thingToReload]) {
       try {
-        let cmd = this.client.commands[thingToReload] || this.client.commands[this.client.aliases[thingToReload]];
-        delete require.cache[require.resolve(`../${cmd.options.category}/${cmd.options.name}`)];
-        delete this.client.commands[cmd.options.name];
-        for (const alias of cmd.options.aliases) delete this.client.aliases[alias];
+        const oldCmd = this.client.commands[thingToReload] || this.client.commands[this.client.aliases[thingToReload]];
+        delete require.cache[require.resolve(`../${oldCmd.options.category}/${oldCmd.options.name}`)];
+        delete this.client.commands[oldCmd.options.name];
+        for (const alias of oldCmd.options.aliases) delete this.client.aliases[alias];
 
-        const category = cmd.options.category;
-        cmd = new (require(`../${cmd.options.category}/${cmd.options.name}`))(this.client);
+        const newCmd = new (require(`../${oldCmd.options.category}/${oldCmd.options.name}`))(this.client);
 
-        cmd.options.name = thingToReload;
-        cmd.options.category = category;
+        newCmd.options.name = oldCmd.options.name;
+        newCmd.options.category = oldCmd.options.category;
 
-        this.client.commands[cmd.options.name] = cmd;
-        for (const alias of cmd.options.aliases) this.client.aliases[alias] = cmd.options.name;
+        this.client.commands[newCmd.options.name] = newCmd;
+        for (const alias of newCmd.options.aliases) this.client.aliases[alias] = newCmd.options.name;
       } catch (error) {
         return msg.error(error, `reload this command!`);
       }

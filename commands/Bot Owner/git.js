@@ -43,7 +43,7 @@ module.exports = class extends Command {
       const commit = await exec(`git commit -m "${commitMessage}"`);
       await message.edit(`\`\`\`bash\nCommit message has been set to "${commitMessage}"\n\n${commit.stdout}\`\`\``);
       await exec(`git push`);
-      await message.edit(`\`\`\`bash\nI have sucessfully pushed the commit to the repository!\n\n${commit.stdout}\n\`\`\``);
+      await message.edit(`\`\`\`bash\n"I have sucessfully pushed the commit to the repository!"\n\n${commit.stdout}\n\`\`\``);
     } catch (error) {
       return message.edit(`\`\`\`bash\n${error}\n\`\`\``);
     }
