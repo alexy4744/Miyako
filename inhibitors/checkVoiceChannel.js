@@ -15,7 +15,7 @@ module.exports = (client, msg, cmd) => {
         color: msg.colors.fail
       }
     });
-  } else { // eslint-disable-line
-    return 1;
   }
+
+  return 1;
 };

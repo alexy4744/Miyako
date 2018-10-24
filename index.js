@@ -18,7 +18,7 @@ require("dotenv").config({ "path": path.join(__dirname, "process.env") });
 
   const clientCache = await Database.get("client", process.env.CLIENT_ID).catch(e => ({ "error": e }));
   if (clientCache.error) throw clientCache.error;
-  client.cache.client.set(process.env.CLIENT_ID, clientCache);
+  client.caches.client.set(process.env.CLIENT_ID, clientCache);
 
   client.db = Database;
   client.db.on("change", data => client.updateCache(data));

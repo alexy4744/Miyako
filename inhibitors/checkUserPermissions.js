@@ -4,10 +4,8 @@ module.exports = (client, msg, cmd) => {
 
   if (msg.channel.type !== "text" || perms.length < 1) return 1;
 
-  const member = msg.guild.member(msg.author);
-
   for (let i = 0; i < perms.length; i++) {
-    if (!member.hasPermission(perms[i])) {
+    if (!msg.member.hasPermission(perms[i])) {
       return msg.channel.send({
         embed: {
           title: `${msg.emojis.fail}You do not have the permissions to run this command!`,

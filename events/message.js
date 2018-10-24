@@ -1,11 +1,10 @@
-/* eslint no-undefined: 0 */
-
 module.exports = async (client, msg) => {
   client.messagesPerSecond++;
 
   if (msg.guild) {
     if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return;
-    if (!client.cache.guilds.has(msg.guild.id)) { // If the cache does not exist in the Map, then cache it
+
+    if (!client.caches.guilds.has(msg.guild.id)) { // If the cache does not exist in the Map, then cache it
       let guildCache = await client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
       if (guildCache && guildCache.error) return console.error(guildCache.error); // Silently fail if an error occurs
 
@@ -18,7 +17,7 @@ module.exports = async (client, msg) => {
         }
       }
 
-      client.cache.guilds.set(msg.guild.id, guildCache);
+      client.caches.guilds.set(msg.guild.id, guildCache);
     }
   }
 

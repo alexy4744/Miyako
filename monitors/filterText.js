@@ -20,6 +20,6 @@ module.exports = async (client, msg) => {
     if (!pattern.test(content)) return 1;
 
     if (action === "delete") return msg.delete().catch(() => { });
-    if (action === "mute") return client.runCmd(msg, "mute", ["30m", "Use of a filtered/banned word"]);
+    if (action === "mute") return client.runCommand(msg, "mute", ["30m", "Use of a filtered/banned word"]);
   }
 };

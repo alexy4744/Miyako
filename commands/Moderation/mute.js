@@ -66,7 +66,7 @@ module.exports = class extends Command {
 
     try {
       if (days) {
-        const clientCache = this.client.myCache;
+        const clientCache = this.client.cache;
         if (!(clientCache.mutedMembers instanceof Array)) clientCache.mutedMembers = [];
 
         clientCache.mutedMembers.push({

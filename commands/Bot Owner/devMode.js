@@ -17,7 +17,7 @@ module.exports = class extends Command {
   }
 
   async run(msg) {
-    const data = this.client.myCache;
+    const data = this.client.cache;
 
     if (data.error) return msg.error(data.error, "activate/deactivate developer mode!");
 

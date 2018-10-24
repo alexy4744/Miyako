@@ -4,7 +4,7 @@ const ImageFilter = require("../modules/ImageFilter");
 const getURL = require("get-urls");
 const regex = /\.(jpe?g|png|gif|bmp|tiff)$/gi;
 
-module.exports = (client, msg) => {
+module.exports = async (client, msg) => {
   if (!msg.guild ||
     !msg.guild.cache ||
     !msg.guild.cache.images ||
@@ -12,13 +12,13 @@ module.exports = (client, msg) => {
 
   if (msg.attachments.size > 0) {
     for (const attachment of msg.attachments) {
-      if (attachment[1].file.attachment.match(regex)) validate(attachment[1].file.attachment);
+      if (attachment[1].file.attachment.match(regex)) await validate(attachment[1].file.attachment);
     }
   } else {
     const urls = getURL(msg.content);
     if (urls.size > 0) {
       for (const url of urls) {
-        if (validate(url) === 0) return 0;
+        if (await validate(url) === 0) return 0;
       }
     }
 

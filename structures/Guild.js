@@ -4,15 +4,20 @@ const { Structures } = require("discord.js");
 
 Structures.extend("Guild", Guild => {
   class MiyakoGuild extends Guild {
+    constructor(...args) {
+      super(...args);
+      this.userCooldowns = new Set();
+    }
+
     get cache() {
-      return this.client.cache.guilds.get(this.id);
+      return this.client.caches.guilds.get(this.id);
     }
 
     async syncDatabase() {
       const data = await this.client.db.get("guilds", this.id).catch(error => ({ error }));
       if (data.error) return Promise.reject(data.error);
 
-      this.client.cache.guilds.set(this.id, data);
+      this.client.caches.guilds.set(this.id, data);
 
       return Promise.resolve(this.cache);
     }

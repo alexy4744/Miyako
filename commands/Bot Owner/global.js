@@ -19,7 +19,10 @@ module.exports = class extends Command {
   }
 
   async run(msg, args) {
-    if (!this.client.commands[args[1]] && !this.client.aliases[args[1]]) return msg.fail(`"${args[1]}" is not a valid command!`);
+    if (!this.client.commands[args[1]] && !this.client.aliases[args[1]]) {
+      msg.fail(`"${args[1]}" is not a valid command!`);
+      return false;
+    }
 
     const cmd = this.client.commands[args[1]] || this.client.commands[this.client.aliases[args[1]]];
 
@@ -28,7 +31,7 @@ module.exports = class extends Command {
       return false;
     }
 
-    if (!this.client.myCache.global || (this.client.utils.is.object(this.client.myCache.global) && !this.client.utils.is.array(!this.client.myCache.global.disabledCommands))) {
+    if (!this.client.cache.global || (this.client.utils.is.object(this.client.cache.global) && !this.client.utils.is.array(this.client.cache.global.disabledCommands))) {
       await this.client.db.update("client", {
         _id: this.client.user.id,
         global: {
@@ -43,7 +46,7 @@ module.exports = class extends Command {
   }
 
   enable(msg) {
-    const data = this.client.myCache;
+    const data = this.client.cache;
 
     if (!data.global.disabledCommands.includes(this.shared.cmd.options.name)) return msg.fail(`"${this.shared.cmd.options.name}" is already globally enabled!`);
 
@@ -53,7 +56,7 @@ module.exports = class extends Command {
   }
 
   disable(msg) {
-    const data = this.client.myCache;
+    const data = this.client.cache;
 
     if (data.global.disabledCommands.includes(this.shared.cmd.options.name)) return msg.fail(`"${this.shared.cmd.options.name}" is already globally disabled!`);
 

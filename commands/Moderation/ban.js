@@ -69,7 +69,7 @@ module.exports = class extends Command {
 
       // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
       if (days) { // Only save it to the database if this is a timed ban.
-        const clientCache = msg.client.myCache;
+        const clientCache = msg.client.cache;
 
         if (!(clientCache.bannedMembers instanceof Array)) clientCache.bannedMembers = [];
 
@@ -97,7 +97,7 @@ module.exports = class extends Command {
         // Ignoring errors because I can check if this member is actually banned later in my loop
         if (days) {
           try {
-            const clientCache = msg.client.myCache;
+            const clientCache = msg.client.cache;
             const index = clientCache.bannedMembers.findIndex(el => el.memberId === guildMember.id);
 
             if (index > -1) {

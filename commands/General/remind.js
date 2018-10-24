@@ -38,7 +38,7 @@ module.exports = class extends Command {
 
     try {
       await this.client.db.update("client", {
-        ...this.client.myCache,
+        ...this.client.cache,
         reminders: clientData.reminders
       });
       return msg.success("I have successfully set a reminder for you!", `**Reminder**: ${reminder}\n\n**When**: ${moment(when).format("dddd, MMMM Do YYYY, hh:mm:ss A")}`);

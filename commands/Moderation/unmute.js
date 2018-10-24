@@ -37,7 +37,7 @@ module.exports = class extends Command {
     if (!role || !msg.guild.roles.has(role) || !member.roles.has(role)) return msg.fail(`${member.user.tag} is already unmuted!`);
 
     try {
-      const clientCache = this.client.myCache;
+      const clientCache = this.client.cache;
 
       if (clientCache.mutedMembers instanceof Array) {
         const index = clientCache.mutedMembers.findIndex(el => el.memberId === member.id);

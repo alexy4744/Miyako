@@ -9,7 +9,7 @@ require("./Structures")();
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    Object.assign(this.options, options.clientOptions);
+    Object.assign(this, options.clientOptions);
 
     Object.assign(this, {
       "events": {},
@@ -23,14 +23,13 @@ module.exports = class Miyako extends Client {
     });
 
     Object.assign(this, {
-      "cache": {
+      "caches": {
         "client": new Map(),
         "users": new Map(),
         "guilds": new Map(),
         "members": new Map()
       },
       "categories": new Set(),
-      "userCooldowns": new Set(),
       "player": new Lavalink(this),
       "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
     });
@@ -52,8 +51,8 @@ module.exports = class Miyako extends Client {
     require("../loaders/loader")(this);
   }
 
-  get myCache() {
-    return this.cache.client.get(process.env.CLIENT_ID);
+  get cache() {
+    return this.caches.client.get(process.env.CLIENT_ID);
   }
 
   // Perform a check against all inhibitors before executing the command.
@@ -136,32 +135,32 @@ module.exports = class Miyako extends Client {
       return;
     }
 
-    return this.runFinalizers();
+    return this.runFinalizers(msg, cmd, args);
   }
 
-  runFinalizers() {
+  runFinalizers(msg, cmd, args) {
     const finalizers = Object.keys(this.finalizers);
     if (finalizers.length < 1) return;
-    for (const finalizer of finalizers) this.finalizers[finalizer](this);
+    for (const finalizer of finalizers) this.finalizers[finalizer](this, msg, cmd, args);
   }
 
   async syncDatabase() {
     const data = await this.db.get("client", process.env.CLIENT_ID).catch(error => ({ error }));
     if (data.error) return Promise.reject(data.error);
 
-    this.cache.client.set(process.env.CLIENT_ID, data);
+    this.caches.client.set(process.env.CLIENT_ID, data);
 
-    return Promise.resolve(this.myCache);
+    return Promise.resolve(this.cache);
   }
 
   updateCache(data) {
-    if (!this.cache[data.ns.coll].has(data.documentKey._id)) return;
-    if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.cache[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
-    if (data.operationType === "insert" || data.operationType === "replace") return this.cache[data.ns.coll].set(data.documentKey._id, data.fullDocument);
+    if (!this.caches[data.ns.coll].has(data.documentKey._id)) return;
+    if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.caches[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
+    if (data.operationType === "insert" || data.operationType === "replace") return this.caches[data.ns.coll].set(data.documentKey._id, data.fullDocument);
     if (data.operationType === "update") {
       const updated = data.updateDescription.updatedFields; // Object with newly added properties
       const removed = data.updateDescription.removedFields; // Array of removed property names
-      const cache = this.cache[data.ns.coll].get(data.documentKey._id);
+      const cache = this.caches[data.ns.coll].get(data.documentKey._id);
 
       if (Object.keys(removed).length > 0) {
         for (const prop of removed) {
@@ -170,7 +169,7 @@ module.exports = class Miyako extends Client {
         }
       }
 
-      this.cache[data.ns.coll].set(data.documentKey._id, {
+      this.caches[data.ns.coll].set(data.documentKey._id, {
         ...cache,
         ...updated
       });

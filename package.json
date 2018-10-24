@@ -1,8 +1,8 @@
 {
-  "name": "void",
+  "name": "miyako",
   "version": "1.0.0",
   "description": "Discord bot for moderation",
-  "main": "Miyako.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/alexy4744/Miyako.git"
   },
-  "author": "FreezIn",
+  "author": "alexy4744",
   "license": "MIT",
   "dependencies": {
     "bufferutil": "^4.0.0",
@@ -23,12 +23,10 @@
     "fs-nextra": "^0.3.5",
     "get-urls": "^8.0.0",
     "html-metadata": "^1.7.0",
-    "js-beautify": "^1.7.5",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
     "mongodb": "^3.1.6",
     "os-utils": "github:alexy4744/os-utils",
-    "pixelmatch": "^4.0.2",
     "request-promise-native": "^1.0.5",
     "rethinkdbdash": "^2.3.31",
     "snekfetch": "^4.0.4",
