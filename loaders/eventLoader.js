@@ -6,6 +6,7 @@ module.exports = async (client, fs) => {
   for (let event of events) {
     event = event.slice(0, -3).toLowerCase();
     client.events[event] = new (require(`../events/${event}`))(client);
+    client.events[event].name = event.charAt(0).toUpperCase() + event.slice(1);
     client.on(event, (...args) => client.events[event].run(...args));
   }
 };

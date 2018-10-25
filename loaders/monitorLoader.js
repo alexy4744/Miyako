@@ -6,5 +6,6 @@ module.exports = async (client, fs) => {
   for (let monitor of monitors) {
     monitor = monitor.slice(0, -3).toLowerCase();
     client.monitors[monitor] = new (require(`../monitors/${monitor}`))(client);
+    client.monitors[monitor].name = monitor.charAt(0).toUpperCase() + monitor.slice(1);
   }
 };
