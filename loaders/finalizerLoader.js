@@ -1,6 +1,10 @@
-module.exports = (client, fs) => {
-  /* Load all command finalizers. */
-  fs.readdir("./finalizers")
-    .then(finalizers => finalizers.forEach(f => client.finalizers[f.slice(0, -3)] = require(`../finalizers/${f}`)))
-    .catch(error => { throw error; });
+module.exports = async (client, fs) => {
+  const finalizers = await fs.readdir("./finalizers").catch(error => ({ error }));
+  if (finalizers.error) throw finalizers.error;
+  if (finalizers.length < 1) return;
+
+  for (let finalizer of finalizers) {
+    finalizer = finalizer.slice(0, -3).toLowerCase();
+    client.finalizers[finalizer] = new (require(`../finalizers/${finalizer}`))(client);
+  }
 };

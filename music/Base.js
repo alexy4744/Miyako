@@ -19,7 +19,7 @@ module.exports = class LavalinkBase extends EventEmitter {
     });
     this.ws.on("message", this._message.bind(this));
     this.ws.on("error", this._error.bind(this));
-    this.ws.on("close", () => this.ws = null);
+    this.ws.on("close", this._close.bind(this));
 
     this.client.on("raw", packet => {
       if (packet.t === "VOICE_SERVER_UPDATE") this._sendVoiceUpdate(packet.d); // Intercept these packets and send them to Lavalink instead.
@@ -61,8 +61,16 @@ module.exports = class LavalinkBase extends EventEmitter {
     if (data.type === "TrackStuckEvent" || data.type === "TrackExceptionEvent") return this.emit("finished", guild);
   }
 
+  _close() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
   _error(err) {
-    return this.emit(err);
+    this._close();
+    return this.emit("error", err);
   }
 
   _sendVoiceUpdate(packet) {

@@ -23,10 +23,6 @@ require("dotenv").config({ "path": path.join(__dirname, "process.env") });
   client.db = Database;
   client.db.on("change", data => client.updateCache(data));
 
-  client.once("ready", () => client.events.ready(client));
-  client.on("error", error => client.events.error(error));
-  client.on("message", msg => client.events.message(client, msg));
-
   client.login(process.env.TOKEN).catch(error => { throw error; });
 })();
 

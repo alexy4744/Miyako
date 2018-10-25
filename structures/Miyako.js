@@ -1,5 +1,3 @@
-/* eslint no-use-before-define: 0 */
-
 const { Client } = require("discord.js");
 const chalk = require("chalk");
 const WebSocket = require("ws");
@@ -9,7 +7,7 @@ require("./Structures")();
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    Object.assign(this, options.clientOptions);
+    Object.assign(this, options.clientOptions || {});
 
     Object.assign(this, {
       "events": {},
@@ -43,10 +41,10 @@ module.exports = class Miyako extends Client {
 
     this.wss.on("open", this._wssOnOpen.bind(this));
     this.wss.on("error", this._wssOnError.bind(this));
-    this.wss.on("message", this._handleRequests.bind(this)); // Bind the event listener to this method so that it can process the request.
+    this.wss.on("message", this._handleRequests.bind(this));
 
-    this.player.on("error", console.error);
     this.player.on("finished", this._playerFinish.bind(this));
+    this.player.on("error", error => console.error(error));
 
     require("../loaders/loader")(this);
   }
@@ -67,7 +65,7 @@ module.exports = class Miyako extends Client {
     for (const inhibitor of inhibitors) { // Loop through all loaded inhibitors.
       try {
         if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
-        count += this.inhibitors[inhibitor](this, msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
+        count += this.inhibitors[inhibitor].run(msg, cmd); // Inhibitors returns 1 if it doesn't fail or return any error.
       } catch (error) {
         break;
       }
@@ -139,9 +137,10 @@ module.exports = class Miyako extends Client {
   }
 
   runFinalizers(msg, cmd, args) {
+    this.commandsPerSecond++;
     const finalizers = Object.keys(this.finalizers);
     if (finalizers.length < 1) return;
-    for (const finalizer of finalizers) this.finalizers[finalizer](this, msg, cmd, args);
+    for (const finalizer of finalizers) this.finalizers[finalizer].run(msg, cmd, args);
   }
 
   async syncDatabase() {

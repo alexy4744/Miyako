@@ -1,47 +1,66 @@
-module.exports = async (client, msg) => {
-  client.messagesPerSecond++;
+const Event = require("../modules/Event");
 
-  if (msg.guild) {
+module.exports = class Message extends Event {
+  constructor(...args) {
+    super(...args);
+  }
+
+  async run(msg) {
+    this.client.messagesPerSecond++;
+
+    if (msg.guild) await this._updateGuildCache(msg);
+
+    if (!await this._checkMonitors(msg)) return;
+
+    if (msg.author.bot) return;
+
+    const prefix = msg.guild ? msg.guild.cache.prefix || this.client.prefix : this.client.prefix;
+
+    if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
+
+    const args = msg.content.slice(prefix.length).trim().split(/ +/g);
+    const cmd = args.shift().toLowerCase();
+
+    if (this.client.commands[cmd]) return this.client.runInhibitors(msg, this.client.commands[cmd], args);
+    else if (this.client.aliases[cmd]) return this.client.runInhibitors(msg, this.client.commands[this.client.aliases[cmd]], args);
+  }
+
+  async _checkMonitors(msg) {
+    let count = 0;
+
+    for (const monitor in this.client.monitors) { // eslint-disable-line
+      try {
+        if (isNaN(count)) count += 0;
+        let res = this.client.monitors[monitor].run(msg);
+        if (res instanceof Promise) res = await res;
+        count += res;
+      } catch (error) {
+        count += 0;
+      }
+    }
+
+    if (count < Object.keys(this.client.monitors).length) return false;
+
+    return true;
+  }
+
+  async _updateGuildCache(msg) {
     if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return;
 
-    if (!client.caches.guilds.has(msg.guild.id)) { // If the cache does not exist in the Map, then cache it
-      let guildCache = await client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
+    if (!this.client.caches.guilds.has(msg.guild.id)) { // If the cache does not exist in the Map, then cache it
+      let guildCache = await this.client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
       if (guildCache && guildCache.error) return console.error(guildCache.error); // Silently fail if an error occurs
 
       if (!guildCache) {
         try {
           guildCache = { _id: msg.guild.id };
-          await client.db.insert("guilds", guildCache);
+          await this.client.db.insert("guilds", guildCache);
         } catch (error) {
           return console.error(error); // Silently fail if an error occurs
         }
       }
 
-      client.caches.guilds.set(msg.guild.id, guildCache);
+      this.client.caches.guilds.set(msg.guild.id, guildCache);
     }
   }
-
-  let count = 0;
-
-  for (const monitor in client.monitors) { // eslint-disable-line
-    try {
-      if (isNaN(count)) break; // If the inhibitor throws anything that is not a number, then the command should fail to execute.
-      count += await client.monitors[monitor](client, msg); // Inhibitors returns 1 if it doesn't fail or return any error.
-    } catch (error) {
-      break;
-    }
-  }
-
-  if (count < Object.keys(client.monitors).length) return;
-  if (msg.author.bot) return;
-
-  const prefix = msg.guild ? msg.guild.cache.prefix || client.prefix : client.prefix;
-
-  if (!msg.content.toLowerCase().startsWith(prefix)) return; // eslint-disable-line
-
-  const args = msg.content.slice(prefix.length).trim().split(/ +/g);
-  const cmd = args.shift().toLowerCase();
-
-  if (client.commands[cmd]) return client.runInhibitors(msg, client.commands[cmd], args);
-  else if (client.aliases[cmd]) return client.runInhibitors(msg, client.commands[client.aliases[cmd]], args);
 };

@@ -1,6 +1,10 @@
-module.exports = (client, fs) => {
-  /* Load all message monitors */
-  fs.readdir(`./monitors`)
-    .then(monitors => monitors.forEach(m => client.monitors[m.slice(0, -3)] = require(`../monitors/${m}`)))
-    .catch(error => { throw error; });
+module.exports = async (client, fs) => {
+  const monitors = await fs.readdir("./monitors").catch(error => ({ error }));
+  if (monitors.error) throw monitors.error;
+  if (monitors.length < 1) return;
+
+  for (let monitor of monitors) {
+    monitor = monitor.slice(0, -3).toLowerCase();
+    client.monitors[monitor] = new (require(`../monitors/${monitor}`))(client);
+  }
 };

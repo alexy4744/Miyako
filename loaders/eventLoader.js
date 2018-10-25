@@ -1,10 +1,11 @@
-module.exports = (client, fs) => {
-  /* Load all client events. */
-  fs.readdir("./events")
-    .then(events => {
-      if (events.length < 1) throw new Error("No events found");
-      events.forEach(e => client.events[e.slice(0, -3)] = require(`../events/${e}`));
-    }).catch(error => {
-      throw error;
-    });
+module.exports = async (client, fs) => {
+  const events = await fs.readdir("./events").catch(error => ({ error }));
+  if (events.error) throw events.error;
+  if (events.length < 1) throw new Error("No events found!");
+
+  for (let event of events) {
+    event = event.slice(0, -3).toLowerCase();
+    client.events[event] = new (require(`../events/${event}`))(client);
+    client.on(event, (...args) => client.events[event].run(...args));
+  }
 };

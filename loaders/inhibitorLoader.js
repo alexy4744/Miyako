@@ -1,6 +1,10 @@
-module.exports = (client, fs) => {
-  /* Load all command inhibitors. */
-  fs.readdir("./inhibitors")
-    .then(inhibitors => inhibitors.forEach(i => client.inhibitors[i.slice(0, -3)] = require(`../inhibitors/${i}`)))
-    .catch(error => { throw error; });
+module.exports = async (client, fs) => {
+  const inhibitors = await fs.readdir("./inhibitors").catch(error => ({ error }));
+  if (inhibitors.error) throw inhibitors.error;
+  if (inhibitors.length < 1) return;
+
+  for (let inhibitor of inhibitors) {
+    inhibitor = inhibitor.slice(0, -3).toLowerCase();
+    client.inhibitors[inhibitor] = new (require(`../inhibitors/${inhibitor}`))(client);
+  }
 };
