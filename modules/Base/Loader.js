@@ -13,4 +13,12 @@ module.exports = class Loader {
 
     for (const loader of loaders) new (require(`../../loaders/${loader}`))(this.client).run();
   }
+
+  reload() {
+
+  }
+
+  reloadAll() {
+
+  }
 };

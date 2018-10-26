@@ -1,5 +1,3 @@
-/* eslint no-use-before-define: 0 */
-
 const Command = require("../../modules/Base/Command");
 const ImageFilter = require("../../modules/ImageFilter");
 

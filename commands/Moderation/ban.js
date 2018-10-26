@@ -1,6 +1,3 @@
-/* eslint no-use-before-define: 0 */
-/* eslint no-confusing-arrow: 0 */
-
 const Command = require("../../modules/Base/Command");
 const moment = require("moment");
 
