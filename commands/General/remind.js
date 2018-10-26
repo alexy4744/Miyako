@@ -1,4 +1,4 @@
-const Command = require("../../modules/Command");
+const Command = require("../../modules/Base/Command");
 const moment = require("moment");
 
 module.exports = class extends Command {

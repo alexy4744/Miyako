@@ -1,4 +1,4 @@
-const Event = require("../modules/Event");
+const Event = require("../modules/Base/Event");
 
 module.exports = class Error extends Event {
   constructor(...args) {

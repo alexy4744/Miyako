@@ -1,7 +1,9 @@
 const { Client } = require("discord.js");
 const chalk = require("chalk");
 const WebSocket = require("ws");
+
 const Lavalink = require("../music/Lavalink");
+
 require("./Structures")();
 
 module.exports = class Miyako extends Client {
@@ -46,7 +48,7 @@ module.exports = class Miyako extends Client {
     this.player.on("finished", this._playerFinish.bind(this));
     this.player.on("error", error => console.error(error));
 
-    require("../loaders/loader")(this);
+    new (require("../modules/Base/Loader"))(this).loadAll();
   }
 
   get cache() {

@@ -1,5 +1,5 @@
 
-const Inhibitor = require("../modules/Inhibitor");
+const Inhibitor = require("../modules/Base/Inhibitor");
 
 module.exports = class DeveloperMode extends Inhibitor {
   constructor(...args) {

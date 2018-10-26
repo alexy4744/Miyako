@@ -1,4 +1,4 @@
-const Inhibitor = require("../modules/Inhibitor");
+const Inhibitor = require("../modules/Base/Inhibitor");
 
 module.exports = class NSFW extends Inhibitor {
   constructor(...args) {

@@ -1,4 +1,4 @@
-const Monitor = require("../modules/Monitor");
+const Monitor = require("../modules/Base/Monitor");
 const ImageFilter = require("../modules/ImageFilter");
 const getURL = require("get-urls");
 const regex = /\.(jpe?g|png|gif|bmp|tiff)$/gi;

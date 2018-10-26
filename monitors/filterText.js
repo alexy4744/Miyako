@@ -1,4 +1,4 @@
-const Monitor = require("../modules/Monitor");
+const Monitor = require("../modules/Base/Monitor");
 
 module.exports = class FilterImage extends Monitor {
   constructor(...args) {

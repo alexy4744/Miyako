@@ -1,4 +1,4 @@
-const Finalizer = require("../modules/Finalizer");
+const Finalizer = require("../modules/Base/Finalizer");
 
 module.exports = class AddToCooldown extends Finalizer {
   constructor(...args) {

@@ -1,4 +1,4 @@
-const Command = require("../../modules/Command");
+const Command = require("../../modules/Base/Command");
 const moment = require("moment");
 require("moment-duration-format")(moment);
 

@@ -1,6 +1,6 @@
 /* eslint no-eval: 0 */
 
-const Command = require("../../modules/Command");
+const Command = require("../../modules/Base/Command");
 const snekfetch = require("snekfetch");
 const util = require("util");
 

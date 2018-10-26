@@ -1,25 +1,33 @@
-module.exports = async (client, fs) => {
-  const folders = await fs.readdir("./commands").catch(error => ({ error }));
-  if (folders.error) throw folders.error;
-  if (folders.length < 1) return;
+const Loader = require("../modules/Base/Loader");
 
-  for (const folder of folders) {
-    client.categories.add(folder);
+module.exports = class CommandLoader extends Loader {
+  constructor(...args) {
+    super(...args);
+  }
 
-    const commands = await fs.readdir(`./commands/${folder}`).catch(error => ({ error }));
-    if (commands.error) throw commands.error;
+  async run() {
+    const folders = await this.fs.readdir("./commands").catch(error => ({ error }));
+    if (folders.error) throw folders.error;
+    if (folders.length < 1) return;
 
-    for (const command of commands) {
-      if (command.split(".").pop() === "js") {
-        const cmd = new (require(`../commands/${folder}/${command}`))(client);
-        const name = command.slice(0, -3).toLowerCase();
+    for (const folder of folders) {
+      this.client.categories.add(folder);
 
-        cmd.options.name = name;
-        cmd.options.category = folder;
+      const commands = await this.fs.readdir(`./commands/${folder}`).catch(error => ({ error }));
+      if (commands.error) throw commands.error;
 
-        client.commands[name] = cmd;
+      for (const command of commands) {
+        if (command.split(".").pop() === "js") {
+          const cmd = new (require(`../commands/${folder}/${command}`))(this.client);
+          const name = command.slice(0, -3).toLowerCase();
 
-        for (const alias of cmd.options.aliases) client.aliases[alias] = name;
+          cmd.options.name = name;
+          cmd.options.category = folder;
+
+          this.client.commands[name] = cmd;
+
+          for (const alias of cmd.options.aliases) this.client.aliases[alias] = name;
+        }
       }
     }
   }

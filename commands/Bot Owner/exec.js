@@ -2,7 +2,7 @@ const { post } = require("snekfetch");
 const childProcess = require("child_process");
 const { promisify } = require("util");
 const exec = promisify(childProcess.exec);
-const Command = require("../../modules/Command");
+const Command = require("../../modules/Base/Command");
 
 module.exports = class extends Command {
   constructor(...args) {

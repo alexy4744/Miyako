@@ -1,6 +1,6 @@
 /* eslint no-use-before-define: 0 */
 
-const Command = require("../../modules/Command");
+const Command = require("../../modules/Base/Command");
 const ImageFilter = require("../../modules/ImageFilter");
 
 module.exports = class extends Command {
