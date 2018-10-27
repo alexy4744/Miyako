@@ -17,6 +17,7 @@ module.exports = class FilterImage extends Monitor {
       }
     } else {
       const urls = getURL(msg.content);
+
       if (urls.size > 0) {
         for (const url of urls) {
           if (await this._validate(msg, url) === 0) return 0;
@@ -29,27 +30,33 @@ module.exports = class FilterImage extends Monitor {
 
   async _validate(msg, url) {
     const Filter = new ImageFilter();
-    const image = await Filter.loadImage(url).catch(e => ({ "error": e }));
+    const image = await Filter.loadImage(url).catch(error => ({ error }));
 
     if (image.error) return 1;
 
-    const match = await Filter.matchArray(msg.guild.cache.images).catch(e => ({ "error": e }));
+    const match = await Filter.match(msg.guild.cache.images).catch(error => ({ error }));
 
     if (match.error) return 1;
 
     if (match) {
+      const action = msg.guild.cache.filterImage.action;
+
       msg.delete().catch(() => { });
 
       msg.author.send({
         embed: {
           title: `${msg.emojis.fail}Your message has been deleted in ${msg.guild.name}!`,
-          description: `[**This image**](${url}) has been banned by the admins of this guild; therefore, your message has been deleted.`,
+          description: `[**This image**](${url}) has been banned by the admins of this guild; therefore, your message has been **deleted**. ${action === "mute" ? "You have also been **muted**" : ""}`,
           image: { url },
           color: msg.colors.fail
         }
       }).catch(() => { });
 
+      if (action === "mute") return this.client.commands.mute.mute(msg, msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+
       return 0;
-    } else return 1; //eslint-disable-line
+    }
+
+    return 1;
   }
 };

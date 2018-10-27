@@ -83,9 +83,7 @@ module.exports = class extends Command {
           if (index > -1) {
             try {
               clientData.bannedMembers.splice(index, 1);
-              await msg.client.db.update({
-                "bannedMembers": clientData.bannedMembers
-              });
+              await this.client.updateDatabase({ "bannedMembers": clientData.bannedMembers });
             } catch (error) {
               // noop
             }

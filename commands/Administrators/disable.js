@@ -36,7 +36,7 @@ module.exports = class extends Command {
     cmd.options.aliases.forEach(alias => data.disabledCommands.push(alias));
 
     try {
-      await this.client.db.update("guilds", data);
+      await msg.guild.updateDatabase(data);
       return msg.success(`I have successfully disabled "${args[0]}"`);
     } catch (error) {
       return msg.error(error, "disable this command");

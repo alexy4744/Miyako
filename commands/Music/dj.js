@@ -32,13 +32,12 @@ module.exports = class extends Command {
     if (!member) return msg.fail(`I could not find a member named "${args.join(" ")}"`);
 
     const cache = msg.guild.cache;
-
     if (!cache.djs) cache.djs = [];
 
     cache.djs.push(member.id);
 
     try {
-      await this.client.db.update("guilds", cache);
+      await msg.guild.updateDatabase(cache);
       return msg.success(`I have added ${member.user.tag} as a DJ!`);
     } catch (error) {
       return msg.error("add DJs", error);
@@ -59,7 +58,7 @@ module.exports = class extends Command {
     cache.djs.splice(index, 1);
 
     try {
-      await this.client.db.update("guilds", cache);
+      await msg.guild.updateDatabase(cache);
       return msg.success(`I have removed ${member.user.tag} as a DJ!`);
     } catch (error) {
       return msg.error("remove DJs", error);

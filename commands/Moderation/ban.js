@@ -38,9 +38,7 @@ module.exports = class extends Command {
           embed: {
             title: `${msg.emojis.pending}Are you sure you want to ban ${guildMember.user.tag}?`,
             description: `User ID: \`${guildMember.id}\`\n\nRespond with **${msg.guild.me.hasPermission("ADD_REACTIONS") ? "👌" : "YES"}** to ban this member or **${msg.guild.me.hasPermission("ADD_REACTIONS") ? "❌" : "NO"}** to cancel the command within **15** seconds`,
-            thumbnail: {
-              "url": guildMember.user.getAvatar(512)
-            },
+            thumbnail: { "url": guildMember.user.getAvatar(512) },
             color: msg.colors.pending
           }
         });
@@ -62,8 +60,6 @@ module.exports = class extends Command {
     }
 
     async function ban(guildMember) {
-      if (!guildMember.bannable) return msg.fail(`I do not have the privilege to ban ${guildMember.user.tag}!`, `Please make sure that this member's permissions or roles are not higher than me in order for me to ban them!`);
-
       // Put the data into the db first before banning, that way if the database fails, the member doesn't get banned.
       if (days) { // Only save it to the database if this is a timed ban.
         const clientCache = msg.client.cache;
@@ -79,7 +75,7 @@ module.exports = class extends Command {
           });
 
           try {
-            await msg.client.db.update("client", clientCache);
+            await this.client.updateDatabase(clientCache);
           } catch (error) {
             return msg.error(error, `ban ${guildMember.user.tag}!`);
           }
@@ -88,7 +84,7 @@ module.exports = class extends Command {
 
       try {
         await guildMember.ban({ reason });
-        return msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason ? reason : `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`);
+        return msg.success(`I have successfully banned ${guildMember.user.tag}!`, `Reason: ${reason || `Not Specified`}\n\n${days ? `Banned Until: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`);
       } catch (error) {
         // Only revert database if it is a timed ban.
         // Ignoring errors because I can check if this member is actually banned later in my loop
@@ -100,7 +96,7 @@ module.exports = class extends Command {
             if (index > -1) {
               try {
                 clientCache.bannedMembers.splice(index, 1);
-                await msg.client.db.update("client", clientCache);
+                await this.client.updateDatabase(clientCache);
               } catch (err) {
                 // noop
               }

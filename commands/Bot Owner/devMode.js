@@ -25,7 +25,8 @@ module.exports = class extends Command {
     else data.devMode = false;
 
     try {
-      await this.client.db.update("client", { "devMode": data.devMode });
+      await this.client.updateDatabase({ "devMode": data.devMode });
+
       return msg.channel.send({
         embed: {
           title: `⚙${msg.emojis.bar}Developer Mode has been ${data.devMode === true ? `activated` : `deactivated`}!`,

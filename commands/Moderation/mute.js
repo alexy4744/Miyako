@@ -79,7 +79,7 @@ module.exports = class extends Command {
           "mutedUntil": Date.now() + time
         });
 
-        await this.client.db.update("client", clientCache);
+        await this.client.updateDatabase(clientCache);
       }
 
       await member.roles.add(role.id);

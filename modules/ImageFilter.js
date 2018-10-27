@@ -86,7 +86,7 @@ module.exports = class ImageFilter {
     return hash;
   }
 
-  matchArray(hashArray, sensitivity) {
+  match(hashArray, sensitivity) {
     if (!this.image || !this.hash) return Promise.reject(new Error("Run loadImage() first"));
     if (!hashArray) return Promise.reject(new Error("Hash array must be provided"));
 

@@ -31,7 +31,7 @@ module.exports = class extends Command {
     if ((!data.prefix && newPrefix === this.client.prefix) || data.prefix === newPrefix) return msg.fail(`"${newPrefix}" is already the current prefix!`);
 
     try {
-      await this.client.db.update("guilds", { ...data, "prefix": newPrefix });
+      await msg.guild.updateDatabase({ "prefix": newPrefix });
       return msg.success(`I have succesfully re-assigned the prefix to "${newPrefix}"`);
     } catch (error) {
       return msg.error(error, "re-assign the prefix");

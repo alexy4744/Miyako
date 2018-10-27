@@ -40,7 +40,7 @@ module.exports = class extends Command {
         const index = clientCache.mutedMembers.findIndex(el => el.memberId === member.id);
         if (index > -1) clientCache.mutedMembers.splice(index, 1);
 
-        await this.client.db.update("client", clientCache);
+        await this.client.updateDatabase(clientCache);
       }
 
       await member.roles.remove(role);

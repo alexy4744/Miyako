@@ -37,7 +37,7 @@ module.exports = class extends Command {
     });
 
     try {
-      await this.client.db.update("client", {
+      await this.client.updateDatabase({
         ...this.client.cache,
         reminders: clientData.reminders
       });

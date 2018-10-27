@@ -33,7 +33,7 @@ module.exports = class extends Command {
     const filteredCommands = data.disabledCommands.filter(command => !cmd.options.aliases.includes(command) && command !== args[0] && command !== cmd.options.name);
 
     try {
-      await this.client.db.update("guilds", { ...data, "disabledCommands": filteredCommands });
+      await msg.guild.updateDatabase({ "disabledCommands": filteredCommands });
       return msg.success(`I have successfully enabled "${args[0]}"`);
     } catch (error) {
       return msg.error(error, "enable this command");
