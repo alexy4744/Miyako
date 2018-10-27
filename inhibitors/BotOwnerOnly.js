@@ -6,7 +6,7 @@ module.exports = class BotOwnerOnly extends Inhibitor {
   }
 
   run(msg, cmd) {
-    if (!cmd.options.botOwnerOnly || (msg.author.id === this.client.owner && cmd.options.botOwnerOnly)) return 1;
+    if (!cmd.botOwnerOnly || (msg.author.id === this.client.owner && cmd.botOwnerOnly)) return 1;
     return 0;
   }
 };

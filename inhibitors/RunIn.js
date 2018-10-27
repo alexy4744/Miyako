@@ -6,7 +6,7 @@ module.exports = class RunIn extends Inhibitor {
   }
 
   run(msg, cmd) {
-    const runIn = cmd.options.runIn;
+    const runIn = cmd.runIn;
     const len = runIn.length;
 
     if (len < 1) return 1;
@@ -18,7 +18,7 @@ module.exports = class RunIn extends Inhibitor {
 
     for (let i = 0; i < len; i++) {
       if (msg.channel.type === runIn[i]) continue;
-      return msg.fail(`This command can only be ran in ${types[cmd.options.runIn[i]]}!`);
+      return msg.fail(`This command can only be ran in ${types[cmd.runIn[i]]}!`);
     }
 
     return 1;

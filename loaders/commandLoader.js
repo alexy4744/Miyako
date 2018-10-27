@@ -21,12 +21,12 @@ module.exports = class CommandLoader extends Loader {
           const cmd = new (require(`../commands/${folder}/${command}`))(this.client);
           const name = command.slice(0, -3).toLowerCase();
 
-          cmd.options.name = name;
-          cmd.options.category = folder;
+          cmd.name = name;
+          cmd.category = folder;
 
           this.client.commands[name] = cmd;
 
-          for (const alias of cmd.options.aliases) this.client.aliases[alias] = name;
+          for (const alias of cmd.aliases) this.client.aliases[alias] = name;
         }
       }
     }

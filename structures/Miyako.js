@@ -78,7 +78,7 @@ module.exports = class Miyako extends Client {
   }
 
   async runCommand(msg, cmd, args) {
-    if (cmd.options.subcommands && (this.utils.is.object(cmd.options.subcommands) || (this.utils.is.array(cmd.options.subcommands) && cmd.options.subcommands.length > 0))) {
+    if (cmd.subcommands && (this.utils.is.object(cmd.subcommands) || (this.utils.is.array(cmd.subcommands) && cmd.subcommands.length > 0))) {
       let sharedVariables = null;
 
       if (this.utils.is.function(cmd.run)) {
@@ -90,18 +90,18 @@ module.exports = class Miyako extends Client {
 
       let found = false;
 
-      if (this.utils.is.object(cmd.options.subcommands)) {
+      if (this.utils.is.object(cmd.subcommands)) {
         let subcmd;
 
-        if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.options.name}`, `Available Subcommands: \`${Object.keys(cmd.options.subcommands).join(" | ")}\``);
+        if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.name}`, `Available Subcommands: \`${Object.keys(cmd.subcommands).join(" | ")}\``);
 
-        for (const subcommand in cmd.options.subcommands) {
+        for (const subcommand in cmd.subcommands) {
           if (args[0] === subcommand) {
             subcmd = subcommand;
 
             if (!args[1]) break;
 
-            for (const extendedSubCommand of cmd.options.subcommands[subcommand]) {
+            for (const extendedSubCommand of cmd.subcommands[subcommand]) {
               if (args[1] === extendedSubCommand) {
                 cmd.shared = sharedVariables;
                 cmd[subcommand](msg, extendedSubCommand, args.slice(2));
@@ -112,11 +112,11 @@ module.exports = class Miyako extends Client {
           }
         }
 
-        if (!found) return msg.fail(`Invalid extended subcommand for ${cmd.options.name}`, `Available Extended Subcommands: \`${cmd.options.subcommands[subcmd].join(" | ")}\``);
-      } else if (this.utils.is.array(cmd.options.subcommands)) {
-        if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.options.name}`, `Available Subcommands: \`${cmd.options.subcommands.join(" | ")}\``);
+        if (!found) return msg.fail(`Invalid extended subcommand for ${cmd.name}`, `Available Extended Subcommands: \`${cmd.subcommands[subcmd].join(" | ")}\``);
+      } else if (this.utils.is.array(cmd.subcommands)) {
+        if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.name}`, `Available Subcommands: \`${cmd.subcommands.join(" | ")}\``);
 
-        for (const subcommand of cmd.options.subcommands) {
+        for (const subcommand of cmd.subcommands) {
           if (args[0] === subcommand) {
             cmd.shared = sharedVariables;
             cmd[subcommand](msg, args.slice(1));
@@ -125,7 +125,7 @@ module.exports = class Miyako extends Client {
           }
         }
 
-        if (!found) return msg.fail(`Invalid subcommand for ${cmd.options.name}`, `Available Subcommands: \`${cmd.options.subcommands.join(" | ")}\``);
+        if (!found) return msg.fail(`Invalid subcommand for ${cmd.name}`, `Available Subcommands: \`${cmd.subcommands.join(" | ")}\``);
       } else {
         return;
       }

@@ -1,7 +1,6 @@
 module.exports = class Command {
   constructor(client, options = {}) {
     this.client = client;
-    this.options = options;
     this.enabled = options.enabled || true;
     this.guarded = options.guarded || false;
     this.botOwnerOnly = options.botOwnerOnly || false;
@@ -36,5 +35,9 @@ module.exports = class Command {
     if (user.error) return Promise.reject(user.error);
 
     return Promise.resolve(user);
+  }
+
+  reload() {
+    console.log(this)
   }
 };

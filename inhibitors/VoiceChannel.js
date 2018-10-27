@@ -6,7 +6,7 @@ module.exports = class VoiceChannel extends Inhibitor {
   }
 
   run(msg, cmd) {
-    if (!cmd.options.checkVC) return 1;
+    if (!cmd.checkVC) return 1;
 
     if (!msg.member.voice) return msg.fail(`${msg.emojis.fail}You must join a voice channel before executing this command!`);
 

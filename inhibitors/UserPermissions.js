@@ -6,7 +6,7 @@ module.exports = class UserPermissions extends Inhibitor {
   }
 
   run(msg, cmd) {
-    const perms = cmd.options.userPermissions;
+    const perms = cmd.userPermissions;
     if (msg.author.id === this.client.owner) return 1;
 
     if (msg.channel.type !== "text" || perms.length < 1) return 1;
