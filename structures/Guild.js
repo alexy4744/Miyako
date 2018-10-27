@@ -22,6 +22,16 @@ Structures.extend("Guild", Guild => {
       return Promise.resolve(this.cache);
     }
 
+    async updateDatabase(data) {
+      try {
+        if (!data._id) data._id = this.id;
+        await this.client.db.update("guilds", data);
+        return Promise.resolve(data);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
+
     /**
      * Find a member that matches the best to the given query.
      * @param {String} query The query to find by.

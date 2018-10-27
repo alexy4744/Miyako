@@ -33,13 +33,14 @@ Structures.extend("Message", Message => {
       });
     }
 
-    fail(action, description) {
+    fail(action, description, attachment) {
       return this.channel.send({
         embed: {
           title: `${this.emojis.fail}${action}`,
           description: description ? description : null,
           color: this.colors.fail
-        }
+        },
+        files: attachment ? [attachment] : null
       });
     }
 

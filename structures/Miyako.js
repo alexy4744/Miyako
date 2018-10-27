@@ -111,7 +111,7 @@ module.exports = class Miyako extends Client {
             }
           }
         }
-
+        // TODO: need to check whether subcmd is part of subcommands
         if (!found) return msg.fail(`Invalid extended subcommand for ${cmd.name}`, `Available Extended Subcommands: \`${cmd.subcommands[subcmd].join(" | ")}\``);
       } else if (this.utils.is.array(cmd.subcommands)) {
         if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.name}`, `Available Subcommands: \`${cmd.subcommands.join(" | ")}\``);

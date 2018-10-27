@@ -36,8 +36,4 @@ module.exports = class Command {
 
     return Promise.resolve(user);
   }
-
-  reload() {
-    console.log(this)
-  }
 };
