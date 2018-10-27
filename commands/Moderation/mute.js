@@ -21,8 +21,8 @@ module.exports = class extends Command {
   async run(msg, args) {
     let member = msg.mentions.members.size > 0 ? msg.mentions.members.first() : args[0] !== undefined ? args[0] : null; // eslint-disable-line
     args = args.filter(arg => (member instanceof Object) ? arg !== member.toString() : arg !== member); // Remove member from array of arguments
-    const days = args[0] ? this.client.utils.stringToMillis.isValid(args[0]) ? this.client.utils.stringToMillis.convert(args[0]).ms : null : null; // eslint-disable-line
-    const reason = days ? args.slice(1).join(" ") : args.join(" ").length > 0 ? args.join(" ") : null; // If days were specified, remove first 2 elements, else remove 1 and then join the whole array.
+    const time = args[0] ? this.client.utils.stringToMillis.isValid(args[0]) ? this.client.utils.stringToMillis.convert(args[0]).ms : null : null; // eslint-disable-line
+    const reason = time ? args.slice(1).join(" ") : args.join(" ").length > 0 ? args.join(" ") : null; // If time were specified, remove first 2 elements, else remove 1 and then join the whole array.
 
     if (!member) return msg.fail(`Please mention the member or enter their username/ID in order for me to mute them!`);
 
@@ -33,54 +33,60 @@ module.exports = class extends Command {
 
     if (!member.manageable) return msg.fail("I can't mute a member with higher privilege/roles than me!");
 
-    let role = msg.guild.cache.muteRole || null;
+    try {
+      await this.mute(msg, member, time);
+      return msg.success(
+        `${member.user.tag} has been succesfully muted by ${msg.author.tag}!`,
+        `${reason ? `**Reason**: ${reason}` : ``}\n\n${time ? `**Muted Until**: ${moment(Date.now() + time).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`
+      );
+    } catch (error) {
+      return msg.error(error, `mute ${member.user.tag}!`);
+    }
+  }
 
-    if (!role || !msg.guild.roles.has(role)) {
-      try {
+  async mute(msg, member, time) {
+    try {
+      let role = msg.guild.cache.muteRole || null;
+
+      if (!role) {
         role = await msg.guild.roles.create({
           "data": {
             "name": "Muted",
             "mentionable": false,
             "color": 0x6b6b6b
           }
-        }).then(r => r.id);
+        });
 
-        // Update the mute role of this guild with the newly created role.
-        try {
-          await this.client.db.update("guilds", {
-            _id: msg.guild.id,
-            "muteRole": role
-          });
-        } catch (error) {
-          return msg.error(error, `mute ${member.user.tag}!`);
-        }
-      } catch (error) {
-        return msg.error(error, `mute ${member.user.tag}`);
+        const permissions = role.permissions.toArray();
+        const index = permissions.findIndex(p => p === "SEND_MESSAGES");
+
+        if (index > -1) permissions.splice(index, 1); // Disallow anyone in the role to send messages
+
+        await role.setPermissions(permissions);
+        await msg.guild.updateDatabase({ "muteRole": role.id });
+
+        if (member.roles.has(role.id)) return Promise.reject(new Error(`${member.user.tag} is already muted!`));
       }
-    }
 
-    if (member.roles.has(role)) return msg.fail(`${member.user.tag} is already muted!`);
-
-    try {
-      if (days) {
+      if (time) {
         const clientCache = this.client.cache;
         if (!(clientCache.mutedMembers instanceof Array)) clientCache.mutedMembers = [];
 
         clientCache.mutedMembers.push({
           "memberId": member.id,
           "guildId": msg.guild.id,
-          "muteRole": role,
-          "mutedUntil": Date.now() + days
+          "muteRole": role.id,
+          "mutedUntil": Date.now() + time
         });
 
         await this.client.db.update("client", clientCache);
       }
 
-      await member.roles.add(role);
+      await member.roles.add(role.id);
 
-      return msg.success(`${member.user.tag} has been succesfully muted by ${msg.author.tag}!`, `${reason ? `**Reason**: ${reason}` : ``}\n\n${days ? `**Muted Until**: ${moment(Date.now() + days).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`);
+      return Promise.resolve(member.roles);
     } catch (error) {
-      return msg.error(error, `mute ${member.user.tag}!`);
+      return Promise.reject(error);
     }
   }
 };

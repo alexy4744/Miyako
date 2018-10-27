@@ -11,12 +11,12 @@ module.exports = class FilterImage extends Monitor {
     const sensitivity = msg.guild.cache.filterText.sensitivity || null;
     const action = msg.guild.cache.filterText.action || "delete";
 
-    msg.content = msg.content.toLowerCase();
-
     let content = msg.content;
 
     if (sensitivity === "high") content = msg.content.split(/\s/g).join(""); // remove all whitespaces
     if (sensitivity === "extreme") content = msg.content.split(/[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/\s]/g).join(""); // Remove special characteres and whitespace
+
+    content = content.toLowerCase();
 
     const matched = [];
 
@@ -29,7 +29,7 @@ module.exports = class FilterImage extends Monitor {
       await msg.author.send({
         embed: {
           title: `${msg.emojis.fail}Hey! I have detected you using ${matched.length > 1 ? `${matched.length} banned words` : "1 banned word"}.`,
-          description: `Please refrain from using any of these words listed in this attachment!.\n\n**Words detected**: ${matched.join(", ")}`,
+          description: `Please refrain from using any of these words listed in this attachment!.\n\n**Action Taken**: ${msg.guild.cache.filterText.action.toUpperCase()}\n**Words Detected**: ${matched.join(", ")}`,
           color: msg.colors.fail
         }
       }).catch(() => { });
@@ -42,7 +42,7 @@ module.exports = class FilterImage extends Monitor {
       }).catch(() => { });
 
       if (action === "delete") return msg.delete().catch(() => { });
-      if (action === "mute") return this.client.commands.mute.run(msg, "mute", ["5m", "Use of a filtered/banned word"]);
+      if (action === "mute") return this.client.commands.mute.mute(msg, msg.member, this.client.utils.stringToMillis.convert("5m").ms);
     }
 
     return 1;

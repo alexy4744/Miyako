@@ -1,6 +1,8 @@
 module.exports = class Command {
   constructor(client, options = {}) {
     this.client = client;
+    this.name = options.name || null;
+    this.category = options.category || null;
     this.enabled = options.enabled || true;
     this.guarded = options.guarded || false;
     this.botOwnerOnly = options.botOwnerOnly || false;
