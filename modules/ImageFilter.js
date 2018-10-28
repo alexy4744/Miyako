@@ -16,7 +16,7 @@ module.exports = class ImageFilter {
 
   loadImage(src) {
     return new Promise(async (resolve, reject) => {
-      let buffer = await snekfetch.get(src).catch(e => ({ "error": e }));
+      let buffer = await snekfetch.get(src).catch(error => ({ error }));
       if (buffer.error) return reject(buffer.error);
       if (!buffer.headers["content-type"].match(/image\//)) return reject(new Error("The source did not return an image."));
 

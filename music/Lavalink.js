@@ -1,16 +1,15 @@
 const Base = require("./Base");
 const regexps = require("./regexps");
-const scraper = require("../utils/scraper");
 const snekfetch = require("snekfetch");
 
 module.exports = class Lavalink extends Base {
-  constructor(...args) { super(...args); } // eslint-disable-line
+  constructor(...args) { super(...args); }
 
   async getSong(query) {
     let found = false;
     let source;
 
-    for (const regex in regexps) { // eslint-disable-line
+    for (const regex in regexps) {
       for (const src in regexps[regex]) {
         if (Array.isArray(regexps[regex][src])) {
           for (const pattern of regexps[regex][src]) {
@@ -58,17 +57,22 @@ module.exports = class Lavalink extends Base {
   // Always get the highest quality thumbnail if possible
   async getThumbnail(trackInfo) {
     if (trackInfo.source === "youtube") {
-      const youtubeAPI = `https://www.googleapis.com/youtube/v3/videos?id=${trackInfo.identifier}&part=snippet&key=${process.env.YT}`;
-      const res = await snekfetch.get(youtubeAPI).catch(error => ({ error }));
+      const res = await snekfetch
+        .get(`https://www.googleapis.com/youtube/v3/videos?id=${trackInfo.identifier}&part=snippet&key=${process.env.YT}`)
+        .catch(error => ({ error }));
 
       if (res.error) return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
       if (res.body.items[0].snippet.thumbnails.maxres) return res.body.items[0].snippet.thumbnails.maxres.url;
 
       return `http://i3.ytimg.com/vi/${trackInfo.identifier}/hqdefault.jpg`;
     } else if (trackInfo.source === "soundcloud") {
-      const res = await scraper(trackInfo.uri).catch(error => ({ error }));
+      const res = await snekfetch
+        .get(`http://api.soundcloud.com/resolve?url=${trackInfo.uri}&client_id=${process.env.SOUNDCLOUD}`)
+        .catch(error => ({ error }));
+
       if (res.error) return null;
-      return res.openGraph.image.url;
+
+      return res.body.artwork_url;
     }
   }
 
