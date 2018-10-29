@@ -157,7 +157,7 @@ module.exports = class Miyako extends Client {
   async updateDatabase(data) {
     try {
       if (!data._id) data._id = process.env.CLIENT_ID;
-      await this.client.db.update("client", data);
+      await this.db.update("client", data);
       return Promise.resolve(data);
     } catch (error) {
       return Promise.reject(error);
@@ -165,6 +165,7 @@ module.exports = class Miyako extends Client {
   }
 
   updateCache(data) {
+    console.log(data)
     if (!this.caches[data.ns.coll].has(data.documentKey._id)) return;
     if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.caches[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
     if (data.operationType === "insert" || data.operationType === "replace") return this.caches[data.ns.coll].set(data.documentKey._id, data.fullDocument);

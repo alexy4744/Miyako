@@ -10,7 +10,7 @@ module.exports = class extends Command {
       nsfw: false,
       cooldown: 5,
       description: () => `Mute a member from the entire guild.`,
-      usage: msg => [`${msg.this.client.user.id}`, `${msg.author.username}`],
+      usage: msg => [`${msg.client.user.id}`, `${msg.author.username}`],
       aliases: [],
       userPermissions: ["MANAGE_ROLES"],
       botPermissions: ["MANAGE_ROLES"],
@@ -48,7 +48,7 @@ module.exports = class extends Command {
     try {
       let role = msg.guild.cache.muteRole || null;
 
-      if (!role) {
+      if (!role || !msg.guild.roles.has(role)) {
         role = await msg.guild.roles.create({
           "data": {
             "name": "Muted",
@@ -66,6 +66,8 @@ module.exports = class extends Command {
         await msg.guild.updateDatabase({ "muteRole": role.id });
 
         if (member.roles.has(role.id)) return Promise.reject(new Error(`${member.user.tag} is already muted!`));
+
+        role = role.id;
       }
 
       if (time) {
@@ -75,14 +77,14 @@ module.exports = class extends Command {
         clientCache.mutedMembers.push({
           "memberId": member.id,
           "guildId": msg.guild.id,
-          "muteRole": role.id,
+          "muteRole": role,
           "mutedUntil": Date.now() + time
         });
 
         await this.client.updateDatabase(clientCache);
       }
 
-      await member.roles.add(role.id);
+      await member.roles.add([role]);
 
       return Promise.resolve(member.roles);
     } catch (error) {

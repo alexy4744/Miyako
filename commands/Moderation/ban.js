@@ -10,7 +10,7 @@ module.exports = class extends Command {
       nsfw: false,
       cooldown: 5,
       description: () => `Ban a member with optional reasoning and days of messages to delete.`,
-      usage: msg => [`${msg.this.client.user.toString()}`, `${msg.author.toString()} 7`, `${msg.this.client.user.toString()} 3 this bot sucks`],
+      usage: msg => [`${msg.client.user.toString()}`, `${msg.author.toString()} 7`, `${msg.client.user.toString()} 3 this bot sucks`],
       aliases: [],
       userPermissions: ["BAN_MEMBERS"],
       botPermissions: ["BAN_MEMBERS"],

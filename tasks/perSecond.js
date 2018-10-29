@@ -1,6 +1,14 @@
-module.exports = client => {
-  client.setInterval(() => {
-    client.messagesPerSecond = 0;
-    client.commandsPerSecond = 0;
-  }, 1100);
+const Task = require("../modules/Base/Task");
+
+module.exports = class PerSecond extends Task {
+  constructor(...args) {
+    super(...args, {
+      interval: 1000
+    });
+  }
+
+  run() {
+    this.client.messagesPerSecond = 0;
+    this.client.commandsPerSecond = 0;
+  }
 };
