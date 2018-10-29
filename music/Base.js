@@ -62,10 +62,10 @@ module.exports = class LavalinkBase extends EventEmitter {
   }
 
   _close() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
+    if (!this.ws) return;
+
+    this.ws.close();
+    this.ws = null;
   }
 
   _error(err) {

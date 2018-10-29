@@ -45,7 +45,7 @@ module.exports = class Miyako extends Client {
     this.wss.on("error", this._wssOnError.bind(this));
     this.wss.on("message", this._handleRequests.bind(this));
 
-    this.player.on("finished", this._playerFinish.bind(this));
+    this.player.on("finished", guild => this.player.playerFinish(guild));
     this.player.on("error", error => console.error(error));
 
     new (require("../modules/Base/Loader"))(this).loadAll();
@@ -165,7 +165,6 @@ module.exports = class Miyako extends Client {
   }
 
   updateCache(data) {
-    console.log(data)
     if (!this.caches[data.ns.coll].has(data.documentKey._id)) return;
     if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.caches[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
     if (data.operationType === "insert" || data.operationType === "replace") return this.caches[data.ns.coll].set(data.documentKey._id, data.fullDocument);
@@ -196,12 +195,8 @@ module.exports = class Miyako extends Client {
     if (request.event === "connection") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.wss.url})`)}`);
 
     if (request.op && guild) {
-      if (request.op === "pause") return this.player.pause(guild);
-      else if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
-      else if (request.op === "resume") return this.player.resume(guild);
-      else if (request.op === "skip") return this.player.skip(guild);
-      else if (request.op === "leave") return this.player.leave(guild);
-      else if (request.op === "init") return this._playerInit(guild, request);
+      if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
+      if (this.utils.is.function(this.player[request.op])) return this.player[request.op](guild);
     }
   }
 
@@ -215,21 +210,5 @@ module.exports = class Miyako extends Client {
   _wssOnError(error) {
     this.wss = null;
     return console.error(error);
-  }
-
-  _playerInit(guild, request) {
-    this.wss.send(JSON.stringify({
-      ...request, // Merge the request object with this object.
-      "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],
-      "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
-      "time": guild.player ? guild.player.musicPlayTime() : false
-    }));
-  }
-
-  _playerFinish(guild) {
-    if (!guild.player) return;
-
-    this.player.stop(guild);
-    this.setTimeout(() => this.player.skip(guild), 100);
   }
 };

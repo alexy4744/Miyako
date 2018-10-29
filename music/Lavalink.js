@@ -5,6 +5,22 @@ const snekfetch = require("snekfetch");
 module.exports = class Lavalink extends Base {
   constructor(...args) { super(...args); }
 
+  playerInit(guild) {
+    this.send({
+      "id": guild.id,
+      "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],
+      "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
+      "time": guild.player ? guild.player.musicPlayTime() : false
+    });
+  }
+
+  playerFinish(guild) {
+    if (!guild.player) return;
+
+    this.stop(guild);
+    setTimeout(() => this.skip(guild), 100);
+  }
+
   async getSong(query) {
     let found = false;
     let source;
