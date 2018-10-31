@@ -30,7 +30,6 @@ module.exports = class Miyako extends Client {
         "members": new Map()
       },
       "categories": new Set(),
-      "player": new Lavalink(this),
       "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
     });
 
@@ -42,11 +41,9 @@ module.exports = class Miyako extends Client {
     });
 
     this.wss.on("open", this._wssOnOpen.bind(this));
+    this.wss.on("close", () => console.log("closed"));
     this.wss.on("error", this._wssOnError.bind(this));
     this.wss.on("message", this._handleRequests.bind(this));
-
-    this.player.on("finished", guild => this.player.playerFinish(guild));
-    this.player.on("error", error => console.error(error));
 
     new (require("../modules/Base/Loader"))(this).loadAll();
   }
@@ -84,6 +81,7 @@ module.exports = class Miyako extends Client {
       if (this.utils.is.function(cmd.run)) {
         let run = cmd.run(msg, args);
         if (this.utils.is.thenable(run)) run = await run;
+
         if (!run) return;
         if (this.utils.is.object(run)) sharedVariables = run; // If it returns an object, then the object should be a shared object across all subcommands
       }
@@ -192,7 +190,7 @@ module.exports = class Miyako extends Client {
     const request = JSON.parse(data);
     const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
 
-    if (request.event === "connection") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.wss.url})`)}`);
+    if (request.event === "HELLO") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.wss.url})`)}`);
 
     if (request.op && guild) {
       if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
@@ -205,6 +203,10 @@ module.exports = class Miyako extends Client {
       "op": "identify",
       "identifier": process.env.BOT_IDENTIFIER
     }));
+
+    this.player = new Lavalink(this);
+    this.player.on("finished", guild => this.player.playerFinish(guild)); // Do not create a bound function
+    this.player.on("error", error => console.error(error));
   }
 
   _wssOnError(error) {

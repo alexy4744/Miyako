@@ -5,7 +5,7 @@ module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
       enabled: true,
-      guarded: true,
+      guarded: false,
       botOwnerOnly: false,
       nsfw: false,
       cooldown: 5,

@@ -7,7 +7,7 @@ module.exports = class Lavalink extends Base {
 
   playerInit(guild) {
     this.send({
-      "id": guild.id,
+      "guildId": guild.id,
       "queue": guild.player ? guild.player.queue ? guild.player.queue : [] : [],
       "track": guild.player ? guild.player.queue[0] ? guild.player.queue[0].info : false : false,
       "time": guild.player ? guild.player.musicPlayTime() : false

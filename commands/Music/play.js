@@ -35,7 +35,7 @@ module.exports = class extends Command {
       };
     }
 
-    const tracks = await this.client.player.getSong(args.join(" ")).catch(error => ({ "error": error }));
+    const tracks = await this.client.player.getSong(args.join(" ")).catch(error => ({ error }));
 
     if (tracks.error) return msg.error(tracks.error, `play this track!`);
     if (tracks.length < 1) return msg.fail(`No search results have returned!`);
@@ -44,19 +44,19 @@ module.exports = class extends Command {
     if (tracks[0].info.loadType === "PLAYLIST_LOADED") {
       for (const track of tracks) msg.guild.player.queue.push(track);
     } else {
+      tracks[0].info.thumbnail = await this.client.player.getThumbnail(tracks[0].info);
       msg.guild.player.queue.push(tracks[0]);
     }
 
     if (!msg.guild.player.playing && !msg.guild.player.paused) this.client.player.play(msg.guild);
 
-    const thumbnail = await this.client.player.getThumbnail(msg.guild.player.queue[0].info);
     const position = msg.guild.player.queue.findIndex(track => track.info.identifier === tracks[0].info.identifier) + 1;
 
     return msg.channel.send({
       embed: {
         title: `▶${msg.emojis.bar}Track has been added to the queue!`,
         description: `**Title**: [**${tracks[0].info.title}**](${tracks[0].info.uri})\n\n**Duration**: ${moment.duration(tracks[0].info.length, "milliseconds").format()}\n\n**Position**: #${position}`,
-        thumbnail: { "url": thumbnail },
+        thumbnail: { "url": tracks[0].info.thumbnail },
         color: msg.colors.default
       }
     });

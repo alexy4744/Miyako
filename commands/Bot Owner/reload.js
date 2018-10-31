@@ -25,17 +25,17 @@ module.exports = class extends Command {
     if (this.client.commands[thingToReload] || this.client.aliases[thingToReload]) {
       try {
         const oldCmd = this.client.commands[thingToReload] || this.client.commands[this.client.aliases[thingToReload]];
-        delete require.cache[require.resolve(`../${oldCmd.options.category}/${oldCmd.options.name}`)];
-        delete this.client.commands[oldCmd.options.name];
-        for (const alias of oldCmd.options.aliases) delete this.client.aliases[alias];
+        delete require.cache[require.resolve(`../${oldCmd.category}/${oldCmd.name}`)];
+        delete this.client.commands[oldCmd.name];
+        for (const alias of oldCmd.aliases) delete this.client.aliases[alias];
 
-        const newCmd = new (require(`../${oldCmd.options.category}/${oldCmd.options.name}`))(this.client);
+        const newCmd = new (require(`../${oldCmd.category}/${oldCmd.name}`))(this.client);
 
-        newCmd.options.name = oldCmd.options.name;
-        newCmd.options.category = oldCmd.options.category;
+        newCmd.name = oldCmd.name;
+        newCmd.category = oldCmd.category;
 
-        this.client.commands[newCmd.options.name] = newCmd;
-        for (const alias of newCmd.options.aliases) this.client.aliases[alias] = newCmd.options.name;
+        this.client.commands[newCmd.name] = newCmd;
+        for (const alias of newCmd.aliases) this.client.aliases[alias] = newCmd.name;
       } catch (error) {
         return msg.error(error, `reload this command!`);
       }

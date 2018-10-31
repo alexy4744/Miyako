@@ -54,10 +54,10 @@ Structures.extend("Message", Message => {
       });
     }
 
-    error(err, action) {
+    error(err) {
       return this.channel.send({
         embed: {
-          title: `${this.emojis.fail}Sorry ${this.author.username}, I have failed to ${action}`,
+          title: `${this.emojis.fail}Sorry ${this.author.username}, an error has occurred!`,
           description: `\`\`\`js\n${err.stack}\n\`\`\``,
           color: this.colors.fail
         }

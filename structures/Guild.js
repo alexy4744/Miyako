@@ -26,7 +26,7 @@ Structures.extend("Guild", Guild => {
       try {
         if (!data._id) data._id = this.id;
         await this.client.db.update("guilds", data);
-        return Promise.resolve(data);
+        return Promise.resolve(this.cache);
       } catch (error) {
         return Promise.reject(error);
       }
