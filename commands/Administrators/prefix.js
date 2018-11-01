@@ -24,9 +24,7 @@ module.exports = class extends Command {
 
     if (newPrefix.length > 20) return msg.fail(`The length of this prefix is too long!`, `Prefixes can only have a max length of **20** characters!`);
 
-    const data = await this.client.db.get("guilds", msg.guild.id).catch(e => ({ "error": e }));
-    if (data && data.error) return msg.error(data.error, "re-assign the prefix");
-
+    const data = msg.guild.cache;
     // Default prefix is v$, so if there's no entry for this guild, then the prefix must be the default.
     if ((!data.prefix && newPrefix === this.client.prefix) || data.prefix === newPrefix) return msg.fail(`"${newPrefix}" is already the current prefix!`);
 

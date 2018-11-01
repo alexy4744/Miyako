@@ -13,7 +13,7 @@ module.exports = class FilterImage extends Monitor {
 
     let content = msg.content;
 
-    if (sensitivity === "high") content = msg.content.split(/\s/g).join(""); // remove all whitespaces
+    if (sensitivity === "high") content = msg.content.split(/\s/g).join(""); // Remove all whitespaces
     if (sensitivity === "extreme") content = msg.content.split(/[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/\s]/g).join(""); // Remove special characteres and whitespace
 
     content = content.toLowerCase();
@@ -42,7 +42,7 @@ module.exports = class FilterImage extends Monitor {
       }).catch(() => { });
 
       if (action === "delete") return msg.delete().catch(() => { });
-      if (action === "mute") return this.client.commands.mute.mute(msg, msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      if (action === "mute") return this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
     }
 
     return 1;

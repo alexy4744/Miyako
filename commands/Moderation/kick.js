@@ -9,7 +9,7 @@ module.exports = class extends Command {
       nsfw: false,
       cooldown: 5,
       description: () => `Kick a member.`,
-      usage: msg => [`${msg.client.user.id}`, `${msg.author.username}`],
+      usage: msg => [`${msg.client.user.id}`, `${msg.author.username}`, `${msg.client.user.toString()}`],
       aliases: [],
       userPermissions: ["KICK_MEMBERS"],
       botPermissions: ["KICK_MEMBERS"],
@@ -43,13 +43,9 @@ module.exports = class extends Command {
           }
         });
 
-        const confirmation = await message.prompt(msg.author.id, {
-          "emojis": {
-            "yes": "👌"
-          }
-        }).catch(e => ({
-          "error": e
-        }));
+        const confirmation = await message
+          .prompt(msg.author.id, { "emojis": { "yes": "👌" } })
+          .catch(error => ({ error }));
 
         if (confirmation.error) return msg.cancelledCommand(`${msg.author.toString()} has failed to provide a response within **15** seconds, therefore I have cancelled the command!`);
         if (confirmation) return kick(guildMember);
@@ -60,6 +56,8 @@ module.exports = class extends Command {
     }
 
     async function kick(guildMember) {
+      if (!guildMember.kickable) return Promise.reject(new Error("This member is not kickable!"));
+
       if (guildMember.kickable) {
         try {
           await guildMember.kick(reason);

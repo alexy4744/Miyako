@@ -34,22 +34,24 @@ module.exports = class extends Command {
     if (!member.manageable) return msg.fail("I can't mute a member with higher privilege/roles than me!");
 
     try {
-      await this.mute(msg, member, time);
+      await this.mute(member, time);
       return msg.success(
         `${member.user.tag} has been succesfully muted by ${msg.author.tag}!`,
         `${reason ? `**Reason**: ${reason}` : ``}\n\n${time ? `**Muted Until**: ${moment(Date.now() + time).format("dddd, MMMM Do, YYYY, hh:mm:ss A")}` : ``}`
       );
     } catch (error) {
-      return msg.error(error, `mute ${member.user.tag}!`);
+      return msg.error(error);
     }
   }
 
-  async mute(msg, member, time) {
-    try {
-      let role = msg.guild.cache.muteRole || null;
+  async mute(member, time) {
+    if (!member.manageable) return Promise.reject(new Error("This member is not managable"));
 
-      if (!role || !msg.guild.roles.has(role)) {
-        role = await msg.guild.roles.create({
+    try {
+      let role = member.guild.cache.muteRole || null;
+
+      if (!role || !member.guild.roles.has(role)) {
+        role = await member.guild.roles.create({
           "data": {
             "name": "Muted",
             "mentionable": false,
@@ -63,7 +65,7 @@ module.exports = class extends Command {
         if (index > -1) permissions.splice(index, 1); // Disallow anyone in the role to send messages
 
         await role.setPermissions(permissions);
-        await msg.guild.updateDatabase({ "muteRole": role.id });
+        await member.guild.updateDatabase({ "muteRole": role.id });
 
         if (member.roles.has(role.id)) return Promise.reject(new Error(`${member.user.tag} is already muted!`));
 
@@ -76,7 +78,7 @@ module.exports = class extends Command {
 
         clientCache.mutedMembers.push({
           "memberId": member.id,
-          "guildId": msg.guild.id,
+          "guildId": member.guild.id,
           "muteRole": role,
           "mutedUntil": Date.now() + time
         });

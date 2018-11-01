@@ -48,9 +48,9 @@ module.exports = class extends Command {
   enable(msg) {
     const data = this.client.cache;
 
-    if (!data.global.disabledCommands.includes(this.shared.cmd.options.name)) return msg.fail(`"${this.shared.cmd.options.name}" is already globally enabled!`);
+    if (!data.global.disabledCommands.includes(this.shared.cmd.name)) return msg.fail(`"${this.shared.cmd.name}" is already globally enabled!`);
 
-    data.global.disabledCommands = data.global.disabledCommands.filter(command => !this.shared.cmd.options.aliases.includes(command) && command !== this.shared.cmd.options.name);
+    data.global.disabledCommands = data.global.disabledCommands.filter(command => !this.shared.cmd.aliases.includes(command) && command !== this.shared.cmd.name);
 
     return this.updateDatabase(msg, "enable", data);
   }
@@ -58,11 +58,11 @@ module.exports = class extends Command {
   disable(msg) {
     const data = this.client.cache;
 
-    if (data.global.disabledCommands.includes(this.shared.cmd.options.name)) return msg.fail(`"${this.shared.cmd.options.name}" is already globally disabled!`);
+    if (data.global.disabledCommands.includes(this.shared.cmd.name)) return msg.fail(`"${this.shared.cmd.name}" is already globally disabled!`);
 
-    data.global.disabledCommands.push(this.shared.cmd.options.name);
+    data.global.disabledCommands.push(this.shared.cmd.name);
 
-    for (const alias of this.shared.cmd.options.aliases) data.global.disabledCommands.push(alias);
+    for (const alias of this.shared.cmd.aliases) data.global.disabledCommands.push(alias);
 
     return this.updateDatabase(msg, "disable", data);
   }
@@ -70,7 +70,7 @@ module.exports = class extends Command {
   async updateDatabase(msg, action, data) {
     try {
       await this.client.db.update("client", data);
-      return msg.success(`"${this.shared.cmd.options.name}" is now globally ${action}d!`);
+      return msg.success(`"${this.shared.cmd.name}" is now globally ${action}d!`);
     } catch (error) {
       return msg.error(error, `globally ${action} this command!`);
     }

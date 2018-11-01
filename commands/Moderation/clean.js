@@ -8,33 +8,23 @@ module.exports = class extends Command {
       botOwnerOnly: false,
       nsfw: false,
       cooldown: 30,
-      description: msg => `Delete an x amount of messages sent by ${msg.client.user.toString()} in ${msg.channel.toString()}`,
+      description: msg => `Delete up to 100 ${msg.client.user.toString()}'s messages`,
       aliases: [],
-      userPermissions: ["manage_messages"],
+      userPermissions: ["MANAGE_MESSAGES"],
       botPermissions: [],
       runIn: ["text"]
     });
   }
 
-  run(msg) {
-    if (!msg.guild.myMessages || msg.guild.myMessages.length < 1) return msg.fail(`There are no messages to delete!`);
+  async run(msg) {
+    const myMessages = msg.channel.messages.filter(m => m.author.id === this.client.user.id);
+    if (myMessages.size < 1) return msg.fail("There are no messages to delete!");
 
-    const myMessages = msg.guild.myMessages.get(msg.channel.id);
-    let counter = 0;
-
-    myMessages.forEach(async message => {
-      counter++;
-      const fetchedMessage = await msg.channel.messages.fetch(message).catch(() => null);
-
-      if (fetchedMessage === null) return; // eslint-disable-line
-      else { // eslint-disable-line
-        const isDeleted = await fetchedMessage.delete().catch(() => null);
-
-        if (isDeleted === null) return; // eslint-disable-line
-        else msg.guild.myMessages.set(msg.channel.id, myMessages.splice(counter, 1)); // eslint-disable-line
-      }
-    });
-
-    if (counter >= myMessages.length) return msg.success(`I have successfully deleted my messages!`).then(m => m.delete({ timeout: 10000 }).catch(() => { }));
+    try {
+      await msg.channel.bulkDelete(myMessages);
+      return msg.success(`I have successfully deleted ${myMessages.size} messages!`);
+    } catch (error) {
+      return msg.error(error);
+    }
   }
 };

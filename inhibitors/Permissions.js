@@ -11,10 +11,10 @@ module.exports = class Permissions extends Inhibitor {
     if (msg.channel.type !== "text" || perms.length < 1) return 1;
 
     for (const perm of perms) {
-      if (msg.guild.me.hasPermission(perm)) continue;
+      if (msg.guild.me.hasPermission(perm.toUpperCase())) continue;
 
       return msg.fail(
-        `${msg.emojis.fail}I do not have the permissions to run this command!`,
+        `I do not have the permissions to run this command!`,
         `I need the permission \`${perm.toUpperCase()}\` in order for me to execute this command!`
       );
     }

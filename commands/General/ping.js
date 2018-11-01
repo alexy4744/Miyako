@@ -8,7 +8,7 @@ module.exports = class extends Command {
       botOwnerOnly: false,
       nsfw: false,
       cooldown: 5,
-      description: msg => `View the database, websocket and Discord API latency of ${msg.client.user.toString()}`,
+      description: msg => `View the websocket and Discord API latency of ${msg.client.user.toString()}`,
       subcommands: [],
       aliases: ["latency", "pong"],
       userPermissions: [],

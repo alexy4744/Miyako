@@ -1,6 +1,7 @@
 /* eslint no-eval: 0 */
 
 const Command = require("../../modules/Base/Command");
+const Stopwatch = require("../../modules/Stopwatch");
 const snekfetch = require("snekfetch");
 const util = require("util");
 
@@ -27,10 +28,12 @@ module.exports = class extends Command {
 
       if (args[0] === "async") code = `(async () => {\n${code.slice(6)}\n})();`;
 
-      let evaled = eval(code);
-      const type = evaled;
+      const stopwatch = new Stopwatch();
 
-      if (this.client.utils.is.thenable(evaled)) evaled = await evaled;
+      let evaled = eval(code);
+      if (evaled instanceof Promise) evaled = await evaled;
+
+      stopwatch.stop();
 
       if (typeof evaled !== "string") {
         evaled = util.inspect(evaled, {
@@ -42,7 +45,7 @@ module.exports = class extends Command {
       evaled = evaled.replace(this.client.token, "SIKE");
       evaled = evaled.replace(process.env.BOT_IDENTIFIER, "SIKE");
 
-      if (evaled.length < 2000) return msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled}\n\`\`\`\n**Type**\n\`\`\`js\n${typeof type}\`\`\``);
+      if (evaled.length < 2000) return msg.channel.send(`**Input**\n\`\`\`js\n${code}\n\`\`\`\n**Output**\n\`\`\`js\n${evaled}\n\`\`\`\n**Type**\n\`\`\`js\n${typeof evaled}\`\`\`\n\n⏱ ${stopwatch.toString()}`);
 
       const url = await snekfetch.post(`https://hastebin.com/documents`).send(evaled).then(res => res.body.key);
 
