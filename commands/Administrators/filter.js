@@ -65,7 +65,7 @@ module.exports = class extends Command {
 
     this.action = () => {
       // TODO: allow the word and to conjugate the command
-      const actions = ["delete", "mute"];
+      const actions = ["delete", "mute", "ban"];
       if (!actions.includes(args)) return msg.fail(`Invalid Action!`, `\`Available actions: ${actions.join(", ")}\``);
 
       data.filterText.action = args;
@@ -142,7 +142,7 @@ module.exports = class extends Command {
 
     this.action = () => {
       // TODO: allow the word and to conjugate the command
-      const actions = ["delete", "mute"];
+      const actions = ["delete", "mute", "ban"];
       if (!actions.includes(args)) return msg.fail(`Invalid Action!`, `Available actions: ${actions.join(", ")}`);
 
       data.filterImage.action = args;

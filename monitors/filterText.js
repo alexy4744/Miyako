@@ -41,8 +41,11 @@ module.exports = class FilterImage extends Monitor {
         }]
       }).catch(() => { });
 
-      if (action === "delete") return msg.delete().catch(() => { });
-      if (action === "mute") return this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      if (action === "delete") msg.delete().catch(() => { });
+      else if (action === "mute") this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      else if (action === "ban") this.client.commands.ban.ban(msg.member, null, "Use of banned words");
+
+      return 0;
     }
 
     return 1;

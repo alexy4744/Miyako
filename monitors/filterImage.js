@@ -52,7 +52,8 @@ module.exports = class FilterImage extends Monitor {
         }
       }).catch(() => { });
 
-      if (action === "mute") return this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      if (action === "mute") this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      else if (action === "ban") this.client.commands.ban.ban(msg.member, null);
 
       return 0;
     }

@@ -24,10 +24,7 @@ module.exports = class extends Command {
 
     if (!reminder || !when) return msg.fail(`You must provided a reminder and also when to remind you!`);
 
-    const clientData = await this.client.db.get("client", this.client.user.id).catch(error => ({ error }));
-
-    if (clientData && clientData.error) return msg.error("set your reminder!", clientData.error);
-
+    const clientData = this.client.cache;
     if (!clientData.reminders) clientData.reminders = [];
 
     clientData.reminders.push({
@@ -37,10 +34,7 @@ module.exports = class extends Command {
     });
 
     try {
-      await this.client.updateDatabase({
-        ...this.client.cache,
-        reminders: clientData.reminders
-      });
+      await this.client.updateDatabase({ reminders: clientData.reminders });
       return msg.success("I have successfully set a reminder for you!", `**Reminder**: ${reminder}\n\n**When**: ${moment(when).format("dddd, MMMM Do YYYY, hh:mm:ss A")}`);
     } catch (error) {
       return msg.error("set your reminder!", error);

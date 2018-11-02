@@ -28,7 +28,7 @@ module.exports = class Message extends Event {
 
     for (const monitor in this.client.monitors) {
       try {
-        if (isNaN(count)) count += 0;
+        if (isNaN(count)) break;
         let res = this.client.monitors[monitor].run(msg);
         if (res instanceof Promise) res = await res;
         count += res;
