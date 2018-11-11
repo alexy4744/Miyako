@@ -1,4 +1,5 @@
 const Loader = require("../modules/Base/Loader");
+const fs = require("fs-nextra");
 
 module.exports = class MonitorLoader extends Loader {
   constructor(...args) {
@@ -6,7 +7,7 @@ module.exports = class MonitorLoader extends Loader {
   }
 
   async run() {
-    const monitors = await this.fs.readdir("./monitors").catch(error => ({ error }));
+    const monitors = await fs.readdir("./monitors").catch(error => ({ error }));
     if (monitors.error) throw monitors.error;
     if (monitors.length < 1) return;
 

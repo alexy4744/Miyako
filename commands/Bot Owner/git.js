@@ -22,11 +22,11 @@ module.exports = class extends Command {
   }
 
   async pull(msg, args) {
-    const branch = args[0] ? args.join(" ") : null;
+    const branch = args[0] ? args.join(" ") : "master";
 
     try {
-      const pull = await exec(`git pull origin ${branch || "master"}`);
-      return msg.channel.send(`I have successfully pulled from the repository!\n\n\`\`\`bash\n${pull.stdout}\n\`\`\``);
+      const pull = await exec(`git pull origin ${branch}`);
+      return msg.channel.send(`I have successfully pulled from the *${branch}* branch!\n\n\`\`\`bash\n${pull.stdout}\n\`\`\``);
     } catch (error) {
       return msg.error(error);
     }

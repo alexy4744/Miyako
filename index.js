@@ -6,14 +6,11 @@ require("dotenv").config({ "path": path.join(__dirname, "process.env") });
 
 (async () => {
   const Database = await MongoDB.create();
-  const client = new Miyako({
-    "owner": process.env.OWNER,
-    "prefix": process.env.PREFIX,
-    "clientOptions": {
-      "disabledEvents": ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
-      "disableEveryone": true,
-      "fetchAllMembers": false
-    }
+  const client = await Miyako.load({
+    "disabledEvents": ["TYPING_START", "RELATIONSHIP_ADD", "RELATIONSHIP_REMOVE", "USER_NOTE_UPDATE"],
+    "disableEveryone": true,
+    "fetchAllMembers": false,
+    "shardCount": "auto"
   });
 
   const clientCache = await Database.get("client", process.env.CLIENT_ID).catch(error => ({ error }));

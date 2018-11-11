@@ -1,4 +1,5 @@
 const Loader = require("../modules/Base/Loader");
+const fs = require("fs-nextra");
 
 module.exports = class FinalizerLoader extends Loader {
   constructor(...args) {
@@ -6,7 +7,7 @@ module.exports = class FinalizerLoader extends Loader {
   }
 
   async run() {
-    const finalizers = await this.fs.readdir("./finalizers").catch(error => ({ error }));
+    const finalizers = await fs.readdir("./finalizers").catch(error => ({ error }));
     if (finalizers.error) throw finalizers.error;
     if (finalizers.length < 1) return;
 

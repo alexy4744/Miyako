@@ -1,15 +1,14 @@
 const { Client } = require("discord.js");
+const fs = require("fs-nextra");
 const chalk = require("chalk");
 const WebSocket = require("ws");
 
 const Lavalink = require("../music/Lavalink");
 
-require("./Structures")();
-
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
     super();
-    Object.assign(this, options.clientOptions || {});
+    Object.assign(this, options || {});
 
     Object.assign(this, {
       "events": {},
@@ -34,8 +33,8 @@ module.exports = class Miyako extends Client {
     });
 
     Object.assign(this, {
-      "owner": options.owner,
-      "prefix": options.prefix,
+      "owner": process.env.OWNER,
+      "prefix": process.env.PREFIX,
       "messagesPerSecond": 0,
       "commandsPerSecond": 0
     });
@@ -44,8 +43,20 @@ module.exports = class Miyako extends Client {
     this.wss.on("close", () => console.log("closed"));
     this.wss.on("error", this._wssOnError.bind(this));
     this.wss.on("message", this._handleRequests.bind(this));
+  }
 
-    new (require("../modules/Base/Loader"))(this).loadAll();
+  static async load(options) {
+    const structures = await fs.readdir("./structures").catch(error => ({ error }));
+    if (structures.error) throw structures.error;
+    for (const structure of structures) require(`./${structure}`);
+
+    const self = new Miyako(options); // eslint-disable-line
+
+    const loaders = await fs.readdir("./loaders").catch(error => ({ error }));
+    if (loaders.error) throw loaders.error;
+    for (const loader of loaders) new (require(`../loaders/${loader}`))(self).run();
+
+    return self;
   }
 
   get cache() {
@@ -163,7 +174,7 @@ module.exports = class Miyako extends Client {
   }
 
   updateCache(data) {
-    if (!this.caches[data.ns.coll].has(data.documentKey._id)) return;
+    if (!this.caches[data.ns.coll] || (this.caches[data.ns.coll] && !this.caches[data.ns.coll].has(data.documentKey._id))) return;
     if (data.operationType === "delete" && data.documentKey._id !== process.env.CLIENT_ID) return this.caches[data.ns.coll].delete(data.documentKey._id); // Don't let it delete itself from cache
     if (data.operationType === "insert" || data.operationType === "replace") return this.caches[data.ns.coll].set(data.documentKey._id, data.fullDocument);
     if (data.operationType === "update") {

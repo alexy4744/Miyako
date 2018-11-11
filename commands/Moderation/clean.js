@@ -11,7 +11,7 @@ module.exports = class extends Command {
       description: msg => `Delete up to 100 ${msg.client.user.toString()}'s messages`,
       aliases: [],
       userPermissions: ["MANAGE_MESSAGES"],
-      botPermissions: [],
+      botPermissions: ["MANAGE_MESSAGES"],
       runIn: ["text"]
     });
   }

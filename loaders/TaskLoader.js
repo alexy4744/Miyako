@@ -1,4 +1,5 @@
 const Loader = require("../modules/Base/Loader");
+const fs = require("fs-nextra");
 
 module.exports = class TaskLoader extends Loader {
   constructor(...args) {
@@ -6,7 +7,7 @@ module.exports = class TaskLoader extends Loader {
   }
 
   async run() {
-    const tasks = await this.fs.readdir("./tasks").catch(error => ({ error }));
+    const tasks = await fs.readdir("./tasks").catch(error => ({ error }));
     if (tasks.error) throw tasks.error;
     if (tasks.length < 1) return;
 

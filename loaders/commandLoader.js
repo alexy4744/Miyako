@@ -1,4 +1,5 @@
 const Loader = require("../modules/Base/Loader");
+const fs = require("fs-nextra");
 
 module.exports = class CommandLoader extends Loader {
   constructor(...args) {
@@ -6,14 +7,14 @@ module.exports = class CommandLoader extends Loader {
   }
 
   async run() {
-    const folders = await this.fs.readdir("./commands").catch(error => ({ error }));
+    const folders = await fs.readdir("./commands").catch(error => ({ error }));
     if (folders.error) throw folders.error;
     if (folders.length < 1) return;
 
     for (const folder of folders) {
       this.client.categories.add(folder);
 
-      const commands = await this.fs.readdir(`./commands/${folder}`).catch(error => ({ error }));
+      const commands = await fs.readdir(`./commands/${folder}`).catch(error => ({ error }));
       if (commands.error) throw commands.error;
 
       for (const command of commands) {

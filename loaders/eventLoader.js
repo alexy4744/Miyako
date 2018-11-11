@@ -1,4 +1,5 @@
 const Loader = require("../modules/Base/Loader");
+const fs = require("fs-nextra");
 
 module.exports = class EventLoader extends Loader {
   constructor(...args) {
@@ -6,7 +7,7 @@ module.exports = class EventLoader extends Loader {
   }
 
   async run() {
-    const events = await this.fs.readdir("./events").catch(error => ({ error }));
+    const events = await fs.readdir("./events").catch(error => ({ error }));
     if (events.error) throw events.error;
     if (events.length < 1) throw new Error("No events found!");
 

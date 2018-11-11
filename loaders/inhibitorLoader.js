@@ -1,4 +1,5 @@
 const Loader = require("../modules/Base/Loader");
+const fs = require("fs-nextra");
 
 module.exports = class InhibitorLoader extends Loader {
   constructor(...args) {
@@ -6,7 +7,7 @@ module.exports = class InhibitorLoader extends Loader {
   }
 
   async run() {
-    const inhibitors = await this.fs.readdir("./inhibitors").catch(error => ({ error }));
+    const inhibitors = await fs.readdir("./inhibitors").catch(error => ({ error }));
     if (inhibitors.error) throw inhibitors.error;
     if (inhibitors.length < 1) return;
 
