@@ -4,6 +4,8 @@ const chalk = require("chalk");
 const WebSocket = require("ws");
 
 const Lavalink = require("../music/Lavalink");
+const Stopwatch = require("../modules/Stopwatch");
+const MongoDB = require("../database/MongoDB");
 
 module.exports = class Miyako extends Client {
   constructor(options = {}) {
@@ -29,7 +31,8 @@ module.exports = class Miyako extends Client {
         "members": new Map()
       },
       "categories": new Set(),
-      "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false })
+      "wss": new WebSocket(process.env.WEBSOCKET, { "rejectUnauthorized": false }),
+      "startUpTime": new Stopwatch()
     });
 
     Object.assign(this, {
@@ -40,12 +43,11 @@ module.exports = class Miyako extends Client {
     });
 
     this.wss.on("open", this._wssOnOpen.bind(this));
-    this.wss.on("close", () => console.log("closed"));
     this.wss.on("error", this._wssOnError.bind(this));
     this.wss.on("message", this._handleRequests.bind(this));
   }
 
-  static async load(options) {
+  static async start(options) {
     const structures = await fs.readdir("./structures").catch(error => ({ error }));
     if (structures.error) throw structures.error;
     for (const structure of structures) require(`./${structure}`);
@@ -55,6 +57,20 @@ module.exports = class Miyako extends Client {
     const loaders = await fs.readdir("./loaders").catch(error => ({ error }));
     if (loaders.error) throw loaders.error;
     for (const loader of loaders) new (require(`../loaders/${loader}`))(self).run();
+
+    const Database = await MongoDB.create();
+    const clientCache = await Database.get("client", process.env.CLIENT_ID).catch(error => ({ error }));
+    if (clientCache.error) throw clientCache.error;
+
+    self.caches.client.set(process.env.CLIENT_ID, clientCache);
+
+    self.db = Database;
+    self.db.on("change", data => self.updateCache(data));
+
+    self.startUpTime.stop();
+    self.startUpTime = self.startUpTime.duration;
+
+    self.login(process.env.TOKEN).catch(error => { throw error; });
 
     return self;
   }
@@ -201,7 +217,7 @@ module.exports = class Miyako extends Client {
     const request = JSON.parse(data);
     const guild = request.id ? this.guilds.get(request.id) : request.guildId ? this.guilds.get(request.guildId) : false;
 
-    if (request.event === "HELLO") return console.log(`${chalk.keyword("green")(`[${new Date(Date.now()).toLocaleString()}]`)} ${chalk.keyword("cyan")(`🔗  Connected ${chalk.green("successfully")} to the main websocket server! (${this.wss.url})`)}`);
+    if (request.event === "HELLO") return console.log(`${chalk.green(`[HELLO]`)} Connected sucessfully to the main websocket server! (${this.wss.url})}`);
 
     if (request.op && guild) {
       if (request.op === "seek" && request.pos) return this.player.seek(guild, request.pos);
@@ -220,8 +236,7 @@ module.exports = class Miyako extends Client {
     this.player.on("error", error => console.error(error));
   }
 
-  _wssOnError(error) {
-    this.wss = null;
-    return console.error(error);
+  _wssOnError() {
+    return this.wss = null;
   }
 };

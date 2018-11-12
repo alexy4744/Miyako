@@ -21,15 +21,12 @@ module.exports = class extends Command {
     });
   }
 
-  run(msg, args) {
+  async pull(msg, args) {
     const branch = args[0] ? args.join(" ") : "master";
-    return { branch };
-  }
 
-  async pull(msg) {
     try {
-      const pull = await exec(`git pull origin ${this.shared.branch}`);
-      return msg.channel.send(`I have successfully pulled from the *${this.shared.branch}* branch!\n\n\`\`\`bash\n${pull.stdout}\n\`\`\``);
+      const pull = await exec(`git pull origin ${branch}`);
+      return msg.channel.send(`I have successfully pulled from the *${branch}* branch!\n\n\`\`\`bash\n${pull.stdout}\n\`\`\``);
     } catch (error) {
       return msg.error(error);
     }
@@ -45,7 +42,7 @@ module.exports = class extends Command {
       await exec("git add .");
       const commit = await exec(`git commit -m "${commitMessage}"`);
       await message.edit(`\`\`\`bash\nCommit message has been set to "${commitMessage}"\n\n${commit.stdout}\`\`\``);
-      await exec(`git push origin ${this.shared.branch}`);
+      await exec(`git push`);
       await message.edit(`\`\`\`bash\n"I have sucessfully pushed the commit to the repository!"\n\n${commit.stdout}\n\`\`\``);
     } catch (error) {
       return message.edit(`\`\`\`bash\n${error}\n\`\`\``);

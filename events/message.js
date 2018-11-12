@@ -8,8 +8,11 @@ module.exports = class Message extends Event {
   async run(msg) {
     this.client.messagesPerSecond++;
 
-    if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return;
-    if (msg.guild) await this._updateGuildCache(msg);
+    if (msg.guild) {
+      if (!msg.guild.me.hasPermission("SEND_MESSAGES")) return;
+      await this._updateGuildCache(msg);
+    }
+
     if (!await this._checkMonitors(msg)) return;
     if (msg.author.bot) return;
 

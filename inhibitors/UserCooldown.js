@@ -6,7 +6,7 @@ module.exports = class UserCooldown extends Inhibitor {
   }
 
   run(msg, cmd) {
-    if (!cmd.cooldown || cmd.cooldown < 1 || !msg.guild.userCooldowns.has(msg.author.id)) return 1;
+    if (!cmd.cooldown || cmd.cooldown < 1 || !msg.guild.userCooldowns.has(msg.author.id) || !msg.author.cooldown) return 1;
 
     return msg.channel
       .send(`${msg.author.toString()}, wait ${cmd.cooldown} seconds before executing commands again!`)

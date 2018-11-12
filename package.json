@@ -16,17 +16,15 @@
     "bufferutil": "^4.0.0",
     "canvas": "github:Automattic/node-canvas",
     "chalk": "^2.4.1",
-    "cheerio": "^1.0.0-rc.2",
     "discord.js": "github:discordjs/discord.js",
-    "dotenv": "^6.0.0",
+    "dotenv": "^6.1.0",
     "erlpack": "github:discordapp/erlpack",
-    "fs-nextra": "^0.3.5",
+    "fs-nextra": "^0.3.7",
     "get-urls": "^8.0.0",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
-    "mongodb": "^3.1.6",
+    "mongodb": "^3.1.9",
     "os-utils": "github:alexy4744/os-utils",
-    "rethinkdbdash": "^2.3.31",
     "snekfetch": "^4.0.4",
     "ws": "^5.2.1",
     "zlib-sync": "^0.1.4"
@@ -36,7 +34,7 @@
   },
   "homepage": "https://github.com/alexy4744/Miyako#readme",
   "devDependencies": {
-    "eslint": "^5.1.0",
-    "eslint-plugin-import": "^2.13.0"
+    "eslint": "^5.9.0",
+    "eslint-plugin-import": "^2.14.0"
   }
 }

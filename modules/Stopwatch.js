@@ -25,10 +25,10 @@ module.exports = class Stopwatch {
     return this;
   }
 
-  toString() {
-		const time = this.duration;
+  toString(duration) {
+		const time = duration || this.duration;
 		if (time >= 1000) return `${(time / 1000).toFixed(this.digits)}s`;
 		if (time >= 1) return `${time.toFixed(this.digits)}ms`;
 		return `${(time * 1000).toFixed(this.digits)}μs`;
-	}
+  }
 };

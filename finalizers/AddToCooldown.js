@@ -7,7 +7,13 @@ module.exports = class AddToCooldown extends Finalizer {
 
   run(msg, cmd) {
     if (msg.author.id === this.client.owner) return;
-    msg.guild.userCooldowns.add(msg.author.id);
-    setTimeout(() => msg.guild.userCooldowns.delete(msg.author.id), cmd.options.cooldown ? cmd.options.cooldown * 1000 : 5000);
+
+    if (msg.guild) {
+      msg.guild.userCooldowns.add(msg.author.id);
+      return setTimeout(() => msg.guild.userCooldowns.delete(msg.author.id), cmd.cooldown * 1000);
+    }
+
+    msg.author.cooldown = true;
+    return setTimeout(() => msg.author.cooldown = false, cmd.cooldown * 1000);
   }
 };
