@@ -18,4 +18,19 @@ module.exports = class Command {
     this.botPermissions = options.botPermissions || [];
     this.runIn = options.runIn || [];
   }
+
+  reload() {
+    delete require.cache[require.resolve(`../../commands/${this.category}/${this.name}.js`)];
+    delete this.client.commands[this.name];
+
+    for (const alias of this.aliases) delete this.client.aliases[alias];
+
+    const newCmd = new (require(`../../commands/${this.category}/${this.name}`))(this.client);
+
+    newCmd.name = this.name;
+    newCmd.category = this.category;
+
+    this.client.commands[newCmd.name] = newCmd;
+    for (const alias of newCmd.aliases) this.client.aliases[alias] = newCmd.name;
+  }
 };

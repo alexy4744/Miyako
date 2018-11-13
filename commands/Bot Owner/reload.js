@@ -8,8 +8,7 @@ module.exports = class extends Command {
       botOwnerOnly: true,
       nsfw: false,
       cooldown: 5,
-      description: () => `Reload commands, inhibitors and utilities`,
-      usage: () => [`ban`, `checkNSFW`, `is`],
+      description: () => `Reload commands, events, inhibitors, monitors, tasks`,
       aliases: [],
       userPermissions: [],
       botPermissions: [],
@@ -22,45 +21,9 @@ module.exports = class extends Command {
 
     const thingToReload = args[0];
 
-    if (this.client.commands[thingToReload] || this.client.aliases[thingToReload]) {
-      try {
-        const oldCmd = this.client.commands[thingToReload] || this.client.commands[this.client.aliases[thingToReload]];
-        delete require.cache[require.resolve(`../${oldCmd.category}/${oldCmd.name}`)];
-        delete this.client.commands[oldCmd.name];
-        for (const alias of oldCmd.aliases) delete this.client.aliases[alias];
-
-        const newCmd = new (require(`../${oldCmd.category}/${oldCmd.name}`))(this.client);
-
-        newCmd.name = oldCmd.name;
-        newCmd.category = oldCmd.category;
-
-        this.client.commands[newCmd.name] = newCmd;
-        for (const alias of newCmd.aliases) this.client.aliases[alias] = newCmd.name;
-      } catch (error) {
-        return msg.error(error, `reload this command!`);
-      }
-    } else if (this.client.inhibitors[thingToReload]) {
-      try {
-        delete require.cache[require.resolve(`../../inhibitors/${thingToReload}`)];
-        delete this.client.inhibitors[thingToReload];
-
-        this.client.inhibitors[thingToReload] = require(`../../inhibitors/${thingToReload}`);
-      } catch (error) {
-        return msg.error(error, `reload this inhibitor!`);
-      }
-    } else if (this.client.utils.hasOwnProperty(thingToReload)) {
-      try {
-        delete this.client.utils[thingToReload];
-        delete require.cache[require.resolve(`../../utils/${thingToReload}`)];
-
-        const util = require(`../../utils/${thingToReload}`);
-        this.client.utils[thingToReload] = util;
-      } catch (error) {
-        return msg.error(error, `reload this utility!`);
-      }
-    } else {
-      return msg.fail(`"${thingToReload}" is not a valid command, inhibitor or a utility!`);
-    }
+    if (this.client.commands[thingToReload] || this.client.aliases[thingToReload]) this.client.commands[thingToReload].reload();
+    else if (this.client.inhibitors[thingToReload]) this.client.inhibitors[thingToReload].reload();
+    else if (this.client.finalizers[thingToReload]) this.client.finalizers[thingToReload].reload();
 
     return msg.success(`"${thingToReload}" has been succesfully reloaded!`);
   }

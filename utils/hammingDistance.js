@@ -1,11 +1,13 @@
-module.exports = (x, y) => {
+module.exports = (sX, sY) => {
   // Higher the hamming distance, the less similar it is.
-  if (x.length !== y.length) return 1;
-  if (x === y) return 0;
+  if (sX.length !== sY.length) return 1;
+  if (sX === sY) return 0;
 
   let difference = 0;
 
-  for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) difference++; // Check if this bit on the first hash is different from the second hash
+  for (let i = 0; i < sX.length; i++) {
+    if (sX[i] !== sY[i]) difference++;
+  }
 
-  return difference / x.length; // Return it as a percentage
+  return difference / sX.length; // Return it as a percentage
 };
