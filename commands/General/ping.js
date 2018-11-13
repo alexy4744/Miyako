@@ -37,7 +37,7 @@ module.exports = class extends Command {
           },
           {
             "name": "Heartbeat \\💙",
-            "value": `${String(Math.round(this.client.ping))} ms`,
+            "value": `${String(Math.round(this.client.ws.ping))} ms`,
             "inline": true
           }
         ],

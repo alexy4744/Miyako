@@ -12,11 +12,7 @@ module.exports = class TimedMutes extends Task {
 
     if (cache && cache.mutedMembers instanceof Array) {
       for (const member of cache.mutedMembers) {
-        if (!this.client.guilds.has(member.guildId) || !this.client.guilds.get(member.guildId).roles.has(member.muteRole)) {
-          await this.removeFromDatabase(cache, member.memberId);
-          continue;
-        }
-        if (!member.mutedUntil) continue; // If it is not a timed mute.
+        if (!this.client.guilds.has(member.guildId) || (this.client.guilds.has(member.guildId) && !this.client.guilds.get(member.guildId).roles.has(member.muteRole))) continue;
 
         if (Date.now() >= member.mutedUntil) { // If the current date is already passed the specified ban duration, unban this member.
           const guild = this.client.guilds.get(member.guildId);

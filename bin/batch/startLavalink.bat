@@ -1,3 +1,3 @@
 echo off
-cd ../../music
+cd ../
 java -jar Lavalink.jar

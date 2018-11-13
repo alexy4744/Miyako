@@ -1,6 +1,10 @@
 const Inhibitor = require("../modules/Base/Inhibitor");
 
 module.exports = class UserPermissions extends Inhibitor {
+  constructor(...args) {
+    super(...args);
+  }
+
   run(msg, cmd) {
     const perms = cmd.userPermissions;
     if (msg.author.id === this.client.owner) return 1;

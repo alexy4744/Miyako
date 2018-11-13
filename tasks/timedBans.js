@@ -12,18 +12,13 @@ module.exports = class TimedBans extends Task {
 
     if (cache && cache.bannedMembers) {
       for (const member of cache.bannedMembers) {
-        if (!this.client.guilds.has(member.guildId)) { // If the bot is still in the guild the member that was originally banned in.
-          await this.removeFromDatabase(cache, member.memberId);
-          continue;
-        }
-
-        if (!member.bannedUntil) continue; // If it is not a timed ban.
+        if (!this.client.guilds.has(member.guildId)) continue;
 
         if (Date.now() >= member.bannedUntil) { // If the current date is already passed the specified ban duration, unban this member.
-          const unban = await this.client.guilds.get(member.guildId).members.unban(member.memberId).catch(e => ({ "error": e }));
+          const unban = await this.client.guilds.get(member.guildId).members.unban(member.memberId).catch(error => ({ error }));
 
           if (unban.error) {
-            if (unban.error.message === "Unknown Ban") await this.removeFromDatabase(cache, member.memberId);
+            if (unban.error.message === "Unknown Ban") await this.removeFromDatabase(cache, member.memberId); // Remove if ban doesn't exist anymore
             continue;
           }
 

@@ -17,7 +17,7 @@ module.exports = class extends Command {
     });
   }
 
-  run(msg, args) {
+  async run(msg, args) {
     const help = this.helpBuilder(msg);
 
     if (args[0]) {
@@ -37,7 +37,13 @@ module.exports = class extends Command {
       }
     }
 
-    return msg.author.send(description, { split: true });
+    try {
+      await msg.author.send(description, { split: true });
+    } catch (error) {
+      return msg.fail(`Your DMs are blocked, you must enable them in order to receive help!`);
+    }
+
+    if (msg.guild.me.permissions.has("ADD_REACTIONS")) return msg.react("✅").catch(() => { });
   }
 
   specificCommand(msg, command) {

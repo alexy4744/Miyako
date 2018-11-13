@@ -1,6 +1,6 @@
 const Finalizer = require("../modules/Base/Finalizer");
 
-module.exports = class AddToCooldown extends Finalizer {
+module.exports = class SetCooldown extends Finalizer {
   constructor(...args) {
     super(...args);
   }
