@@ -1,10 +1,6 @@
 const Inhibitor = require("../modules/Base/Inhibitor");
 
 module.exports = class VoiceChannel extends Inhibitor {
-  constructor(...args) {
-    super(...args);
-  }
-
   run(msg, cmd) {
     if (!cmd.checkVC) return 1;
 

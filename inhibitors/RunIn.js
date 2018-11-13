@@ -1,10 +1,6 @@
 const Inhibitor = require("../modules/Base/Inhibitor");
 
 module.exports = class RunIn extends Inhibitor {
-  constructor(...args) {
-    super(...args);
-  }
-
   run(msg, cmd) {
     const runIn = cmd.runIn;
     const len = runIn.length;

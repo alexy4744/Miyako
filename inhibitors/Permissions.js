@@ -1,10 +1,6 @@
 const Inhibitor = require("../modules/Base/Inhibitor");
 
 module.exports = class Permissions extends Inhibitor {
-  constructor(...args) {
-    super(...args);
-  }
-
   run(msg, cmd) {
     const perms = cmd.botPermissions;
 

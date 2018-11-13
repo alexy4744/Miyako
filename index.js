@@ -5,11 +5,9 @@ const Stopwatch = require("./modules/Stopwatch");
 require("dotenv").config({ "path": path.join(__dirname, "process.env") });
 
 const { ShardingManager, Util } = require("discord.js");
-const Manager = new ShardingManager("./Miyako.js", {
-  token: process.env.TOKEN
-});
+const Manager = new ShardingManager("./Miyako.js", { token: process.env.TOKEN });
 
-let totalShards = 5;
+let totalShards = parseInt(process.env.SHARDS) || 0;
 let currShard = 0;
 let shardsReady = 0;
 
@@ -24,11 +22,11 @@ const stopwatch = new Stopwatch();
     if (totalShards.error) throw totalShards.error;
   }
 
-  Manager.spawn(totalShards).then(shards => {
+  if (totalShards > 1) totalShards--;
+
+  Manager.spawn(totalShards > 1 ? totalShards + 1 : totalShards).then(shards => {
     if (totalShards <= 1) return verboseSingleShard(shards.first());
   }).catch(error => { throw error; });
-
-  if (totalShards > 1) totalShards--;
 
   spawned = `${chalk.red("[SHARD]")} 0/${totalShards} spawned!`;
   ready = `${chalk.red("[SHARD]")} 0/${totalShards} ready!`;
@@ -67,7 +65,7 @@ async function verboseMultiShard() {
       const tag = await Manager.fetchClientValues("user.tag").then(t => t[0]);
       const guilds = await Manager.fetchClientValues("guilds.size").then(g => g.reduce((a, b) => a + b));
       const users = await Manager.fetchClientValues("users.size").then(u => u.reduce((a, b) => a + b));
-      const startUpTimes = await Manager.broadcastEval("this.startUpTime").then(ms => ms.reduce((a, b) => a + b));
+      const startUpTimes = await Manager.fetchClientValues("startUpTime").then(ms => ms.reduce((a, b) => a + b));
 
       console.log(`${chalk.green("[SHARD]")} All shards are READY!\n`);
       console.log(`⏱  All shards loaded in ${chalk.cyan(stopwatch.toString(startUpTimes))}!`);

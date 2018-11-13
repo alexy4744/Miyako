@@ -4,11 +4,6 @@ const { Structures } = require("discord.js");
 
 Structures.extend("Guild", Guild => {
   class MiyakoGuild extends Guild {
-    constructor(...args) {
-      super(...args);
-      this.userCooldowns = new Set();
-    }
-
     get cache() {
       return this.client.caches.guilds.get(this.id);
     }
