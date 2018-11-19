@@ -5,7 +5,9 @@ const regex = /\.(jpe?g|png|gif|bmp|tiff)$/gi;
 
 module.exports = class FilterImage extends Monitor {
   constructor(...args) {
-    super(...args);
+    super(...args, {
+      ignoreBots: false
+    });
   }
 
   async run(msg) {

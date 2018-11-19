@@ -32,7 +32,7 @@ module.exports = class extends Command {
         await msg.guild.updateDatabase({
           filterText: {
             action: "delete",
-            sensitivity: "default",
+            sensitivity: "high",
             words: []
           }
         });

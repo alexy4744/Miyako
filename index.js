@@ -78,23 +78,19 @@ async function verboseMultiShard() {
   }
 }
 
-function verboseSingleShard(shard) {
-  if (!shard.ready) return shard.on("ready", verbose.bind(this));
+async function verboseSingleShard(shard) {
+  if (!shard.ready) return shard.on("ready", () => verboseSingleShard(shard));
 
-  return verbose();
+  try {
+    const startUpTime = await shard.fetchClientValue("startUpTime");
+    const tag = await shard.fetchClientValue("user.tag");
+    const guilds = await shard.fetchClientValue("guilds.size");
+    const users = await shard.fetchClientValue("users.size");
 
-  async function verbose() {
-    try {
-      const startUpTime = await shard.fetchClientValue("startUpTime");
-      const tag = await shard.fetchClientValue("user.tag");
-      const guilds = await shard.fetchClientValue("guilds.size");
-      const users = await shard.fetchClientValue("users.size");
-
-      console.log(`${chalk.green("[SHARD]")} 1/1 is READY!\n`);
-      console.log(`⏱  Ready in ${stopwatch.toString(startUpTime)}!`);
-      console.log(`🚀  ${chalk.cyan(tag)}, serving in ${guilds} guilds for ${users} users!`);
-    } catch (error) {
-      throw error;
-    }
+    console.log(`${chalk.green("[SHARD]")} 1/1 is READY!\n`);
+    console.log(`⏱  Ready in ${stopwatch.toString(startUpTime)}!`);
+    console.log(`🚀  ${chalk.cyan(tag)}, serving in ${guilds} guilds for ${users} users!`);
+  } catch (error) {
+    throw error;
   }
 }

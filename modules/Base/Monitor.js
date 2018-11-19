@@ -7,6 +7,14 @@ module.exports = class Monitor {
     this.ignoreOthers = options.ignoreOthers || false;
   }
 
+  shouldIgnore(msg) {
+    if (msg.author.id === this.client.user.id && this.ignoreSelf) return 1;
+    if (msg.author.bot && this.ignoreBots) return 1;
+    if (this.ignoreOthers) return 1;
+
+    return 0;
+  }
+
   reload() {
     delete require.cache[require.resolve(`../../monitors/${this.name}`)];
     delete this.client.monitors[this.name];

@@ -13,7 +13,7 @@ module.exports = class Message extends Event {
       await this._updateGuildCache(msg);
     }
 
-    if (!await this._checkMonitors(msg)) return;
+    if (!await this._runMonitors(msg)) return;
     if (msg.author.bot) return;
 
     const prefix = msg.guild ? msg.guild.cache.prefix || this.client.prefix : this.client.prefix;
@@ -27,21 +27,33 @@ module.exports = class Message extends Event {
     else if (this.client.aliases[cmd]) return this.client.runInhibitors(msg, this.client.commands[this.client.aliases[cmd]], args);
   }
 
-  async _checkMonitors(msg) {
+  async _runMonitors(msg) {
     let count = 0;
+    let ignored = 0;
 
-    for (const monitor in this.client.monitors) {
+    for (let monitor in this.client.monitors) {
+      monitor = this.client.monitors[monitor];
+
       try {
         if (isNaN(count)) break;
-        let res = this.client.monitors[monitor].run(msg);
+
+        const shouldIgnore = this.client.utils.is.function(monitor.shouldIgnore) ? monitor.shouldIgnore(msg) : 0;
+
+        if (shouldIgnore) {
+          ignored++;
+          continue;
+        }
+
+        let res = monitor.run(msg);
         if (res instanceof Promise) res = await res;
+
         count += res;
       } catch (error) {
         count += 0;
       }
     }
 
-    if (count < Object.keys(this.client.monitors).length) return false;
+    if (count < Object.keys(this.client.monitors).length - ignored) return false;
 
     return true;
   }
