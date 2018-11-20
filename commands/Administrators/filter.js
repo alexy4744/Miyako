@@ -14,7 +14,8 @@ module.exports = class extends Command {
       aliases: [],
       subcommands: {
         "word": ["add", "remove", "action", "sensitivity"],
-        "image": ["add", "remove", "action"]
+        "image": ["add", "remove", "action"],
+        "noInvites": []
       },
       userPermissions: ["administrator"],
       botPermissions: [],
@@ -87,6 +88,20 @@ module.exports = class extends Command {
     };
 
     return this[subcommand]();
+  }
+
+  async noInvites(msg) {
+    let state = msg.guild.cache.noInvites || false;
+
+    state = !state;
+
+    try {
+      await msg.guild.updateDatabase({ noInvites: state });
+    } catch (error) {
+      return msg.error(error);
+    }
+
+    return msg.success(`No-invites have been ${state ? "enabled" : "disabled"}!`, `Invite links will now ${state ? "be deleted" : "remain undeleted"}!`);
   }
 
   async image(msg, subcommand, args) {

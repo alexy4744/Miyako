@@ -18,7 +18,7 @@ module.exports = class FilterImage extends Monitor {
   }
 
   sanitizeContent(msg) {
-    const sensitivity = msg.guild.cache.filterText.sensitivity || null;
+    const sensitivity = msg.guild.cache.filterText ? msg.guild.cache.filterText.sensitivity : null;
     let content = msg.content;
 
     if (sensitivity === "high") content = content.split(/\s/g).join(" "); // Remove all whitespaces join space see

@@ -46,7 +46,8 @@ module.exports = class Message extends Event {
 
         let res = monitor.run(msg);
         if (res instanceof Promise) res = await res;
-        // console.log(monitor.name, res)
+        if (!res) break; // if it returns a 0, then break it to prevent further execution of monitors.
+
         count += res;
       } catch (error) {
         count += 0;

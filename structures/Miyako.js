@@ -121,8 +121,13 @@ module.exports = class Miyako extends Client {
         if (!args[0]) return msg.fail(`Invalid subcommand for ${cmd.name}`, `Available Subcommands: \`${Object.keys(cmd.subcommands).join(" | ")}\``);
 
         for (const subcommand in cmd.subcommands) {
-          if (args[0] === subcommand) {
+          if (args[0] === subcommand.toLowerCase()) {
             subcmd = subcommand;
+
+            if (cmd.subcommands[subcmd].length < 1) { // If theres no extended subcommands, then just execute it as a subcommand instead.
+              if (this.utils.is.function(cmd[subcmd])) return cmd[subcmd](msg);
+              return;
+            }
 
             if (!args[1]) break;
 
@@ -136,6 +141,7 @@ module.exports = class Miyako extends Client {
             }
           }
         }
+
         // TODO: need to check whether subcmd is part of subcommands
         if (!found) return msg.fail(`Invalid extended subcommand for ${cmd.name}`, `Available Extended Subcommands: \`${cmd.subcommands[subcmd].join(" | ")}\``);
       } else if (this.utils.is.array(cmd.subcommands)) {

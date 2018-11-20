@@ -11,7 +11,7 @@ module.exports = class FilterImage extends Monitor {
   }
 
   async run(msg) {
-    if (!msg.guild.cache.filterImage.images || msg.guild.cache.filterImage.images.length < 1) return 1;
+    if (!msg.guild.cache.filterImage || !msg.guild.cache.filterImage.images || msg.guild.cache.filterImage.images.length < 1) return 1;
 
     if (msg.attachments.size > 0) {
       for (const attachment of msg.attachments) {
