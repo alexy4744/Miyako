@@ -46,7 +46,7 @@ module.exports = class Message extends Event {
 
         let res = monitor.run(msg);
         if (res instanceof Promise) res = await res;
-
+        // console.log(monitor.name, res)
         count += res;
       } catch (error) {
         count += 0;
