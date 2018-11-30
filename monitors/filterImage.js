@@ -42,21 +42,25 @@ module.exports = class FilterImage extends Monitor {
     return 0;
   }
 
-  takeAction(msg, url) {
+  async takeAction(msg, url) {
     const action = msg.guild.cache.filterImage.action;
 
-    if (action === "mute") this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
-    else if (action === "ban") this.client.commands.ban.ban(msg.member, null);
+    try {
+      if (action === "mute") await this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      else if (action === "ban") await this.client.commands.ban.ban(msg.member, null);
 
-    msg.delete().catch(() => { });
+      await msg.delete();
 
-    msg.author.send({
-      embed: {
-        title: `${msg.emojis.fail}Your message has been deleted in ${msg.guild.name}!`,
-        description: `[**This image**](${url}) has been banned by the admins of this guild; therefore, your message has been **deleted**. ${action === "mute" ? "You have also been **muted**" : ""}`,
-        image: { url },
-        color: msg.colors.fail
-      }
-    }).catch(() => { });
+      await msg.author.send({
+        embed: {
+          title: `${msg.emojis.fail}Your message has been deleted in ${msg.guild.name}!`,
+          description: `[**This image**](${url}) has been banned by the admins of this guild; therefore, your message has been **deleted**. ${action === "mute" ? "You have also been **muted**" : ""}`,
+          image: { url },
+          color: msg.colors.fail
+        }
+      });
+    } catch (error) {
+      // noop
+    }
   }
 };

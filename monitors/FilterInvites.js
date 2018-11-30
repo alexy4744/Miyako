@@ -19,7 +19,7 @@ module.exports = class FilterInvites extends Monitor {
     msg.author.send({
       embed: {
         title: `${msg.emojis.fail}Hey, please don't send invite links!`,
-        description: `**${msg.guild.name}** doesn't like it when you distribute other server's invite links, therefore your message has been deleted!`,
+        description: `**${msg.guild.name}** is not the place to distribute other server's invitation links!`,
         color: msg.colors.fail
       }
     }).catch(() => { });

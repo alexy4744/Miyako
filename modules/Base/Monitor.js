@@ -5,12 +5,14 @@ module.exports = class Monitor {
     this.ignoreSelf = options.ignoreSelf || true;
     this.ignoreBots = options.ignoreBots || true;
     this.ignoreOthers = options.ignoreOthers || false;
+    this.ignoreEdits = options.ignoreEdits || false;
   }
 
   shouldIgnore(msg) {
     if (msg.author.id === this.client.user.id && this.ignoreSelf) return 1;
     if (msg.author.bot && this.ignoreBots) return 1;
     if (this.ignoreOthers) return 1;
+    if (this.ignoreEdits && msg.edits.length > 0) return 1;
 
     return 0;
   }

@@ -41,23 +41,27 @@ module.exports = class FilterImage extends Monitor {
   async takeAction(msg, matched) {
     const action = msg.guild.cache.filterText.action || "delete";
 
-    if (action === "delete") msg.delete().catch(() => { });
-    else if (action === "mute") this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
-    else if (action === "ban") this.client.commands.ban.ban(msg.member, null, "Use of banned words");
+    try {
+      if (action === "delete") await msg.delete();
+      else if (action === "mute") await this.client.commands.mute.mute(msg.member, this.client.utils.stringToMillis.convert("5m").ms);
+      else if (action === "ban") await this.client.commands.ban.ban(msg.member, null, "Use of banned words");
 
-    await msg.author.send({
-      embed: {
-        title: `${msg.emojis.fail}Hey! I have detected you using ${matched.length > 1 ? `${matched.length} banned words` : "1 banned word"}.`,
-        description: `Please refrain from using any of these words listed in this attachment!.\n\n**Action Taken**: ${msg.guild.cache.filterText.action.toUpperCase()}\n**Words Detected**: ${matched.join(", ")}`,
-        color: msg.colors.fail
-      }
-    }).catch(() => { });
+      await msg.author.send({
+        embed: {
+          title: `${msg.emojis.fail}Hey! I have detected you using ${matched.length > 1 ? `${matched.length} banned words` : "1 banned word"}.`,
+          description: `Please refrain from using any of these words listed in this attachment!.\n\n**Action Taken**: ${msg.guild.cache.filterText.action.toUpperCase()}\n**Words Detected**: ${matched.join(", ")}`,
+          color: msg.colors.fail
+        }
+      });
 
-    msg.author.send({
-      files: [{
-        attachment: Buffer.from(msg.guild.cache.filterText.words.join("\r\n")),
-        name: `${msg.guild.name}'s banned words.txt`
-      }]
-    }).catch(() => { });
+      await msg.author.send({
+        files: [{
+          attachment: Buffer.from(msg.guild.cache.filterText.words.join("\r\n")),
+          name: `${msg.guild.name}'s banned words.txt`
+        }]
+      });
+    } catch (error) {
+      // noop
+    }
   }
 };
