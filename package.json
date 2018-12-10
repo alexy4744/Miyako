@@ -1,0 +1,24 @@
+{
+  "name": "miyako",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexy4744/Miyako.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexy4744/Miyako/issues"
+  },
+  "homepage": "https://github.com/alexy4744/Miyako#readme",
+  "dependencies": {
+    "chalk": "github:chalk/chalk",
+    "discord.js": "github:discordjs/discord.js",
+    "mongodb": "^3.1.10"
+  }
+}
