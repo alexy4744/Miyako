@@ -20,11 +20,17 @@ class MiyakoSharder extends ShardingManager {
   }
 
   start() {
-    this.spawn(this.total);
+    this
+      .spawn(this.total)
+      .then(shards => this.total === 1 ? this._verbose(shards.first()) : null)
+      .catch(error => { throw error; });
+
     this.on("shardCreate", this._onSpawn.bind(this));
   }
 
-  async _verbose() {
+  async _verbose(shard) {
+    if (this.total <= 1 && !shard.ready) return shard.on("ready", () => this._onReady(shard));
+
     console.clear();
     console.log(`[SHARD] ${this.spawned} / ${this.total} spawned!`);
     console.log(`[SHARD] ${this.ready} / ${this.total} ready!`);
@@ -53,14 +59,14 @@ class MiyakoSharder extends ShardingManager {
 
   _onSpawn(shard) {
     this.spawned++;
-    this._verbose();
+    this._verbose(shard);
 
-    shard.on("ready", this._onReady.bind(this));
+    shard.on("ready", () => this._onReady(shard));
   }
 
-  _onReady() {
+  _onReady(shard) {
     this.ready++;
-    this._verbose();
+    this._verbose(shard);
   }
 }
 

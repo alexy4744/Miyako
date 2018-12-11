@@ -21,7 +21,7 @@ class MiyakoClient extends Client {
       const startupTime = new Stopwatch();
       const miyako = new MiyakoClient(options);
 
-      miyako.db = await MongoDB.initalize();
+      // miyako.db = await MongoDB.initalize();
 
       miyako.startupTime = startupTime.duration;
 

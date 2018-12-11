@@ -12,7 +12,9 @@ Lavalink.jar*
 
 # Visual Studio Code Workspace
 .eslintrc.json*
+.eslintrc*
 .vscode/
+.vs/
 
 # Logs
 logs

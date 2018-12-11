@@ -4,7 +4,9 @@ const Sharder = require("./structures/Sharder");
 
 dotenv.config({ path: path.join(__dirname, "./process.env") });
 
-new Sharder("./Miyako.js");
+new Sharder("./Miyako.js", {
+  token: process.env.TOKEN
+});
 
 process.on("uncaughtException", (...args) => console.error(...args));
 process.on("unhandledRejection", (...args) => console.error(...args));
